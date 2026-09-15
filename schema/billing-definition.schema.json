@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://supla.org/schema/energy-cost/billing-definition-v1.json",
+  "title": "SUPLA Energy Cost Billing Definition",
+  "type": "object",
+  "required": ["version", "currency", "periods"],
+  "properties": {
+    "version": {"const": 1},
+    "currency": {"type": "string", "minLength": 3, "maxLength": 3},
+    "timezone": {"type": "string", "default": "UTC"},
+    "periods": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/period"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "period": {
+      "type": "object",
+      "required": ["components"],
+      "properties": {
+        "validFrom": {"type": ["string", "null"], "format": "date-time"},
+        "validTo": {"type": ["string", "null"], "format": "date-time"},
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/component"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "component": {
+      "type": "object",
+      "required": ["id", "category", "quantity", "rate"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "quantity": {"$ref": "#/$defs/quantity"},
+        "selector": {"$ref": "#/$defs/selector"},
+        "rate": {"$ref": "#/$defs/rate"}
+      },
+      "additionalProperties": false
+    },
+    "quantity": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": {"enum": ["ACTIVE_ENERGY_IMPORT", "ACTIVE_ENERGY_EXPORT", "ACTIVE_ENERGY_BALANCED_IMPORT", "ACTIVE_ENERGY_BALANCED_EXPORT", "REACTIVE_ENERGY_IMPORT", "REACTIVE_ENERGY_EXPORT"]}
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["type", "period"],
+          "properties": {
+            "type": {"const": "PERIOD"},
+            "period": {"enum": ["DAY", "WEEK", "MONTH"]},
+            "prorate": {"type": "boolean", "default": false}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "selector": {
+      "oneOf": [
+        {"type": "object", "required": ["type"], "properties": {"type": {"const": "ALWAYS"}}, "additionalProperties": false},
+        {
+          "type": "object",
+          "required": ["type", "source"],
+          "properties": {
+            "type": {"const": "REFERENCE"},
+            "source": {"type": "string"},
+            "mapping": {"type": "object", "additionalProperties": {"type": "string"}}
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["type", "rules"],
+          "properties": {
+            "type": {"const": "WEEKLY_SCHEDULE"},
+            "timezone": {"type": "string"},
+            "rules": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["zone", "days", "from", "to"],
+                "properties": {
+                  "zone": {"type": "string"},
+                  "days": {"type": "array", "items": {"enum": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]}},
+                  "from": {"type": "string"},
+                  "to": {"type": "string"}
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "rate": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["type", "value"],
+          "properties": {
+            "type": {"const": "CONSTANT"},
+            "value": {"type": ["string", "number"]},
+            "unit": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["type", "rates"],
+          "properties": {
+            "type": {"const": "ZONED"},
+            "rates": {"type": "object", "additionalProperties": {"type": ["string", "number"]}},
+            "unit": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["type", "source"],
+          "properties": {
+            "type": {"const": "REFERENCE"},
+            "source": {"type": "string"},
+            "sourceUnit": {"type": "string"},
+            "multiplier": {"type": ["string", "number"], "default": "1"},
+            "add": {"type": ["string", "number"], "default": "0"},
+            "unit": {"type": "string"}
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

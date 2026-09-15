@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "periods": [
+    {
+      "validFrom": "2026-01-01T00:00:00+01:00",
+      "validTo": null,
+      "components": [
+        {
+          "id": "energy",
+          "category": "ENERGY",
+          "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
+          "rate": {
+            "type": "REFERENCE",
+            "source": "PL.TGE.FIXING1",
+            "sourceUnit": "PLN/MWh",
+            "multiplier": "0.001",
+            "add": "0.0500",
+            "unit": "PLN/kWh"
+          }
+        },
+        {
+          "id": "network-variable",
+          "category": "NETWORK",
+          "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
+          "selector": {
+            "type": "REFERENCE",
+            "source": "PL.PSE.PDGSZ",
+            "mapping": {"0": "S1", "1": "S2", "2": "S3", "3": "S4"}
+          },
+          "rate": {
+            "type": "ZONED",
+            "rates": {
+              "S1": "0.0276",
+              "S2": "0.1098",
+              "S3": "0.4774",
+              "S4": "2.9220"
+            },
+            "unit": "PLN/kWh"
+          }
+        },
+        {
+          "id": "commercial-fee",
+          "category": "SERVICE",
+          "quantity": {"type": "PERIOD", "period": "MONTH", "prorate": false},
+          "rate": {"type": "CONSTANT", "value": "12.50", "unit": "PLN/month"}
+        }
+      ]
+    }
+  ]
+}

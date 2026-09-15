@@ -1,0 +1,30 @@
+{
+  "name": "supla/energy-cost-calculator",
+  "description": "Framework-agnostic PHP library for calculating electricity costs from interval energy deltas and JSON billing rules.",
+  "type": "library",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": ">=8.2",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Supla\\EnergyCostCalculator\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Supla\\EnergyCostCalculator\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "lint": "find src tests examples -name '*.php' -print0 | xargs -0 -n1 php -l"
+  },
+  "config": {
+    "sort-packages": true
+  }
+}
