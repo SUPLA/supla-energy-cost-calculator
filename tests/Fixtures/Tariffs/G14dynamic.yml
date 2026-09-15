@@ -1,0 +1,45 @@
+cases:
+  recommended_use:
+    deltas:
+      - { datetime: '2026-01-05T10:15:00Z', import: '1' }
+    references:
+      PL.PSE.PDGSZ:
+        - { from: '2026-01-05T10:00:00Z', to: '2026-01-05T11:00:00Z', value: '0' }
+    expected:
+      total: '0.6'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.1' }
+      selections:
+        - { componentIndex: 1, zone: S1 }
+  normal_use:
+    deltas:
+      - { datetime: '2026-01-05T11:15:00Z', import: '1' }
+    references:
+      PL.PSE.PDGSZ:
+        - { from: '2026-01-05T11:00:00Z', to: '2026-01-05T12:00:00Z', value: '1' }
+    expected:
+      total: '0.7'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.2' }
+      selections:
+        - { componentIndex: 1, zone: S2 }
+  recommended_saving:
+    deltas:
+      - { datetime: '2026-01-05T12:15:00Z', import: '1' }
+    references:
+      PL.PSE.PDGSZ:
+        - { from: '2026-01-05T12:00:00Z', to: '2026-01-05T13:00:00Z', value: '2' }
+    expected:
+      total: '1'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.5' }
+      selections:
+        - { componentIndex: 1, zone: S3 }
+  required_limitation:
+    deltas:
+      - { datetime: '2026-01-05T13:15:00Z', import: '1' }
+    references:
+      PL.PSE.PDGSZ:
+        - { from: '2026-01-05T13:00:00Z', to: '2026-01-05T14:00:00Z', value: '3' }
+    expected:
+      total: '2.5'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '2' }
+      selections:
+        - { componentIndex: 1, zone: S4 }

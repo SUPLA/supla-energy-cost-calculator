@@ -1,0 +1,33 @@
+cases:
+  weekday_z1:
+    deltas:
+      - { datetime: '2026-01-05T05:15:00Z', import: '1' }
+    expected:
+      total: '0.7'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.2' }
+      selections:
+        - { componentIndex: 1, zone: Z1 }
+  weekday_z2:
+    deltas:
+      - { datetime: '2026-01-05T06:15:00Z', import: '1' }
+    expected:
+      total: '0.85'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.35' }
+      selections:
+        - { componentIndex: 1, zone: Z2 }
+  sunday:
+    deltas:
+      - { datetime: '2026-01-04T12:15:00Z', import: '1' }
+    expected:
+      total: '0.6'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.1' }
+      selections:
+        - { componentIndex: 1, zone: Z3 }
+  public_holiday:
+    deltas:
+      - { datetime: '2026-01-06T12:15:00Z', import: '1' }
+    expected:
+      total: '0.6'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.1' }
+      selections:
+        - { componentIndex: 1, zone: Z3 }

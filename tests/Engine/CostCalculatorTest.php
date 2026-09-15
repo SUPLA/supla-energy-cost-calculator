@@ -63,7 +63,19 @@ final class CostCalculatorTest extends TestCase
             fn(array $delta): EnergyDelta => $this->deltaFromEnd($delta['datetime'], (string)$delta['import']),
             $case['deltas'],
         );
-        $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource());
+        $references = [];
+        foreach ($case['references'] ?? [] as $source => $intervals) {
+            $references[$source] = array_map(
+                fn(array $interval): ReferenceInterval => new ReferenceInterval(
+                    new \DateTimeImmutable($interval['from']),
+                    new \DateTimeImmutable($interval['to']),
+                    (string)$interval['value'],
+                    $interval['unit'] ?? null,
+                ),
+                $intervals,
+            );
+        }
+        $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource($references));
         $result = $calculator->calculate(
             'meter',
             new TimeRange($deltas[0]->from, $deltas[array_key_last($deltas)]->to),
@@ -75,7 +87,7 @@ final class CostCalculatorTest extends TestCase
         foreach ($case['expected']['byComponent'] as $component => $expected) {
             self::assertSame((string)$expected, $result->byComponent[$component], $name);
         }
-        foreach ($case['expected']['selections'] ?? [] as $intervalIndex => $selection) {
+        foreach (array_values($case['expected']['selections'] ?? []) as $intervalIndex => $selection) {
             self::assertSame($selection['zone'], $result->intervals[$intervalIndex]['components'][$selection['componentIndex']]['selection'], $name);
         }
     }

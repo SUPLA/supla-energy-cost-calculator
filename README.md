@@ -134,6 +134,8 @@ The starter tests cover:
 
 - constant energy rate,
 - periodic fee,
+- YAML-defined G11, G12, and G13 tariff profile cases,
+- YAML-defined TAURON G14dynamic cases using PDGSZ reference zones,
 - Fixing1 reference rate,
 - PDGSZ-based dynamic zone selection,
 - billing rules changing over time.
