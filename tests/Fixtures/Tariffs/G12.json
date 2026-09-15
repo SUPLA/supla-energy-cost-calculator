@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "periods": [
+    {
+      "validFrom": "2026-01-01T00:00:00Z",
+      "validTo": null,
+      "components": [
+        {
+          "id": "energy-purchase",
+          "category": "ENERGY",
+          "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
+          "rate": {"type": "CONSTANT", "value": "0.50", "unit": "PLN/kWh"}
+        },
+        {
+          "id": "distribution-variable",
+          "category": "NETWORK",
+          "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
+          "selector": {
+            "type": "WEEKLY_SCHEDULE",
+            "timezone": "Europe/Warsaw",
+            "rules": [
+              {"zone": "NIGHT", "days": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], "from": "00:00", "to": "06:00"},
+              {"zone": "DAY", "days": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], "from": "06:00", "to": "22:00"},
+              {"zone": "NIGHT", "days": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], "from": "22:00", "to": "24:00"}
+            ]
+          },
+          "rate": {
+            "type": "ZONED",
+            "rates": {"DAY": "0.32", "NIGHT": "0.14"},
+            "unit": "PLN/kWh"
+          }
+        }
+      ]
+    }
+  ]
+}

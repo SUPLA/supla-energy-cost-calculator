@@ -1,0 +1,15 @@
+cases:
+  monday:
+    deltas:
+      - { datetime: '2026-01-05T00:15:00Z', import: '1.5' }
+      - { datetime: '2026-01-05T12:15:00Z', import: '0.5' }
+    expected:
+      total: '2.8'
+      byComponent: { energy-purchase: '1', distribution-variable: '0.6', distribution-fixed: '1.2' }
+  sunday:
+    deltas:
+      - { datetime: '2026-01-04T00:15:00Z', import: '1.5' }
+      - { datetime: '2026-01-04T12:15:00Z', import: '0.5' }
+    expected:
+      total: '2.8'
+      byComponent: { energy-purchase: '1', distribution-variable: '0.6', distribution-fixed: '1.2' }

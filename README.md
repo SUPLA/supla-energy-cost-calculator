@@ -133,7 +133,12 @@ composer test
 The starter tests cover:
 
 - constant energy rate,
+- YAML-defined G11-style single-zone energy and distribution cases,
+- YAML-defined G12-style day/night distribution cases,
 - periodic fee,
 - Fixing1 reference rate,
 - PDGSZ-based dynamic zone selection,
 - billing rules changing over time.
+
+Tariff profile tests live in `tests/Fixtures/Tariffs/`. Each `<profile>.json` is a calculator billing definition,
+while `<profile>.yml` contains named cases. Delta `datetime` values are 15-minute interval end timestamps.

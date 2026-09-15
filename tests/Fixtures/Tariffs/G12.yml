@@ -1,0 +1,21 @@
+cases:
+  monday:
+    deltas:
+      - { datetime: '2026-01-05T04:15:00Z', import: '1' }
+      - { datetime: '2026-01-05T12:15:00Z', import: '1' }
+    expected:
+      total: '1.46'
+      byComponent: { energy-purchase: '1', distribution-variable: '0.46' }
+      selections:
+        - { componentIndex: 1, zone: NIGHT }
+        - { componentIndex: 1, zone: DAY }
+  sunday:
+    deltas:
+      - { datetime: '2026-01-04T04:15:00Z', import: '1' }
+      - { datetime: '2026-01-04T12:15:00Z', import: '1' }
+    expected:
+      total: '1.46'
+      byComponent: { energy-purchase: '1', distribution-variable: '0.46' }
+      selections:
+        - { componentIndex: 1, zone: NIGHT }
+        - { componentIndex: 1, zone: DAY }

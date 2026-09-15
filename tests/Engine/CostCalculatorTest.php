@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Supla\EnergyCostCalculator\Tests\Engine;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Engine\CalculationOptions;
 use Supla\EnergyCostCalculator\Engine\CostCalculator;
@@ -13,6 +14,7 @@ use Supla\EnergyCostCalculator\Model\ReferenceInterval;
 use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryEnergyDeltaSource;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
+use Symfony\Component\Yaml\Yaml;
 
 final class CostCalculatorTest extends TestCase
 {
@@ -52,6 +54,46 @@ final class CostCalculatorTest extends TestCase
         self::assertSame('3', $result->total);
         self::assertSame('1', $result->byComponent['energy']);
         self::assertSame('2', $result->byComponent['service']);
+    }
+
+    #[DataProvider('tariffProfileCases')]
+    public function testTariffProfile(string $name, array $definition, array $case): void
+    {
+        $deltas = array_map(
+            fn(array $delta): EnergyDelta => $this->deltaFromEnd($delta['datetime'], (string)$delta['import']),
+            $case['deltas'],
+        );
+        $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource());
+        $result = $calculator->calculate(
+            'meter',
+            new TimeRange($deltas[0]->from, $deltas[array_key_last($deltas)]->to),
+            $definition,
+            new CalculationOptions(includeIntervals: isset($case['expected']['selections'])),
+        );
+
+        self::assertSame((string)$case['expected']['total'], $result->total, $name);
+        foreach ($case['expected']['byComponent'] as $component => $expected) {
+            self::assertSame((string)$expected, $result->byComponent[$component], $name);
+        }
+        foreach ($case['expected']['selections'] ?? [] as $intervalIndex => $selection) {
+            self::assertSame($selection['zone'], $result->intervals[$intervalIndex]['components'][$selection['componentIndex']]['selection'], $name);
+        }
+    }
+
+    public static function tariffProfileCases(): iterable
+    {
+        foreach (glob(__DIR__ . '/../Fixtures/Tariffs/*.yml') ?: [] as $file) {
+            $profile = Yaml::parseFile($file);
+            $definitionFile = substr($file, 0, -4) . '.json';
+            $definition = json_decode((string)file_get_contents($definitionFile), true, 512, JSON_THROW_ON_ERROR);
+            foreach ($profile['cases'] as $caseName => $case) {
+                yield basename($file, '.yml') . '_' . $caseName => [
+                    basename($file, '.yml') . '_' . $caseName,
+                    $definition,
+                    $case,
+                ];
+            }
+        }
     }
 
     public function testFixing1ReferenceRate(): void
@@ -170,6 +212,12 @@ final class CostCalculatorTest extends TestCase
             QuantityType::ACTIVE_ENERGY_BALANCED_IMPORT->value => $import,
             QuantityType::ACTIVE_ENERGY_BALANCED_EXPORT->value => '0',
         ]);
+    }
+
+    private function deltaFromEnd(string $end, string $import): EnergyDelta
+    {
+        $to = new \DateTimeImmutable($end);
+        return $this->delta($to->modify('-15 minutes')->format(DATE_ATOM), $to->format(DATE_ATOM), $import);
     }
 
     private function singleComponentDefinition(array $component): array
