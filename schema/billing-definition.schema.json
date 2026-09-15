@@ -186,6 +186,37 @@
             "timezone": {
               "type": "string"
             },
+            "calendar": {
+              "type": "string",
+              "minLength": 1
+            },
+            "seasons": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "id",
+                  "from",
+                  "to"
+                ],
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "from": {
+                    "type": "string",
+                    "pattern": "^--(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"
+                  },
+                  "to": {
+                    "type": "string",
+                    "pattern": "^--(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
             "rules": {
               "type": "array",
               "minItems": 1,
@@ -193,9 +224,7 @@
                 "type": "object",
                 "required": [
                   "zone",
-                  "days",
-                  "from",
-                  "to"
+                  "days"
                 ],
                 "properties": {
                   "zone": {
@@ -203,6 +232,7 @@
                   },
                   "days": {
                     "type": "array",
+                    "minItems": 1,
                     "items": {
                       "enum": [
                         "MON",
@@ -212,23 +242,86 @@
                         "FRI",
                         "SAT",
                         "SUN",
-                        "HOLIDAY"
+                        "HOLIDAY",
+                        "mon",
+                        "tue",
+                        "wed",
+                        "thu",
+                        "fri",
+                        "sat",
+                        "sun",
+                        "holiday"
                       ]
                     }
+                  },
+                  "season": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "priority": {
+                    "type": "integer"
                   },
                   "from": {
                     "type": "string"
                   },
                   "to": {
                     "type": "string"
+                  },
+                  "time_ranges": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "from",
+                        "to"
+                      ],
+                      "properties": {
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
                   }
                 },
+                "oneOf": [
+                  {
+                    "required": [
+                      "from",
+                      "to"
+                    ],
+                    "not": {
+                      "required": [
+                        "time_ranges"
+                      ]
+                    }
+                  },
+                  {
+                    "required": [
+                      "time_ranges"
+                    ],
+                    "not": {
+                      "anyOf": [
+                        {
+                          "required": [
+                            "from"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "to"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                ],
                 "additionalProperties": false
               }
-            },
-            "calendar": {
-              "type": "string",
-              "minLength": 1
             }
           },
           "additionalProperties": false

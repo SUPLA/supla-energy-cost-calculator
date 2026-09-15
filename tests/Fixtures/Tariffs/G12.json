@@ -4,7 +4,7 @@
   "timezone": "Europe/Warsaw",
   "periods": [
     {
-      "validFrom": "2026-01-01T00:00:00Z",
+      "validFrom": "2026-01-01T00:00:00+01:00",
       "validTo": null,
       "components": [
         {
@@ -21,9 +21,22 @@
             "type": "WEEKLY_SCHEDULE",
             "timezone": "Europe/Warsaw",
             "rules": [
-              {"zone": "NIGHT", "days": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], "from": "00:00", "to": "06:00"},
-              {"zone": "DAY", "days": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], "from": "06:00", "to": "22:00"},
-              {"zone": "NIGHT", "days": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"], "from": "22:00", "to": "24:00"}
+              {
+                "zone": "NIGHT",
+                "days": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+                "time_ranges": [
+                  {"from": "22:00", "to": "06:00"},
+                  {"from": "13:00", "to": "15:00"}
+                ]
+              },
+              {
+                "zone": "DAY",
+                "days": ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+                "time_ranges": [
+                  {"from": "06:00", "to": "13:00"},
+                  {"from": "15:00", "to": "22:00"}
+                ]
+              }
             ]
           },
           "rate": {

@@ -142,6 +142,25 @@ final class BillingDefinitionParser
                 throw new DefinitionException("$path.rules must be a non-empty array.");
             }
 
+            $seasonIds = [];
+            if (isset($data['seasons'])) {
+                if (!is_array($data['seasons']) || $data['seasons'] === []) {
+                    throw new DefinitionException("$path.seasons must be a non-empty array when provided.");
+                }
+                foreach ($data['seasons'] as $i => $season) {
+                    if (!is_array($season)) {
+                        throw new DefinitionException("$path.seasons[$i] must be an object.");
+                    }
+                    $seasonId = $this->requiredString($season, 'id', "$path.seasons[$i]");
+                    if (isset($seasonIds[$seasonId])) {
+                        throw new DefinitionException("Duplicate season id '$seasonId' at $path.seasons[$i].");
+                    }
+                    $seasonIds[$seasonId] = true;
+                    $this->validateRecurringMonthDay((string)($season['from'] ?? ''), "$path.seasons[$i].from");
+                    $this->validateRecurringMonthDay((string)($season['to'] ?? ''), "$path.seasons[$i].to");
+                }
+            }
+
             $usesHoliday = false;
             $allowedDays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN', 'HOLIDAY'];
             foreach ($data['rules'] as $i => $rule) {
@@ -165,13 +184,57 @@ final class BillingDefinitionParser
                     throw new DefinitionException("$path.rules[$i].days must not mix HOLIDAY with weekdays.");
                 }
                 $usesHoliday = $usesHoliday || in_array('HOLIDAY', $normalizedDays, true);
-                $this->validateClock((string)($rule['from'] ?? ''), "$path.rules[$i].from");
-                $this->validateClock((string)($rule['to'] ?? ''), "$path.rules[$i].to", true);
+
+                if (isset($rule['season'])) {
+                    if (!is_string($rule['season']) || $rule['season'] === '') {
+                        throw new DefinitionException("$path.rules[$i].season must be a non-empty string.");
+                    }
+                    if ($rule['season'] !== '*' && !isset($seasonIds[$rule['season']])) {
+                        throw new DefinitionException("$path.rules[$i].season references unknown season '{$rule['season']}'.");
+                    }
+                }
+                if (isset($rule['priority']) && !is_int($rule['priority'])) {
+                    throw new DefinitionException("$path.rules[$i].priority must be an integer.");
+                }
+
+                $hasShorthand = array_key_exists('from', $rule) || array_key_exists('to', $rule);
+                $hasTimeRanges = array_key_exists('time_ranges', $rule);
+                if ($hasShorthand && $hasTimeRanges) {
+                    throw new DefinitionException("$path.rules[$i] must use either from/to or time_ranges, not both.");
+                }
+                if ($hasTimeRanges) {
+                    if (!is_array($rule['time_ranges']) || $rule['time_ranges'] === []) {
+                        throw new DefinitionException("$path.rules[$i].time_ranges must be a non-empty array.");
+                    }
+                    foreach ($rule['time_ranges'] as $j => $timeRange) {
+                        if (!is_array($timeRange)) {
+                            throw new DefinitionException("$path.rules[$i].time_ranges[$j] must be an object.");
+                        }
+                        $this->validateClock((string)($timeRange['from'] ?? ''), "$path.rules[$i].time_ranges[$j].from");
+                        $this->validateClock((string)($timeRange['to'] ?? ''), "$path.rules[$i].time_ranges[$j].to", true);
+                    }
+                } elseif ($hasShorthand) {
+                    $this->validateClock((string)($rule['from'] ?? ''), "$path.rules[$i].from");
+                    $this->validateClock((string)($rule['to'] ?? ''), "$path.rules[$i].to", true);
+                } else {
+                    throw new DefinitionException("$path.rules[$i] must define from/to or time_ranges.");
+                }
             }
 
             if ($usesHoliday && !isset($data['calendar'])) {
                 throw new DefinitionException("$path.calendar is required when a WEEKLY_SCHEDULE rule uses HOLIDAY.");
             }
+        }
+    }
+
+    private function validateRecurringMonthDay(string $value, string $path): void
+    {
+        if (!preg_match('/^--(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$/', $value)) {
+            throw new DefinitionException("$path must use --MM-DD format.");
+        }
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', '2000-' . substr($value, 2));
+        if ($date === false || $date->format('m-d') !== substr($value, 2)) {
+            throw new DefinitionException("$path contains an invalid month/day.");
         }
     }
 

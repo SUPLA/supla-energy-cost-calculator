@@ -1,33 +1,49 @@
 cases:
-  weekday_z1:
+  summer_morning_peak:
     deltas:
-      - { datetime: '2026-01-05T05:15:00Z', import: '1' }
+      - { datetime: '2026-06-15T08:15:00+02:00', import: '1' }
     expected:
       total: '0.7'
       byComponent: { energy-purchase: '0.5', distribution-variable: '0.2' }
       selections:
-        - { componentIndex: 1, zone: Z1 }
-  weekday_z2:
+        - { componentIndex: 1, zone: MORNING_PEAK }
+  summer_afternoon_peak:
     deltas:
-      - { datetime: '2026-01-05T06:15:00Z', import: '1' }
+      - { datetime: '2026-06-15T20:15:00+02:00', import: '1' }
     expected:
       total: '0.85'
       byComponent: { energy-purchase: '0.5', distribution-variable: '0.35' }
       selections:
-        - { componentIndex: 1, zone: Z2 }
-  sunday:
+        - { componentIndex: 1, zone: AFTERNOON_PEAK }
+  winter_afternoon_peak:
     deltas:
-      - { datetime: '2026-01-04T12:15:00Z', import: '1' }
+      - { datetime: '2026-01-05T17:15:00+01:00', import: '1' }
+    expected:
+      total: '0.85'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.35' }
+      selections:
+        - { componentIndex: 1, zone: AFTERNOON_PEAK }
+  winter_overnight:
+    deltas:
+      - { datetime: '2026-01-06T03:15:00+01:00', import: '1' }
     expected:
       total: '0.6'
       byComponent: { energy-purchase: '0.5', distribution-variable: '0.1' }
       selections:
-        - { componentIndex: 1, zone: Z3 }
+        - { componentIndex: 1, zone: OFF_PEAK }
+  saturday:
+    deltas:
+      - { datetime: '2026-01-10T12:15:00+01:00', import: '1' }
+    expected:
+      total: '0.6'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.1' }
+      selections:
+        - { componentIndex: 1, zone: OFF_PEAK }
   public_holiday:
     deltas:
-      - { datetime: '2026-01-06T12:15:00Z', import: '1' }
+      - { datetime: '2026-01-06T12:15:00+01:00', import: '1' }
     expected:
       total: '0.6'
       byComponent: { energy-purchase: '0.5', distribution-variable: '0.1' }
       selections:
-        - { componentIndex: 1, zone: Z3 }
+        - { componentIndex: 1, zone: OFF_PEAK }

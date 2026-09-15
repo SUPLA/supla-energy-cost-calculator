@@ -1,21 +1,33 @@
 cases:
-  monday:
+  overnight_before_midnight:
     deltas:
-      - { datetime: '2026-01-05T04:15:00Z', import: '1' }
-      - { datetime: '2026-01-05T12:15:00Z', import: '1' }
+      - { datetime: '2026-01-05T22:15:00+01:00', import: '1' }
     expected:
-      total: '1.46'
-      byComponent: { energy-purchase: '1', distribution-variable: '0.46' }
+      total: '0.64'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.14' }
       selections:
         - { componentIndex: 1, zone: NIGHT }
-        - { componentIndex: 1, zone: DAY }
-  sunday:
+  overnight_after_midnight:
     deltas:
-      - { datetime: '2026-01-04T04:15:00Z', import: '1' }
-      - { datetime: '2026-01-04T12:15:00Z', import: '1' }
+      - { datetime: '2026-01-06T05:15:00+01:00', import: '1' }
     expected:
-      total: '1.46'
-      byComponent: { energy-purchase: '1', distribution-variable: '0.46' }
+      total: '0.64'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.14' }
       selections:
         - { componentIndex: 1, zone: NIGHT }
+  afternoon_night_window:
+    deltas:
+      - { datetime: '2026-01-05T13:15:00+01:00', import: '1' }
+    expected:
+      total: '0.64'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.14' }
+      selections:
+        - { componentIndex: 1, zone: NIGHT }
+  day:
+    deltas:
+      - { datetime: '2026-01-05T12:15:00+01:00', import: '1' }
+    expected:
+      total: '0.82'
+      byComponent: { energy-purchase: '0.5', distribution-variable: '0.32' }
+      selections:
         - { componentIndex: 1, zone: DAY }
