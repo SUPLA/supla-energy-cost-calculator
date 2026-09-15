@@ -1,0 +1,902 @@
+{
+  "$schema": "../../schema/holiday-calendar.schema.json",
+  "id": "PL_PUBLIC_HOLIDAYS",
+  "countryCode": "PL",
+  "timezone": "Europe/Warsaw",
+  "validFrom": "2018-01-01",
+  "validTo": "2031-01-01",
+  "kind": "STATUTORY_PUBLIC_HOLIDAYS",
+  "notes": [
+    "Dates are explicit to keep historical calculations deterministic.",
+    "Sundays are not generated as separate weekly holidays; statutory holidays that happen to fall on Sunday are still listed explicitly.",
+    "24 December is included starting with 2025, after the statutory change effective 1 February 2025.",
+    "12 November 2018 was a one-off statutory day off under the centenary independence act."
+  ],
+  "legalBasis": [
+    "Ustawa z dnia 18 stycznia 1951 r. o dniach wolnych od pracy (tekst jednolity: Dz.U. 2025 poz. 296).",
+    "Ustawa z dnia 6 grudnia 2024 r. o zmianie ustawy o dniach wolnych od pracy oraz niektórych innych ustaw (Dz.U. 2024 poz. 1965).",
+    "Ustawa z dnia 7 listopada 2018 r. o ustanowieniu Święta Narodowego z okazji Setnej Rocznicy Odzyskania Niepodległości Rzeczypospolitej Polskiej (Dz.U. 2018 poz. 2117)."
+  ],
+  "holidays": [
+    {
+      "date": "2018-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2018-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2018-04-01",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2018-04-02",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2018-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2018-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2018-05-20",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2018-05-31",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2018-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2018-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2018-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2018-11-12",
+      "code": "INDEPENDENCE_CENTENARY_HOLIDAY",
+      "name": "Święto Narodowe z okazji Setnej Rocznicy Odzyskania Niepodległości Rzeczypospolitej Polskiej"
+    },
+    {
+      "date": "2018-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2018-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2019-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2019-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2019-04-21",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2019-04-22",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2019-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2019-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2019-06-09",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2019-06-20",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2019-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2019-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2019-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2019-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2019-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2020-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2020-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2020-04-12",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2020-04-13",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2020-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2020-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2020-05-31",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2020-06-11",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2020-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2020-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2020-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2020-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2020-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2021-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2021-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2021-04-04",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2021-04-05",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2021-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2021-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2021-05-23",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2021-06-03",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2021-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2021-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2021-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2021-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2021-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2022-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2022-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2022-04-17",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2022-04-18",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2022-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2022-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2022-06-05",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2022-06-16",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2022-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2022-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2022-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2022-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2022-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2023-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2023-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2023-04-09",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2023-04-10",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2023-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2023-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2023-05-28",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2023-06-08",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2023-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2023-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2023-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2023-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2023-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2024-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2024-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2024-03-31",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2024-04-01",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2024-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2024-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2024-05-19",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2024-05-30",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2024-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2024-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2024-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2024-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2024-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2025-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2025-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2025-04-20",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2025-04-21",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2025-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2025-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2025-06-08",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2025-06-19",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2025-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2025-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2025-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2025-12-24",
+      "code": "CHRISTMAS_EVE",
+      "name": "Wigilia Bożego Narodzenia"
+    },
+    {
+      "date": "2025-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2025-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2026-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2026-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2026-04-05",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2026-04-06",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2026-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2026-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2026-05-24",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2026-06-04",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2026-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2026-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2026-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2026-12-24",
+      "code": "CHRISTMAS_EVE",
+      "name": "Wigilia Bożego Narodzenia"
+    },
+    {
+      "date": "2026-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2026-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2027-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2027-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2027-03-28",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2027-03-29",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2027-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2027-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2027-05-16",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2027-05-27",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2027-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2027-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2027-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2027-12-24",
+      "code": "CHRISTMAS_EVE",
+      "name": "Wigilia Bożego Narodzenia"
+    },
+    {
+      "date": "2027-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2027-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2028-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2028-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2028-04-16",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2028-04-17",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2028-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2028-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2028-06-04",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2028-06-15",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2028-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2028-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2028-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2028-12-24",
+      "code": "CHRISTMAS_EVE",
+      "name": "Wigilia Bożego Narodzenia"
+    },
+    {
+      "date": "2028-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2028-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2029-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2029-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2029-04-01",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2029-04-02",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2029-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2029-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2029-05-20",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2029-05-31",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2029-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2029-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2029-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2029-12-24",
+      "code": "CHRISTMAS_EVE",
+      "name": "Wigilia Bożego Narodzenia"
+    },
+    {
+      "date": "2029-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2029-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2030-01-01",
+      "code": "NEW_YEAR",
+      "name": "Nowy Rok"
+    },
+    {
+      "date": "2030-01-06",
+      "code": "EPIPHANY",
+      "name": "Święto Trzech Króli"
+    },
+    {
+      "date": "2030-04-21",
+      "code": "EASTER_SUNDAY",
+      "name": "pierwszy dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2030-04-22",
+      "code": "EASTER_MONDAY",
+      "name": "drugi dzień Wielkiej Nocy"
+    },
+    {
+      "date": "2030-05-01",
+      "code": "LABOUR_DAY",
+      "name": "Święto Państwowe"
+    },
+    {
+      "date": "2030-05-03",
+      "code": "CONSTITUTION_DAY",
+      "name": "Święto Narodowe Trzeciego Maja"
+    },
+    {
+      "date": "2030-06-09",
+      "code": "PENTECOST",
+      "name": "pierwszy dzień Zielonych Świątek"
+    },
+    {
+      "date": "2030-06-20",
+      "code": "CORPUS_CHRISTI",
+      "name": "Boże Ciało"
+    },
+    {
+      "date": "2030-08-15",
+      "code": "ASSUMPTION",
+      "name": "Wniebowzięcie Najświętszej Maryi Panny"
+    },
+    {
+      "date": "2030-11-01",
+      "code": "ALL_SAINTS",
+      "name": "Wszystkich Świętych"
+    },
+    {
+      "date": "2030-11-11",
+      "code": "INDEPENDENCE_DAY",
+      "name": "Narodowe Święto Niepodległości"
+    },
+    {
+      "date": "2030-12-24",
+      "code": "CHRISTMAS_EVE",
+      "name": "Wigilia Bożego Narodzenia"
+    },
+    {
+      "date": "2030-12-25",
+      "code": "CHRISTMAS_DAY",
+      "name": "pierwszy dzień Bożego Narodzenia"
+    },
+    {
+      "date": "2030-12-26",
+      "code": "SECOND_DAY_OF_CHRISTMAS",
+      "name": "drugi dzień Bożego Narodzenia"
+    }
+  ]
+}

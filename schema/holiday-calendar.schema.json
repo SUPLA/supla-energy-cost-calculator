@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://supla.org/schema/energy-cost-calculator/holiday-calendar.schema.json",
+  "title": "Holiday calendar",
+  "type": "object",
+  "required": [
+    "id",
+    "countryCode",
+    "timezone",
+    "validFrom",
+    "validTo",
+    "holidays"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "countryCode": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$"
+    },
+    "timezone": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validFrom": {
+      "type": "string",
+      "format": "date",
+      "description": "First local date covered by this calendar, inclusive."
+    },
+    "validTo": {
+      "type": "string",
+      "format": "date",
+      "description": "First local date not covered by this calendar, exclusive."
+    },
+    "kind": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "legalBasis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "holidays": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "date",
+          "code",
+          "name"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

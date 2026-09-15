@@ -33,9 +33,18 @@ Dynamicity belongs to a component, not to the entire tariff. A single billing pe
 This is an initial package skeleton. Before production billing use, consider adding:
 
 - exact decimal implementation (`DecimalMath`) backed by `brick/math` or BCMath,
-- public-holiday/calendar selectors,
 - demand / contracted-power quantity strategies,
 - explicit handling of gaps in delta logs,
 - configurable behavior for definition boundaries that cut through meter intervals,
 - richer validation of units and component compatibility,
 - result/cost caching outside the library if large fleet-wide reports need it.
+
+## Holiday calendars
+
+`WEEKLY_SCHEDULE` can optionally reference a `HolidayCalendarProvider` calendar and use `HOLIDAY` as a pseudo-day.
+
+The default `BundledHolidayCalendarProvider` loads JSON files from `resources/calendars/`. The first bundled calendar is `PL_PUBLIC_HOLIDAYS`, with explicit Polish statutory holiday dates for 2018-2030.
+
+Holiday matching is intentionally data-driven. Country-specific legal dates do not belong in `DefaultSelectorResolver`. The selector only knows the generic concepts `calendar` and `HOLIDAY`.
+
+When both a holiday rule and an ordinary weekday rule could match a timestamp, the holiday rule has priority. Requests outside a bundled calendar's declared coverage fail explicitly.

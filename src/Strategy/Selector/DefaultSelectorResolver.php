@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Supla\EnergyCostCalculator\Strategy\Selector;
 
+use Supla\EnergyCostCalculator\Calendar\BundledHolidayCalendarProvider;
+use Supla\EnergyCostCalculator\Contract\HolidayCalendarProvider;
 use Supla\EnergyCostCalculator\Definition\SelectorDefinition;
 use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
@@ -11,6 +13,11 @@ use Supla\EnergyCostCalculator\Reference\ReferenceDataCache;
 
 final class DefaultSelectorResolver implements SelectorResolver
 {
+    public function __construct(
+        private readonly HolidayCalendarProvider $holidayCalendarProvider = new BundledHolidayCalendarProvider(),
+    ) {
+    }
+
     private const DAY_MAP = [
         'MON' => 1,
         'TUE' => 2,
@@ -51,12 +58,53 @@ final class DefaultSelectorResolver implements SelectorResolver
         $local = $delta->from->setTimezone($timezone);
         $dayNumber = (int)$local->format('N');
         $minute = ((int)$local->format('G') * 60) + (int)$local->format('i');
+        $rules = $definition->config['rules'];
 
-        foreach ($definition->config['rules'] as $rule) {
-            $days = array_map(static fn(string $d) => self::DAY_MAP[strtoupper($d)] ?? 0, $rule['days']);
-            if (!in_array($dayNumber, $days, true)) {
-                continue;
+        $holidayRules = array_values(array_filter(
+            $rules,
+            static fn(array $rule): bool => in_array('HOLIDAY', array_map('strtoupper', $rule['days']), true),
+        ));
+
+        if ($holidayRules !== []) {
+            $calendarId = (string)($definition->config['calendar'] ?? '');
+            if ($calendarId === '') {
+                throw new CalculationException('WEEKLY_SCHEDULE with HOLIDAY rules requires a calendar.');
             }
+
+            if ($this->holidayCalendarProvider->isHoliday($calendarId, $local)) {
+                $zone = $this->matchRules($holidayRules, $minute, null, true);
+                if ($zone !== null) {
+                    return $zone;
+                }
+            }
+        }
+
+        $regularRules = array_values(array_filter(
+            $rules,
+            static fn(array $rule): bool => !in_array('HOLIDAY', array_map('strtoupper', $rule['days']), true),
+        ));
+        $zone = $this->matchRules($regularRules, $minute, $dayNumber, false);
+        if ($zone !== null) {
+            return $zone;
+        }
+
+        throw new CalculationException(sprintf(
+            'No WEEKLY_SCHEDULE rule matched %s.',
+            $local->format(DATE_ATOM),
+        ));
+    }
+
+    /** @param list<array<string, mixed>> $rules */
+    private function matchRules(array $rules, int $minute, ?int $dayNumber, bool $holidayPass): ?string
+    {
+        foreach ($rules as $rule) {
+            if (!$holidayPass) {
+                $days = array_map(static fn(string $d) => self::DAY_MAP[strtoupper($d)] ?? 0, $rule['days']);
+                if ($dayNumber === null || !in_array($dayNumber, $days, true)) {
+                    continue;
+                }
+            }
+
             $from = $this->clockToMinute((string)$rule['from']);
             $to = $this->clockToMinute((string)$rule['to']);
             if ($minute >= $from && $minute < $to) {
@@ -64,10 +112,7 @@ final class DefaultSelectorResolver implements SelectorResolver
             }
         }
 
-        throw new CalculationException(sprintf(
-            'No WEEKLY_SCHEDULE rule matched %s.',
-            $local->format(DATE_ATOM),
-        ));
+        return null;
     }
 
     private function clockToMinute(string $clock): int

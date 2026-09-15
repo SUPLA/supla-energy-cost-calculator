@@ -135,9 +135,15 @@ final class BillingDefinitionParser
         if ($type === 'WEEKLY_SCHEDULE') {
             $timezone = (string)($data['timezone'] ?? 'UTC');
             $this->assertTimezone($timezone);
+            if (isset($data['calendar'])) {
+                $this->requiredString($data, 'calendar', $path);
+            }
             if (!isset($data['rules']) || !is_array($data['rules']) || $data['rules'] === []) {
                 throw new DefinitionException("$path.rules must be a non-empty array.");
             }
+
+            $usesHoliday = false;
+            $allowedDays = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN', 'HOLIDAY'];
             foreach ($data['rules'] as $i => $rule) {
                 if (!is_array($rule)) {
                     throw new DefinitionException("$path.rules[$i] must be an object.");
@@ -147,8 +153,24 @@ final class BillingDefinitionParser
                 if (!is_array($days) || $days === []) {
                     throw new DefinitionException("$path.rules[$i].days must be a non-empty array.");
                 }
+                $normalizedDays = [];
+                foreach ($days as $day) {
+                    if (!is_string($day) || !in_array(strtoupper($day), $allowedDays, true)) {
+                        $displayDay = is_scalar($day) ? (string)$day : gettype($day);
+                        throw new DefinitionException("$path.rules[$i].days contains unsupported day '$displayDay'.");
+                    }
+                    $normalizedDays[] = strtoupper($day);
+                }
+                if (in_array('HOLIDAY', $normalizedDays, true) && count($normalizedDays) > 1) {
+                    throw new DefinitionException("$path.rules[$i].days must not mix HOLIDAY with weekdays.");
+                }
+                $usesHoliday = $usesHoliday || in_array('HOLIDAY', $normalizedDays, true);
                 $this->validateClock((string)($rule['from'] ?? ''), "$path.rules[$i].from");
                 $this->validateClock((string)($rule['to'] ?? ''), "$path.rules[$i].to", true);
+            }
+
+            if ($usesHoliday && !isset($data['calendar'])) {
+                throw new DefinitionException("$path.calendar is required when a WEEKLY_SCHEDULE rule uses HOLIDAY.");
             }
         }
     }

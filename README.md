@@ -133,12 +133,46 @@ composer test
 The starter tests cover:
 
 - constant energy rate,
-- YAML-defined G11-style single-zone energy and distribution cases,
-- YAML-defined G12-style day/night distribution cases,
 - periodic fee,
 - Fixing1 reference rate,
 - PDGSZ-based dynamic zone selection,
 - billing rules changing over time.
 
-Tariff profile tests live in `tests/Fixtures/Tariffs/`. Each `<profile>.json` is a calculator billing definition,
-while `<profile>.yml` contains named cases. Delta `datetime` values are 15-minute interval end timestamps.
+## Bundled public-holiday calendars
+
+The package currently bundles the Polish statutory public-holiday calendar:
+
+```text
+PL_PUBLIC_HOLIDAYS
+```
+
+The source file is `resources/calendars/PL.json` and explicitly covers local dates from `2018-01-01` up to, but not including, `2031-01-01` (therefore through the end of 2030).
+
+Dates are stored explicitly rather than generated algorithmically. This keeps historical calculations deterministic and allows legal exceptions to be represented directly. The bundled Polish data includes, among other dates:
+
+- the one-off public holiday on 12 November 2018,
+- movable Easter/Pentecost/Corpus Christi dates,
+- Christmas Eve starting from 24 December 2025.
+
+`WEEKLY_SCHEDULE` supports an optional `calendar` and the pseudo-day `HOLIDAY`:
+
+```json
+{
+  "type": "WEEKLY_SCHEDULE",
+  "timezone": "Europe/Warsaw",
+  "calendar": "PL_PUBLIC_HOLIDAYS",
+  "rules": [
+    {"zone": "OFF_PEAK", "days": ["HOLIDAY"], "from": "00:00", "to": "24:00"},
+    {"zone": "OFF_PEAK", "days": ["SAT", "SUN"], "from": "00:00", "to": "24:00"},
+    {"zone": "PEAK", "days": ["MON", "TUE", "WED", "THU", "FRI"], "from": "00:00", "to": "24:00"}
+  ]
+}
+```
+
+Holiday rules are evaluated before ordinary weekday rules. A `HOLIDAY` rule requires `calendar` to be configured. `HOLIDAY` must not be mixed with weekday names in the same rule.
+
+If a calculation requests a holiday date outside the bundled calendar coverage, the default provider throws `HolidayCalendarCoverageException` instead of silently treating the day as a non-holiday.
+
+Applications that need calendars from another source can inject a custom `HolidayCalendarProvider` by constructing `DefaultSelectorResolver` with their provider and passing that resolver to `CostCalculator`.
+
+See `examples/definitions/weekly-schedule-polish-holidays.json`.

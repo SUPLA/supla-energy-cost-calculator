@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "periods": [
+    {
+      "validFrom": "2026-01-01T00:00:00+01:00",
+      "validTo": null,
+      "components": [
+        {
+          "id": "network-variable",
+          "category": "NETWORK",
+          "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
+          "selector": {
+            "type": "WEEKLY_SCHEDULE",
+            "timezone": "Europe/Warsaw",
+            "calendar": "PL_PUBLIC_HOLIDAYS",
+            "rules": [
+              {"zone": "OFF_PEAK", "days": ["HOLIDAY"], "from": "00:00", "to": "24:00"},
+              {"zone": "OFF_PEAK", "days": ["SAT", "SUN"], "from": "00:00", "to": "24:00"},
+              {"zone": "PEAK", "days": ["MON", "TUE", "WED", "THU", "FRI"], "from": "06:00", "to": "22:00"},
+              {"zone": "OFF_PEAK", "days": ["MON", "TUE", "WED", "THU", "FRI"], "from": "00:00", "to": "06:00"},
+              {"zone": "OFF_PEAK", "days": ["MON", "TUE", "WED", "THU", "FRI"], "from": "22:00", "to": "24:00"}
+            ]
+          },
+          "rate": {
+            "type": "ZONED",
+            "rates": {"PEAK": "0.32", "OFF_PEAK": "0.14"},
+            "unit": "PLN/kWh"
+          }
+        }
+      ]
+    }
+  ]
+}

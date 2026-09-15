@@ -204,6 +204,66 @@ final class CostCalculatorTest extends TestCase
         self::assertSame('1.25', $result->total);
     }
 
+    public function testHolidayScheduleOverridesRegularWeekdayRule(): void
+    {
+        $deltas = [
+            $this->delta('2026-05-01T10:00:00Z', '2026-05-01T10:15:00Z', '1'), // Friday, 12:00 Europe/Warsaw
+            $this->delta('2026-05-08T10:00:00Z', '2026-05-08T10:15:00Z', '1'), // regular Friday
+        ];
+        $definition = $this->singleComponentDefinition([
+            'id' => 'network',
+            'category' => 'NETWORK',
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'selector' => [
+                'type' => 'WEEKLY_SCHEDULE',
+                'timezone' => 'Europe/Warsaw',
+                'calendar' => 'PL_PUBLIC_HOLIDAYS',
+                'rules' => [
+                    ['zone' => 'OFF_PEAK', 'days' => ['HOLIDAY'], 'from' => '00:00', 'to' => '24:00'],
+                    ['zone' => 'PEAK', 'days' => ['MON', 'TUE', 'WED', 'THU', 'FRI'], 'from' => '00:00', 'to' => '24:00'],
+                    ['zone' => 'OFF_PEAK', 'days' => ['SAT', 'SUN'], 'from' => '00:00', 'to' => '24:00'],
+                ],
+            ],
+            'rate' => [
+                'type' => 'ZONED',
+                'rates' => ['PEAK' => '1.00', 'OFF_PEAK' => '0.10'],
+                'unit' => 'PLN/kWh',
+            ],
+        ]);
+
+        $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource());
+        $result = $calculator->calculate(
+            'meter',
+            new TimeRange(new \DateTimeImmutable('2026-05-01T10:00:00Z'), new \DateTimeImmutable('2026-05-08T10:15:00Z')),
+            $definition,
+            new CalculationOptions(includeIntervals: true),
+        );
+
+        self::assertSame('1.1', $result->total);
+        self::assertSame('OFF_PEAK', $result->intervals[0]['components'][0]['selection']);
+        self::assertSame('PEAK', $result->intervals[1]['components'][0]['selection']);
+    }
+
+    public function testHolidayRuleWithoutCalendarIsRejected(): void
+    {
+        $definition = $this->singleComponentDefinition([
+            'id' => 'network',
+            'category' => 'NETWORK',
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'selector' => [
+                'type' => 'WEEKLY_SCHEDULE',
+                'timezone' => 'Europe/Warsaw',
+                'rules' => [
+                    ['zone' => 'OFF_PEAK', 'days' => ['HOLIDAY'], 'from' => '00:00', 'to' => '24:00'],
+                ],
+            ],
+            'rate' => ['type' => 'ZONED', 'rates' => ['OFF_PEAK' => '0.1']],
+        ]);
+
+        $this->expectException(\Supla\EnergyCostCalculator\Exception\DefinitionException::class);
+        (new \Supla\EnergyCostCalculator\Definition\BillingDefinitionParser())->parse($definition);
+    }
+
     private function delta(string $from, string $to, string $import): EnergyDelta
     {
         return new EnergyDelta(new \DateTimeImmutable($from), new \DateTimeImmutable($to), [
