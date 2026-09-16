@@ -2,6 +2,11 @@
   "version": 1,
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
+  "billingCycle": {
+    "anchor": "2026-01-15T00:00:00+01:00",
+    "length": 1,
+    "unit": "MONTH"
+  },
   "periods": [
     {
       "validFrom": "2026-01-01T00:00:00+01:00",
@@ -10,20 +15,40 @@
         {
           "id": "energy-purchase",
           "category": "ENERGY",
-          "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
-          "rate": {"type": "CONSTANT", "value": "0.50", "unit": "PLN/kWh"}
+          "quantity": {
+            "type": "ACTIVE_ENERGY_IMPORT"
+          },
+          "rate": {
+            "type": "CONSTANT",
+            "value": "0.50",
+            "unit": "PLN/kWh"
+          }
         },
         {
           "id": "distribution-variable",
           "category": "NETWORK",
-          "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
-          "rate": {"type": "CONSTANT", "value": "0.30", "unit": "PLN/kWh"}
+          "quantity": {
+            "type": "ACTIVE_ENERGY_IMPORT"
+          },
+          "rate": {
+            "type": "CONSTANT",
+            "value": "0.30",
+            "unit": "PLN/kWh"
+          }
         },
         {
           "id": "distribution-fixed",
           "category": "NETWORK",
-          "quantity": {"type": "PERIOD", "period": "MONTH", "prorate": false},
-          "rate": {"type": "CONSTANT", "value": "1.20", "unit": "PLN/month"}
+          "quantity": {
+            "type": "PERIOD",
+            "period": "MONTH",
+            "prorate": false
+          },
+          "rate": {
+            "type": "CONSTANT",
+            "value": "1.20",
+            "unit": "PLN/month"
+          }
         }
       ]
     }

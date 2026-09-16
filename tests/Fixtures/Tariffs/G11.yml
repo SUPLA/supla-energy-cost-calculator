@@ -1,15 +1,74 @@
 cases:
-  monday:
+  week_inside_billing_period:
+    query:
+      from: '2026-01-19T00:00:00+01:00'
+      to: '2026-01-26T00:00:00+01:00'
     deltas:
-      - { datetime: '2026-01-05T00:15:00Z', import: '1.5' }
-      - { datetime: '2026-01-05T12:15:00Z', import: '0.5' }
+      - { datetime: '2026-01-19T00:15:00+01:00', import: '1.5' }
+      - { datetime: '2026-01-19T12:15:00+01:00', import: '0.5' }
     expected:
-      total: '2.8'
-      byComponent: { energy-purchase: '1', distribution-variable: '0.6', distribution-fixed: '1.2' }
-  sunday:
+      result:
+        usage:
+          ACTIVE_ENERGY_IMPORT: '2'
+        costs:
+          usageBased:
+            total: '1.6'
+            byComponent: { energy-purchase: '1', distribution-variable: '0.6' }
+          periodic:
+            total: null
+            byComponent: {}
+          total: null
+        billingContext:
+          requestedRangeCoversWholePeriods: false
+          periods:
+            - { from: '2026-01-15T00:00:00+01:00', to: '2026-02-15T00:00:00+01:00', fullyCovered: false }
+        periodicCharges:
+          - id: distribution-fixed
+            definition: { period: MONTH, prorate: false, rate: '1.20', unit: PLN/month }
+            calculated: null
+
+  full_billing_period:
+    query:
+      from: '2026-01-15T00:00:00+01:00'
+      to: '2026-02-15T00:00:00+01:00'
     deltas:
-      - { datetime: '2026-01-04T00:15:00Z', import: '1.5' }
-      - { datetime: '2026-01-04T12:15:00Z', import: '0.5' }
+      - { datetime: '2026-01-19T00:15:00+01:00', import: '1.5' }
+      - { datetime: '2026-01-19T12:15:00+01:00', import: '0.5' }
     expected:
-      total: '2.8'
-      byComponent: { energy-purchase: '1', distribution-variable: '0.6', distribution-fixed: '1.2' }
+      result:
+        costs:
+          usageBased:
+            total: '1.6'
+          periodic:
+            total: '1.2'
+            byComponent: { distribution-fixed: '1.2' }
+          total: '2.8'
+        billingContext:
+          requestedRangeCoversWholePeriods: true
+        periodicCharges:
+          - id: distribution-fixed
+            calculated: { units: '1', amount: '1.2' }
+
+  two_full_billing_periods:
+    query:
+      from: '2026-01-15T00:00:00+01:00'
+      to: '2026-03-15T00:00:00+01:00'
+    deltas:
+      - { datetime: '2026-01-19T00:15:00+01:00', import: '1.5' }
+      - { datetime: '2026-01-19T12:15:00+01:00', import: '0.5' }
+    expected:
+      result:
+        costs:
+          usageBased: { total: '1.6' }
+          periodic:
+            total: '2.4'
+            byComponent: { distribution-fixed: '2.4' }
+          total: '4'
+        billingContext:
+          requestedRangeCoversWholePeriods: true
+          periods:
+            - { from: '2026-01-15T00:00:00+01:00', to: '2026-02-15T00:00:00+01:00', fullyCovered: true }
+            - { from: '2026-02-15T00:00:00+01:00', to: '2026-03-15T00:00:00+01:00', fullyCovered: true }
+        periodicCharges:
+          - id: distribution-fixed
+            calculated: { units: '2', amount: '2.4' }

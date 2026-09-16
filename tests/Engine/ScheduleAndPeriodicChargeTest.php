@@ -47,7 +47,7 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('0.2', $result->total);
+        self::assertSame('0.2', $result->usageBasedTotal);
         self::assertSame('NIGHT', $result->intervals[0]['components'][0]['selection']);
         self::assertSame('NIGHT', $result->intervals[1]['components'][0]['selection']);
     }
@@ -101,16 +101,15 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('0.3', $result->total);
+        self::assertSame('0.3', $result->usageBasedTotal);
         self::assertSame('WINTER', $result->intervals[0]['components'][0]['selection']);
         self::assertSame('SUMMER', $result->intervals[1]['components'][0]['selection']);
     }
 
-    public function testMonthlyFixedCostIsAddedForEveryOverlappingCalendarMonth(): void
+    public function testMonthlyFixedCostUsesBillingAnchorAndIsAddedOnlyForWholeBillingPeriod(): void
     {
         $deltas = [
-            $this->delta('2026-01-15T10:00:00Z', '2026-01-15T10:15:00Z'),
-            $this->delta('2026-02-15T10:00:00Z', '2026-02-15T10:15:00Z'),
+            $this->delta('2026-01-20T10:00:00+01:00', '2026-01-20T10:15:00+01:00'),
         ];
         $definition = $this->definition([
             [
@@ -125,23 +124,73 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
                 'quantity' => ['type' => 'PERIOD', 'period' => 'MONTH', 'prorate' => false],
                 'rate' => ['type' => 'CONSTANT', 'value' => '10.00', 'unit' => 'PLN/month'],
             ],
+        ], [
+            'anchor' => '2026-01-15T00:00:00+01:00',
+            'length' => 1,
+            'unit' => 'MONTH',
+        ]);
+
+        $calculator = new CostCalculator(
+            new InMemoryEnergyDeltaSource($deltas),
+            new InMemoryReferenceDataSource(),
+        );
+
+        $partial = $calculator->calculate(
+            'meter',
+            new TimeRange(
+                new \DateTimeImmutable('2026-01-20T00:00:00+01:00'),
+                new \DateTimeImmutable('2026-01-27T00:00:00+01:00'),
+            ),
+            $definition,
+        );
+        self::assertSame('0.5', $partial->usageBasedTotal);
+        self::assertNull($partial->periodicTotal);
+        self::assertNull($partial->total);
+        self::assertNull($partial->periodicCharges[0]['calculated']);
+
+        $full = $calculator->calculate(
+            'meter',
+            new TimeRange(
+                new \DateTimeImmutable('2026-01-15T00:00:00+01:00'),
+                new \DateTimeImmutable('2026-02-15T00:00:00+01:00'),
+            ),
+            $definition,
+        );
+        self::assertSame('0.5', $full->usageBasedTotal);
+        self::assertSame('10', $full->periodicTotal);
+        self::assertSame('10.5', $full->total);
+        self::assertSame('1', $full->periodicCharges[0]['calculated']['units']);
+        self::assertSame('10', $full->periodicCharges[0]['calculated']['amount']);
+    }
+
+    public function testBillingPeriodFixedCostIsChargedOncePerBillingCycle(): void
+    {
+        $definition = $this->definition([[ 
+            'id' => 'billing-fee',
+            'category' => 'SERVICE',
+            'quantity' => ['type' => 'PERIOD', 'period' => 'BILLING_PERIOD', 'prorate' => false],
+            'rate' => ['type' => 'CONSTANT', 'value' => '7.00', 'unit' => 'PLN/period'],
+        ]], [
+            'anchor' => '2026-01-15T00:00:00+01:00',
+            'length' => 2,
+            'unit' => 'MONTH',
         ]);
 
         $result = (new CostCalculator(
-            new InMemoryEnergyDeltaSource($deltas),
+            new InMemoryEnergyDeltaSource([]),
             new InMemoryReferenceDataSource(),
         ))->calculate(
             'meter',
             new TimeRange(
-                new \DateTimeImmutable('2026-01-15T10:00:00Z'),
-                new \DateTimeImmutable('2026-02-15T10:15:00Z'),
+                new \DateTimeImmutable('2026-01-15T00:00:00+01:00'),
+                new \DateTimeImmutable('2026-03-15T00:00:00+01:00'),
             ),
             $definition,
         );
 
-        self::assertSame('21', $result->total);
-        self::assertSame('1', $result->byComponent['energy']);
-        self::assertSame('20', $result->byComponent['fixed-network']);
+        self::assertSame('7', $result->periodicTotal);
+        self::assertSame('7', $result->total);
+        self::assertSame('1', $result->periodicCharges[0]['calculated']['units']);
     }
 
     private function delta(string $from, string $to): EnergyDelta
@@ -154,9 +203,9 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
         ]);
     }
 
-    private function definition(array $components): array
+    private function definition(array $components, ?array $billingCycle = null): array
     {
-        return [
+        $definition = [
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
@@ -166,5 +215,9 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
                 'components' => $components,
             ]],
         ];
+        if ($billingCycle !== null) {
+            $definition['billingCycle'] = $billingCycle;
+        }
+        return $definition;
     }
 }

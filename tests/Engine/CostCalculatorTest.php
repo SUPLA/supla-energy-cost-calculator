@@ -18,44 +18,6 @@ use Symfony\Component\Yaml\Yaml;
 
 final class CostCalculatorTest extends TestCase
 {
-    public function testConstantEnergyAndPeriodicFee(): void
-    {
-        $deltas = [
-            $this->delta('2026-01-01T00:00:00Z', '2026-01-01T00:15:00Z', '1.5'),
-            $this->delta('2026-01-01T00:15:00Z', '2026-01-01T00:30:00Z', '0.5'),
-        ];
-        $definition = [
-            'version' => 1,
-            'currency' => 'PLN',
-            'timezone' => 'Europe/Warsaw',
-            'periods' => [[
-                'validFrom' => '2026-01-01T00:00:00Z',
-                'validTo' => null,
-                'components' => [
-                    [
-                        'id' => 'energy',
-                        'category' => 'ENERGY',
-                        'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
-                        'rate' => ['type' => 'CONSTANT', 'value' => '0.50', 'unit' => 'PLN/kWh'],
-                    ],
-                    [
-                        'id' => 'service',
-                        'category' => 'SERVICE',
-                        'quantity' => ['type' => 'PERIOD', 'period' => 'DAY', 'prorate' => false],
-                        'rate' => ['type' => 'CONSTANT', 'value' => '2.00', 'unit' => 'PLN/day'],
-                    ],
-                ],
-            ]],
-        ];
-
-        $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource());
-        $result = $calculator->calculate('meter', new TimeRange(new \DateTimeImmutable('2026-01-01T00:00:00Z'), new \DateTimeImmutable('2026-01-01T00:30:00Z')), $definition);
-
-        self::assertSame('3', $result->total);
-        self::assertSame('1', $result->byComponent['energy']);
-        self::assertSame('2', $result->byComponent['service']);
-    }
-
     #[DataProvider('tariffProfileCases')]
     public function testTariffProfile(string $name, array $definition, array $case): void
     {
@@ -75,20 +37,36 @@ final class CostCalculatorTest extends TestCase
                 $intervals,
             );
         }
+
+        $range = isset($case['query'])
+            ? new TimeRange(new \DateTimeImmutable($case['query']['from']), new \DateTimeImmutable($case['query']['to']))
+            : new TimeRange($deltas[0]->from, $deltas[array_key_last($deltas)]->to);
+
+        $expected = $case['expected'];
+        $includeIntervals = isset($expected['selections']) || isset($expected['result']['intervals']);
         $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource($references));
         $result = $calculator->calculate(
             'meter',
-            new TimeRange($deltas[0]->from, $deltas[array_key_last($deltas)]->to),
+            $range,
             $definition,
-            new CalculationOptions(includeIntervals: isset($case['expected']['selections'])),
+            new CalculationOptions(includeIntervals: $includeIntervals),
         );
 
-        self::assertSame((string)$case['expected']['total'], $result->total, $name);
-        foreach ($case['expected']['byComponent'] as $component => $expected) {
-            self::assertSame((string)$expected, $result->byComponent[$component], $name);
+        if (isset($expected['result'])) {
+            $this->assertExpectedSubset($expected['result'], $result->jsonSerialize(), $name);
+        } else {
+            self::assertSame((string)$expected['total'], $result->total, $name);
+            foreach ($expected['byComponent'] as $component => $value) {
+                self::assertSame((string)$value, $result->usageBasedByComponent[$component], $name);
+            }
         }
-        foreach (array_values($case['expected']['selections'] ?? []) as $intervalIndex => $selection) {
-            self::assertSame($selection['zone'], $result->intervals[$intervalIndex]['components'][$selection['componentIndex']]['selection'], $name);
+
+        foreach (array_values($expected['selections'] ?? []) as $intervalIndex => $selection) {
+            self::assertSame(
+                $selection['zone'],
+                $result->intervals[$intervalIndex]['components'][$selection['componentIndex']]['selection'],
+                $name,
+            );
         }
     }
 
@@ -106,6 +84,64 @@ final class CostCalculatorTest extends TestCase
                 ];
             }
         }
+    }
+
+    public function testArbitraryRangeReturnsUsageAndPeriodicDefinitionWithoutAddingPeriodicCharge(): void
+    {
+        $definition = [
+            'version' => 1,
+            'currency' => 'PLN',
+            'timezone' => 'Europe/Warsaw',
+            'billingCycle' => [
+                'anchor' => '2026-01-15T00:00:00+01:00',
+                'length' => 1,
+                'unit' => 'MONTH',
+            ],
+            'periods' => [[
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => null,
+                'components' => [
+                    [
+                        'id' => 'energy',
+                        'category' => 'ENERGY',
+                        'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+                        'rate' => ['type' => 'CONSTANT', 'value' => '0.50', 'unit' => 'PLN/kWh'],
+                    ],
+                    [
+                        'id' => 'fixed',
+                        'category' => 'NETWORK',
+                        'quantity' => ['type' => 'PERIOD', 'period' => 'MONTH', 'prorate' => false],
+                        'rate' => ['type' => 'CONSTANT', 'value' => '12.00', 'unit' => 'PLN/month'],
+                    ],
+                ],
+            ]],
+        ];
+        $deltas = [
+            $this->delta('2026-01-19T00:00:00+01:00', '2026-01-19T00:15:00+01:00', '2'),
+        ];
+
+        $result = (new CostCalculator(
+            new InMemoryEnergyDeltaSource($deltas),
+            new InMemoryReferenceDataSource(),
+        ))->calculate(
+            'meter',
+            new TimeRange(
+                new \DateTimeImmutable('2026-01-19T00:00:00+01:00'),
+                new \DateTimeImmutable('2026-01-26T00:00:00+01:00'),
+            ),
+            $definition,
+            new CalculationOptions(includeIntervals: true),
+        );
+
+        self::assertSame('1', $result->usageBasedTotal);
+        self::assertNull($result->periodicTotal);
+        self::assertNull($result->total);
+        self::assertSame('2', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
+        self::assertSame('2', $result->intervals[0]['usage'][QuantityType::ACTIVE_ENERGY_IMPORT->value]);
+        self::assertSame('1', $result->intervals[0]['costs']['total']);
+        self::assertSame('12.00', $result->periodicCharges[0]['definition']['rate']);
+        self::assertNull($result->periodicCharges[0]['calculated']);
+        self::assertFalse($result->billingContext['requestedRangeCoversWholePeriods']);
     }
 
     public function testFixing1ReferenceRate(): void
@@ -133,8 +169,13 @@ final class CostCalculatorTest extends TestCase
         ]);
 
         $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), $references);
-        $result = $calculator->calculate('meter', new TimeRange(new \DateTimeImmutable('2026-01-01T10:00:00Z'), new \DateTimeImmutable('2026-01-01T10:15:00Z')), $definition);
+        $result = $calculator->calculate(
+            'meter',
+            new TimeRange(new \DateTimeImmutable('2026-01-01T10:00:00Z'), new \DateTimeImmutable('2026-01-01T10:15:00Z')),
+            $definition,
+        );
 
+        self::assertSame('1', $result->usageBasedTotal);
         self::assertSame('1', $result->total);
     }
 
@@ -172,8 +213,68 @@ final class CostCalculatorTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('2.5', $result->total);
+        self::assertSame('2.5', $result->usageBasedTotal);
         self::assertSame('S4', $result->intervals[0]['components'][0]['selection']);
+    }
+
+    public function testHolidayScheduleOverridesRegularWeekdayRule(): void
+    {
+        $deltas = [
+            $this->delta('2026-05-01T10:00:00Z', '2026-05-01T10:15:00Z', '1'),
+            $this->delta('2026-05-08T10:00:00Z', '2026-05-08T10:15:00Z', '1'),
+        ];
+        $definition = $this->singleComponentDefinition([
+            'id' => 'network',
+            'category' => 'NETWORK',
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'selector' => [
+                'type' => 'WEEKLY_SCHEDULE',
+                'timezone' => 'Europe/Warsaw',
+                'calendar' => 'PL_PUBLIC_HOLIDAYS',
+                'rules' => [
+                    ['zone' => 'OFF_PEAK', 'days' => ['HOLIDAY'], 'from' => '00:00', 'to' => '24:00'],
+                    ['zone' => 'PEAK', 'days' => ['MON', 'TUE', 'WED', 'THU', 'FRI'], 'from' => '00:00', 'to' => '24:00'],
+                    ['zone' => 'OFF_PEAK', 'days' => ['SAT', 'SUN'], 'from' => '00:00', 'to' => '24:00'],
+                ],
+            ],
+            'rate' => [
+                'type' => 'ZONED',
+                'rates' => ['PEAK' => '1.00', 'OFF_PEAK' => '0.10'],
+                'unit' => 'PLN/kWh',
+            ],
+        ]);
+
+        $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource());
+        $result = $calculator->calculate(
+            'meter',
+            new TimeRange(new \DateTimeImmutable('2026-05-01T10:00:00Z'), new \DateTimeImmutable('2026-05-08T10:15:00Z')),
+            $definition,
+            new CalculationOptions(includeIntervals: true),
+        );
+
+        self::assertSame('1.1', $result->usageBasedTotal);
+        self::assertSame('OFF_PEAK', $result->intervals[0]['components'][0]['selection']);
+        self::assertSame('PEAK', $result->intervals[1]['components'][0]['selection']);
+    }
+
+    public function testHolidayRuleWithoutCalendarIsRejected(): void
+    {
+        $definition = $this->singleComponentDefinition([
+            'id' => 'network',
+            'category' => 'NETWORK',
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'selector' => [
+                'type' => 'WEEKLY_SCHEDULE',
+                'timezone' => 'Europe/Warsaw',
+                'rules' => [
+                    ['zone' => 'OFF_PEAK', 'days' => ['HOLIDAY'], 'from' => '00:00', 'to' => '24:00'],
+                ],
+            ],
+            'rate' => ['type' => 'ZONED', 'rates' => ['OFF_PEAK' => '0.1']],
+        ]);
+
+        $this->expectException(\Supla\EnergyCostCalculator\Exception\DefinitionException::class);
+        (new \Supla\EnergyCostCalculator\Definition\BillingDefinitionParser())->parse($definition);
     }
 
     public function testRulesCanChangeOverTime(): void
@@ -211,69 +312,14 @@ final class CostCalculatorTest extends TestCase
         ];
 
         $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource());
-        $result = $calculator->calculate('meter', new TimeRange(new \DateTimeImmutable('2026-01-01T00:00:00Z'), new \DateTimeImmutable('2026-07-01T00:15:00Z')), $definition);
-
-        self::assertSame('1.25', $result->total);
-    }
-
-    public function testHolidayScheduleOverridesRegularWeekdayRule(): void
-    {
-        $deltas = [
-            $this->delta('2026-05-01T10:00:00Z', '2026-05-01T10:15:00Z', '1'), // Friday, 12:00 Europe/Warsaw
-            $this->delta('2026-05-08T10:00:00Z', '2026-05-08T10:15:00Z', '1'), // regular Friday
-        ];
-        $definition = $this->singleComponentDefinition([
-            'id' => 'network',
-            'category' => 'NETWORK',
-            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
-            'selector' => [
-                'type' => 'WEEKLY_SCHEDULE',
-                'timezone' => 'Europe/Warsaw',
-                'calendar' => 'PL_PUBLIC_HOLIDAYS',
-                'rules' => [
-                    ['zone' => 'OFF_PEAK', 'days' => ['HOLIDAY'], 'from' => '00:00', 'to' => '24:00'],
-                    ['zone' => 'PEAK', 'days' => ['MON', 'TUE', 'WED', 'THU', 'FRI'], 'from' => '00:00', 'to' => '24:00'],
-                    ['zone' => 'OFF_PEAK', 'days' => ['SAT', 'SUN'], 'from' => '00:00', 'to' => '24:00'],
-                ],
-            ],
-            'rate' => [
-                'type' => 'ZONED',
-                'rates' => ['PEAK' => '1.00', 'OFF_PEAK' => '0.10'],
-                'unit' => 'PLN/kWh',
-            ],
-        ]);
-
-        $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource());
         $result = $calculator->calculate(
             'meter',
-            new TimeRange(new \DateTimeImmutable('2026-05-01T10:00:00Z'), new \DateTimeImmutable('2026-05-08T10:15:00Z')),
+            new TimeRange(new \DateTimeImmutable('2026-01-01T00:00:00Z'), new \DateTimeImmutable('2026-07-01T00:15:00Z')),
             $definition,
-            new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('1.1', $result->total);
-        self::assertSame('OFF_PEAK', $result->intervals[0]['components'][0]['selection']);
-        self::assertSame('PEAK', $result->intervals[1]['components'][0]['selection']);
-    }
-
-    public function testHolidayRuleWithoutCalendarIsRejected(): void
-    {
-        $definition = $this->singleComponentDefinition([
-            'id' => 'network',
-            'category' => 'NETWORK',
-            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
-            'selector' => [
-                'type' => 'WEEKLY_SCHEDULE',
-                'timezone' => 'Europe/Warsaw',
-                'rules' => [
-                    ['zone' => 'OFF_PEAK', 'days' => ['HOLIDAY'], 'from' => '00:00', 'to' => '24:00'],
-                ],
-            ],
-            'rate' => ['type' => 'ZONED', 'rates' => ['OFF_PEAK' => '0.1']],
-        ]);
-
-        $this->expectException(\Supla\EnergyCostCalculator\Exception\DefinitionException::class);
-        (new \Supla\EnergyCostCalculator\Definition\BillingDefinitionParser())->parse($definition);
+        self::assertSame('1.25', $result->usageBasedTotal);
+        self::assertSame('1.25', $result->total);
     }
 
     private function delta(string $from, string $to, string $import): EnergyDelta
@@ -304,5 +350,19 @@ final class CostCalculatorTest extends TestCase
                 'components' => [$component],
             ]],
         ];
+    }
+
+    private function assertExpectedSubset(mixed $expected, mixed $actual, string $path): void
+    {
+        if (!is_array($expected)) {
+            self::assertSame($expected, $actual, $path);
+            return;
+        }
+
+        self::assertIsArray($actual, $path);
+        foreach ($expected as $key => $value) {
+            self::assertArrayHasKey($key, $actual, $path . '.' . $key);
+            $this->assertExpectedSubset($value, $actual[$key], $path . '.' . $key);
+        }
     }
 }

@@ -27,6 +27,9 @@
       "items": {
         "$ref": "#/$defs/period"
       }
+    },
+    "billingCycle": {
+      "$ref": "#/$defs/billingCycle"
     }
   },
   "additionalProperties": false,
@@ -125,7 +128,9 @@
               "enum": [
                 "DAY",
                 "WEEK",
-                "MONTH"
+                "MONTH",
+                "YEAR",
+                "BILLING_PERIOD"
               ]
             },
             "prorate": {
@@ -414,6 +419,33 @@
           "additionalProperties": false
         }
       ]
+    },
+    "billingCycle": {
+      "type": "object",
+      "properties": {
+        "anchor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "unit": {
+          "enum": [
+            "DAY",
+            "WEEK",
+            "MONTH",
+            "YEAR"
+          ],
+          "default": "MONTH"
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

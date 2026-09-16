@@ -14,6 +14,7 @@ final readonly class BillingDefinition
         public int $version,
         public string $currency,
         public string $timezone,
+        public BillingCycleDefinition $billingCycle,
         public array $periods,
     ) {
     }

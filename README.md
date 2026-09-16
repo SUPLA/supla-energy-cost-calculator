@@ -36,9 +36,35 @@ $result = $calculator->calculate(
     options: new CalculationOptions(includeIntervals: false),
 );
 
-$total = $result->total;
-$components = $result->byComponent;
+$usageBasedTotal = $result->usageBasedTotal;
+$usageBasedComponents = $result->usageBasedByComponent;
+$fullTotal = $result->total; // null when a partial billing period has periodic charges
 ```
+
+
+## Requested range vs billing cycle
+
+The requested calculation range and the billing cycle are independent concepts. Callers may request any interval (an hour, week, month, custom range, or a complete billing period).
+
+A billing definition may declare an anchor and cycle length:
+
+```json
+{
+  "billingCycle": {
+    "anchor": "2026-01-15T00:00:00+01:00",
+    "length": 1,
+    "unit": "MONTH"
+  }
+}
+```
+
+This produces cycles such as `15 Jan -> 15 Feb`, `15 Feb -> 15 Mar`, etc. If `billingCycle` is omitted, the default is a natural one-month cycle.
+
+Usage-based costs are always calculated exactly for the requested range. Periodic charges are deliberately kept out of interval logs, so hourly/daily/monthly charts can be built by aggregating `intervals[]` without smearing a monthly fee across time.
+
+When the requested range covers complete billing cycles, periodic charges are also calculated and `costs.total` contains the full amount. When the range covers only part of a billing cycle and periodic charges exist, `costs.periodic.total` and `costs.total` are `null`; `periodicCharges[]` still contains the fee definitions so the UI can display e.g. `+ 12 PLN/month`.
+
+Each interval optionally returned with `includeIntervals` contains both raw `usage` quantities and usage-based `costs`. The top-level `usage` is the sum of the returned meter deltas.
 
 ## JSON model
 
@@ -134,8 +160,6 @@ The starter tests cover:
 
 - constant energy rate,
 - periodic fee,
-- YAML-defined G11, G12, and G13 tariff profile cases,
-- YAML-defined TAURON G14dynamic cases using PDGSZ reference zones,
 - Fixing1 reference rate,
 - PDGSZ-based dynamic zone selection,
 - billing rules changing over time.
@@ -178,3 +202,16 @@ If a calculation requests a holiday date outside the bundled calendar coverage, 
 Applications that need calendars from another source can inject a custom `HolidayCalendarProvider` by constructing `DefaultSelectorResolver` with their provider and passing that resolver to `CostCalculator`.
 
 See `examples/definitions/weekly-schedule-polish-holidays.json`.
+
+## Seasonal and overnight schedules
+
+`WEEKLY_SCHEDULE` also supports the richer rule format carried over from the `supla-cloud` `issue-307` tariff resolver:
+
+- recurring `seasons` defined with `--MM-DD` boundaries,
+- optional `season` and `priority` per rule,
+- multiple `time_ranges` per rule,
+- ranges crossing midnight, e.g. `22:00`–`06:00`.
+
+The original single `from`/`to` rule syntax remains supported for backwards compatibility. See `docs/schedules.md` for the full format and semantics.
+
+The files in `tests/Fixtures/Tariffs/` are regression fixtures for tariff structures. Their monetary rates are intentionally synthetic; they are not an official operator price catalogue.

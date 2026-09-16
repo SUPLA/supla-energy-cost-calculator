@@ -20,6 +20,7 @@ final class BillingDefinitionParser
         $currency = $this->requiredString($data, 'currency');
         $timezone = (string)($data['timezone'] ?? 'UTC');
         $this->assertTimezone($timezone);
+        $billingCycle = $this->parseBillingCycle($data['billingCycle'] ?? null, 'definition.billingCycle');
 
         $rawPeriods = $data['periods'] ?? null;
         if (!is_array($rawPeriods) || $rawPeriods === []) {
@@ -62,7 +63,7 @@ final class BillingDefinitionParser
         usort($periods, static fn(BillingPeriodDefinition $a, BillingPeriodDefinition $b) => ($a->validFrom?->getTimestamp() ?? PHP_INT_MIN) <=> ($b->validFrom?->getTimestamp() ?? PHP_INT_MIN));
         $this->assertNoOverlappingPeriods($periods);
 
-        return new BillingDefinition($version, $currency, $timezone, $periods);
+        return new BillingDefinition($version, $currency, $timezone, $billingCycle, $periods);
     }
 
     private function parseComponent(array $data, string $path): ComponentDefinition
@@ -81,8 +82,8 @@ final class BillingDefinitionParser
         unset($quantityOptions['type']);
         if ($quantityType === QuantityType::PERIOD) {
             $period = strtoupper((string)($quantityOptions['period'] ?? ''));
-            if (!in_array($period, ['DAY', 'WEEK', 'MONTH'], true)) {
-                throw new DefinitionException("$path.quantity.period must be DAY, WEEK or MONTH.");
+            if (!in_array($period, ['DAY', 'WEEK', 'MONTH', 'YEAR', 'BILLING_PERIOD'], true)) {
+                throw new DefinitionException("$path.quantity.period must be DAY, WEEK, MONTH, YEAR or BILLING_PERIOD.");
             }
             $quantityOptions['period'] = $period;
             $quantityOptions['prorate'] = (bool)($quantityOptions['prorate'] ?? false);
@@ -281,6 +282,28 @@ final class BillingDefinitionParser
             throw new DefinitionException("$path.$key must be numeric.");
         }
         return $value;
+    }
+
+    private function parseBillingCycle(mixed $value, string $path): BillingCycleDefinition
+    {
+        if ($value === null) {
+            return new BillingCycleDefinition(null, 1, BillingCycleUnit::MONTH);
+        }
+        if (!is_array($value)) {
+            throw new DefinitionException("$path must be an object.");
+        }
+
+        $length = $value['length'] ?? 1;
+        if (!is_int($length) || $length < 1) {
+            throw new DefinitionException("$path.length must be a positive integer.");
+        }
+
+        $unitRaw = strtoupper((string)($value['unit'] ?? 'MONTH'));
+        $unit = BillingCycleUnit::tryFrom($unitRaw)
+            ?? throw new DefinitionException("$path.unit must be DAY, WEEK, MONTH or YEAR.");
+
+        $anchor = $this->dateOrNull($value['anchor'] ?? null, "$path.anchor");
+        return new BillingCycleDefinition($anchor, $length, $unit);
     }
 
     private function dateOrNull(mixed $value, string $path): ?\DateTimeImmutable

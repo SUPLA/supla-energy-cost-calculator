@@ -17,8 +17,10 @@ The package never imports Doctrine, Symfony or SUPLA entities.
 4. Stream meter deltas.
 5. Resolve the active billing-definition period for each delta.
 6. For every metered component: resolve quantity -> selector -> rate -> cost.
-7. Add periodic components separately.
-8. Return totals and optional per-interval diagnostics.
+7. Resolve the billing-cycle context (`anchor + length + unit`).
+8. Keep periodic charge definitions separate from metered interval costs.
+9. Calculate periodic charges only when the requested range covers complete billing cycles.
+10. Return usage totals and optional per-interval usage/cost diagnostics.
 
 ## Important modelling choice
 
@@ -48,3 +50,11 @@ The default `BundledHolidayCalendarProvider` loads JSON files from `resources/ca
 Holiday matching is intentionally data-driven. Country-specific legal dates do not belong in `DefaultSelectorResolver`. The selector only knows the generic concepts `calendar` and `HOLIDAY`.
 
 When both a holiday rule and an ordinary weekday rule could match a timestamp, the holiday rule has priority. Requests outside a bundled calendar's declared coverage fail explicitly.
+
+## Requested range and billing cycle
+
+`TimeRange` is the caller's analytical range and may be arbitrary. `billingCycle` describes invoice boundaries and does not constrain `TimeRange`.
+
+Periodic fees are not distributed into 15-minute/hour/day chart facts. For partial billing-cycle queries the result exposes their definitions but leaves the periodic/full total unknown (`null`). For ranges aligned to complete billing cycles the engine calculates them. Periodic units are anchored to the billing period start, so a `MONTH` fee on a `15 Jan -> 15 Feb` billing cycle counts as one unit, not two calendar-month overlaps.
+
+This separation lets clients build hour/day/month charts from `intervals[]` while still presenting fixed-fee information and exact full totals for billing-period views.
