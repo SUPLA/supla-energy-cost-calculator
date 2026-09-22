@@ -1,0 +1,21 @@
+cases:
+  negative_net_is_preserved:
+    query:
+      from: '2026-01-02T12:00:00+01:00'
+      to: '2026-01-02T13:00:00+01:00'
+    deltas:
+      - {datetime: '2026-01-02T12:15:00+01:00', import: '0.2', export: '0'}
+      - {datetime: '2026-01-02T12:30:00+01:00', import: '0', export: '0.4'}
+      - {datetime: '2026-01-02T12:45:00+01:00', import: '0.1', export: '0'}
+      - {datetime: '2026-01-02T13:00:00+01:00', import: '0', export: '0.4'}
+    expected:
+      result:
+        costs:
+          usageBased:
+            total: '-0.5'
+        charges:
+          - quantity:
+              import: '0.3'
+              export: '0.8'
+              value: '-0.5'
+            cost: '-0.5'

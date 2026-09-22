@@ -44,7 +44,7 @@ $fullTotal = $result->total; // null when a partial billing period has periodic 
 
 ## Requested range vs billing cycle
 
-The requested calculation range and the billing cycle are independent concepts. Callers may request any interval (an hour, week, month, custom range, or a complete billing period).
+The requested calculation range and the billing cycle are independent concepts. Callers may request an hour, week, month, custom range, or a complete billing period. If a component uses temporal netting, the requested range must contain complete netting windows for that component.
 
 A billing definition may declare an anchor and cycle length:
 
@@ -60,11 +60,11 @@ A billing definition may declare an anchor and cycle length:
 
 This produces cycles such as `15 Jan -> 15 Feb`, `15 Feb -> 15 Mar`, etc. If `billingCycle` is omitted, the default is a natural one-month cycle.
 
-Usage-based costs are always calculated exactly for the requested range. Periodic charges are deliberately kept out of interval logs, so hourly/daily/monthly charts can be built by aggregating `intervals[]` without smearing a monthly fee across time.
+Usage-based costs are calculated from their natural charge windows. Periodic charges are deliberately kept out of time-series charge facts. Use `charges[]` for cost charts: ordinary components produce charges at meter-delta resolution, while temporally netted components produce one charge per complete netting window. `intervals[]` remains a meter-interval diagnostic view and never receives an artificial share of a wider netting-window cost.
 
 When the requested range covers complete billing cycles, periodic charges are also calculated and `costs.total` contains the full amount. When the range covers only part of a billing cycle and periodic charges exist, `costs.periodic.total` and `costs.total` are `null`; `periodicCharges[]` still contains the fee definitions so the UI can display e.g. `+ 12 PLN/month`.
 
-Each interval optionally returned with `includeIntervals` contains both raw `usage` quantities and usage-based `costs`. The top-level `usage` is the sum of the returned meter deltas.
+With `includeIntervals`, the result also returns `charges[]`. Each charge has its natural `[from,to)` window, resolved quantity, selector result, rate and cost. `intervals[]` still contains raw meter `usage` and costs that are genuinely resolvable at that meter interval; a 60-minute netted component is intentionally absent from the four underlying 15-minute interval costs. The top-level `usage` is always the sum of the returned meter deltas.
 
 ## JSON model
 
@@ -72,9 +72,23 @@ The top-level `periods[]` model allows rules for one meter to change over time w
 
 A component is defined by three independent concerns:
 
-1. **quantity** — what is charged, e.g. imported active energy or a calendar month,
+1. **quantity** — what is charged and, optionally, how meter deltas are netted in time,
 2. **selector** — which zone/rule applies at the timestamp,
 3. **rate** — the actual rate, possibly from an external time series.
+
+Temporal netting is declared directly on the quantity:
+
+```json
+{
+  "quantity": {
+    "type": "ACTIVE_ENERGY_IMPORT",
+    "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+    "periodInMinutes": 60
+  }
+}
+```
+
+Supported strategies are `IMPORT_MINUS_EXPORT` and `IMPORT_MINUS_EXPORT_CAP_ZERO`. Without `strategy`, `ACTIVE_ENERGY_IMPORT` keeps the existing forward/import behavior. A netting window must be complete and its selector result and rate must remain constant for the whole window. Therefore a 60-minute netting component can use an hourly Fixing series, but it is invalid with a rate or zone changing every 15 minutes.
 
 Example: dynamic energy (`Fixing1`) plus dynamic network zones (`PDGSZ`) plus a monthly fee:
 
@@ -137,7 +151,9 @@ Reference IDs proposed by the examples:
 - `PL.PSE.RCE`
 - `PL.PSE.PDGSZ`
 - `PL.TGE.FIXING1`
+- `PL.TGE.FIXING1_HOURLY`
 - `PL.TGE.FIXING2`
+- `PL.TGE.FIXING2_HOURLY`
 
 ## Performance characteristics
 
@@ -161,6 +177,8 @@ The starter tests cover:
 - constant energy rate,
 - periodic fee,
 - Fixing1 reference rate,
+- hourly import/export netting and hourly Fixing compatibility,
+- rejection of rate changes inside a netting window,
 - PDGSZ-based dynamic zone selection,
 - billing rules changing over time.
 

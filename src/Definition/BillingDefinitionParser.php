@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Supla\EnergyCostCalculator\Definition;
 
 use Supla\EnergyCostCalculator\Exception\DefinitionException;
+use Supla\EnergyCostCalculator\Model\QuantityStrategy;
 use Supla\EnergyCostCalculator\Model\QuantityType;
 
 final class BillingDefinitionParser
@@ -80,13 +81,40 @@ final class BillingDefinitionParser
             ?? throw new DefinitionException("Unsupported quantity type '$quantityTypeRaw' at $path.quantity.type.");
         $quantityOptions = $quantityData;
         unset($quantityOptions['type']);
+        $quantityStrategy = null;
+        $periodInMinutes = null;
         if ($quantityType === QuantityType::PERIOD) {
+            if (array_key_exists('strategy', $quantityOptions) || array_key_exists('periodInMinutes', $quantityOptions)) {
+                throw new DefinitionException("$path.quantity: PERIOD quantity does not support temporal netting.");
+            }
             $period = strtoupper((string)($quantityOptions['period'] ?? ''));
             if (!in_array($period, ['DAY', 'WEEK', 'MONTH', 'YEAR', 'BILLING_PERIOD'], true)) {
                 throw new DefinitionException("$path.quantity.period must be DAY, WEEK, MONTH, YEAR or BILLING_PERIOD.");
             }
             $quantityOptions['period'] = $period;
             $quantityOptions['prorate'] = (bool)($quantityOptions['prorate'] ?? false);
+        } else {
+            $strategyRaw = $quantityOptions['strategy'] ?? null;
+            $periodRaw = $quantityOptions['periodInMinutes'] ?? null;
+            unset($quantityOptions['strategy'], $quantityOptions['periodInMinutes']);
+
+            if ($strategyRaw === null && $periodRaw !== null) {
+                throw new DefinitionException("$path.quantity.periodInMinutes requires quantity.strategy.");
+            }
+            if ($strategyRaw !== null) {
+                if (!is_string($strategyRaw) || trim($strategyRaw) === '') {
+                    throw new DefinitionException("$path.quantity.strategy must be a non-empty string.");
+                }
+                $quantityStrategy = QuantityStrategy::tryFrom(strtoupper($strategyRaw))
+                    ?? throw new DefinitionException("Unsupported quantity strategy '$strategyRaw' at $path.quantity.strategy.");
+                if ($quantityType !== QuantityType::ACTIVE_ENERGY_IMPORT) {
+                    throw new DefinitionException("$path.quantity.strategy currently supports ACTIVE_ENERGY_IMPORT only.");
+                }
+                if (!is_int($periodRaw) || $periodRaw < 1) {
+                    throw new DefinitionException("$path.quantity.periodInMinutes must be a positive integer when strategy is set.");
+                }
+                $periodInMinutes = $periodRaw;
+            }
         }
 
         $selectorData = $data['selector'] ?? ['type' => 'ALWAYS'];
@@ -118,7 +146,7 @@ final class BillingDefinitionParser
         return new ComponentDefinition(
             $id,
             $category,
-            new QuantityDefinition($quantityType, $quantityOptions),
+            new QuantityDefinition($quantityType, $quantityStrategy, $periodInMinutes, $quantityOptions),
             new SelectorDefinition($selectorType, $selectorData),
             new RateDefinition($rateType, $rateData),
         );

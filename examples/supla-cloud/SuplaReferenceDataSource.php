@@ -19,7 +19,9 @@ final class SuplaReferenceDataSource implements ReferenceDataSource
         'PL.PSE.RCE' => ['column' => 'rce', 'unit' => 'PLN/MWh'],
         'PL.PSE.PDGSZ' => ['column' => 'pdgsz', 'unit' => null],
         'PL.TGE.FIXING1' => ['column' => 'fixing1', 'unit' => 'PLN/MWh'],
+        'PL.TGE.FIXING1_HOURLY' => ['column' => 'fixing1_hourly', 'unit' => 'PLN/MWh'],
         'PL.TGE.FIXING2' => ['column' => 'fixing2', 'unit' => 'PLN/MWh'],
+        'PL.TGE.FIXING2_HOURLY' => ['column' => 'fixing2_hourly', 'unit' => 'PLN/MWh'],
     ];
 
     public function __construct(private readonly Connection $connection)

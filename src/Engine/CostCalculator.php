@@ -9,15 +9,19 @@ use Supla\EnergyCostCalculator\Contract\ReferenceDataSource;
 use Supla\EnergyCostCalculator\Definition\BillingDefinition;
 use Supla\EnergyCostCalculator\Definition\BillingDefinitionParser;
 use Supla\EnergyCostCalculator\Definition\BillingPeriodDefinition;
+use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Exception\IntervalCrossesBillingPeriodException;
 use Supla\EnergyCostCalculator\Exception\MissingBillingPeriodException;
 use Supla\EnergyCostCalculator\Math\DecimalMath;
 use Supla\EnergyCostCalculator\Math\NativeDecimalMath;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
+use Supla\EnergyCostCalculator\Model\QuantityType;
 use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Reference\ReferenceDataCache;
 use Supla\EnergyCostCalculator\Strategy\Quantity\DefaultQuantityResolver;
+use Supla\EnergyCostCalculator\Strategy\Quantity\DefaultQuantityWindowResolver;
 use Supla\EnergyCostCalculator\Strategy\Quantity\QuantityResolver;
+use Supla\EnergyCostCalculator\Strategy\Quantity\QuantityWindowResolver;
 use Supla\EnergyCostCalculator\Strategy\Rate\DefaultRateResolver;
 use Supla\EnergyCostCalculator\Strategy\Rate\RateResolver;
 use Supla\EnergyCostCalculator\Strategy\Selector\DefaultSelectorResolver;
@@ -34,6 +38,7 @@ final class CostCalculator
         private readonly RateResolver $rateResolver = new DefaultRateResolver(),
         private readonly DecimalMath $math = new NativeDecimalMath(),
         private readonly BillingCycleResolver $billingCycleResolver = new BillingCycleResolver(),
+        private readonly QuantityWindowResolver $quantityWindowResolver = new DefaultQuantityWindowResolver(),
     ) {
     }
 
@@ -60,7 +65,68 @@ final class CostCalculator
         $usageBasedByComponent = [];
         $usage = [];
         $intervals = [];
+        $charges = [];
         $processed = 0;
+        $requiresCompleteDeltaCoverage = $this->definitionUsesTemporalNetting($definition, $range);
+        $expectedDeltaFrom = $range->from;
+
+        /** @var array<string, array<string, mixed>> $activeNettingWindows */
+        $activeNettingWindows = [];
+
+        $finalizeNettingWindow = function (array $window) use (
+            &$usageBasedTotal,
+            &$usageBasedByComponent,
+            &$charges,
+            $options,
+        ): void {
+            /** @var list<EnergyDelta> $deltas */
+            $deltas = $window['deltas'];
+            $first = $deltas[0] ?? null;
+            $last = $deltas[array_key_last($deltas)] ?? null;
+            if (!$first instanceof EnergyDelta || !$last instanceof EnergyDelta
+                || $first->from != $window['from'] || $last->to != $window['to']) {
+                throw new CalculationException(sprintf(
+                    "Component '%s' requires a complete netting window %s..%s.",
+                    $window['component']->id,
+                    $window['from']->format(DATE_ATOM),
+                    $window['to']->format(DATE_ATOM),
+                ));
+            }
+
+            $resolution = $this->quantityWindowResolver->resolve(
+                $deltas,
+                $window['component']->quantity,
+                $this->math,
+            );
+            $cost = $this->math->multiply($resolution->value, $window['rate']);
+
+            $usageBasedTotal = $this->math->add($usageBasedTotal, $cost);
+            $componentId = $window['component']->id;
+            $usageBasedByComponent[$componentId] = $this->math->add(
+                $usageBasedByComponent[$componentId] ?? '0',
+                $cost,
+            );
+
+            if ($options->includeIntervals) {
+                $charges[] = [
+                    'componentId' => $componentId,
+                    'category' => $window['component']->category,
+                    'from' => $window['from']->format(DATE_ATOM),
+                    'to' => $window['to']->format(DATE_ATOM),
+                    'quantity' => [
+                        'type' => $window['component']->quantity->type->value,
+                        'strategy' => $window['component']->quantity->strategy?->value,
+                        'periodInMinutes' => $window['component']->quantity->periodInMinutes,
+                        'import' => $resolution->sourceQuantities[QuantityType::ACTIVE_ENERGY_IMPORT->value] ?? '0',
+                        'export' => $resolution->sourceQuantities[QuantityType::ACTIVE_ENERGY_EXPORT->value] ?? '0',
+                        'value' => $resolution->value,
+                    ],
+                    'selection' => $window['selection'],
+                    'rate' => $window['rate'],
+                    'cost' => $cost,
+                ];
+            }
+        };
 
         foreach ($this->deltaSource->getDeltas($meterId, $range) as $delta) {
             if (!$delta instanceof EnergyDelta) {
@@ -72,6 +138,20 @@ final class CostCalculator
             }
             if ($intersection->from != $delta->from || $intersection->to != $delta->to) {
                 throw new IntervalCrossesBillingPeriodException('Requested range cuts through a delta interval. Use boundaries aligned to meter intervals.');
+            }
+            if ($requiresCompleteDeltaCoverage && $delta->from != $expectedDeltaFrom) {
+                throw new CalculationException(sprintf(
+                    'Meter deltas contain a gap at %s; complete coverage is required for temporal netting.',
+                    $expectedDeltaFrom->format(DATE_ATOM),
+                ));
+            }
+            $expectedDeltaFrom = $delta->to;
+
+            foreach ($activeNettingWindows as $key => $window) {
+                if ($delta->from >= $window['to']) {
+                    $finalizeNettingWindow($window);
+                    unset($activeNettingWindows[$key]);
+                }
             }
 
             $period = $definition->periodAt($delta->from)
@@ -89,6 +169,85 @@ final class CostCalculator
                 if ($component->isPeriodic()) {
                     continue;
                 }
+
+                if ($component->quantity->usesTemporalNetting()) {
+                    $window = $this->nettingWindow(
+                        $delta->from,
+                        $component->quantity->periodInMinutes ?? 0,
+                        $definition->timezone,
+                    );
+                    if ($delta->to > $window->to) {
+                        throw new CalculationException(sprintf(
+                            "Delta %s..%s crosses netting window boundary %s for component '%s'.",
+                            $delta->from->format(DATE_ATOM),
+                            $delta->to->format(DATE_ATOM),
+                            $window->to->format(DATE_ATOM),
+                            $component->id,
+                        ));
+                    }
+
+                    $selection = $this->selectorResolver->resolve($delta, $component->selector, $references);
+                    $rate = $this->rateResolver->resolve($delta, $component->rate, $selection, $references, $this->math);
+                    $key = $component->id;
+                    if (!isset($activeNettingWindows[$key])) {
+                        $activeNettingWindows[$key] = [
+                            'component' => $component,
+                            'componentObjectId' => spl_object_id($component),
+                            'from' => $window->from,
+                            'to' => $window->to,
+                            'deltas' => [],
+                            'lastTo' => null,
+                            'selection' => $selection,
+                            'rate' => $rate,
+                        ];
+                    } else {
+                        $active = $activeNettingWindows[$key];
+                        if ($active['from'] != $window->from || $active['to'] != $window->to) {
+                            throw new CalculationException(sprintf(
+                                "Component '%s' has overlapping or non-contiguous netting windows.",
+                                $component->id,
+                            ));
+                        }
+                        if ($active['componentObjectId'] !== spl_object_id($component)) {
+                            throw new CalculationException(sprintf(
+                                "Component '%s' changes definition inside netting window %s..%s.",
+                                $component->id,
+                                $window->from->format(DATE_ATOM),
+                                $window->to->format(DATE_ATOM),
+                            ));
+                        }
+                        if ($active['selection'] !== $selection) {
+                            throw new CalculationException(sprintf(
+                                "Component '%s' changes selector result inside netting window %s..%s.",
+                                $component->id,
+                                $window->from->format(DATE_ATOM),
+                                $window->to->format(DATE_ATOM),
+                            ));
+                        }
+                        if ($active['rate'] !== $rate) {
+                            throw new CalculationException(sprintf(
+                                "Component '%s' changes rate inside netting window %s..%s.",
+                                $component->id,
+                                $window->from->format(DATE_ATOM),
+                                $window->to->format(DATE_ATOM),
+                            ));
+                        }
+                    }
+
+                    $lastTo = $activeNettingWindows[$key]['lastTo'];
+                    if ($lastTo instanceof \DateTimeImmutable && $lastTo != $delta->from) {
+                        throw new CalculationException(sprintf(
+                            "Meter deltas contain a gap inside netting window %s..%s for component '%s'.",
+                            $window->from->format(DATE_ATOM),
+                            $window->to->format(DATE_ATOM),
+                            $component->id,
+                        ));
+                    }
+                    $activeNettingWindows[$key]['deltas'][] = $delta;
+                    $activeNettingWindows[$key]['lastTo'] = $delta->to;
+                    continue;
+                }
+
                 $quantity = $this->quantityResolver->resolve($delta, $component->quantity);
                 $selection = $this->selectorResolver->resolve($delta, $component->selector, $references);
                 $rate = $this->rateResolver->resolve($delta, $component->rate, $selection, $references, $this->math);
@@ -105,6 +264,19 @@ final class CostCalculator
                         'category' => $component->category,
                         'quantityType' => $component->quantity->type->value,
                         'quantity' => $quantity,
+                        'selection' => $selection,
+                        'rate' => $rate,
+                        'cost' => $cost,
+                    ];
+                    $charges[] = [
+                        'componentId' => $component->id,
+                        'category' => $component->category,
+                        'from' => $delta->from->format(DATE_ATOM),
+                        'to' => $delta->to->format(DATE_ATOM),
+                        'quantity' => [
+                            'type' => $component->quantity->type->value,
+                            'value' => $quantity,
+                        ],
                         'selection' => $selection,
                         'rate' => $rate,
                         'cost' => $cost,
@@ -128,6 +300,18 @@ final class CostCalculator
                 ];
             }
             $processed++;
+        }
+
+        if ($requiresCompleteDeltaCoverage && $expectedDeltaFrom != $range->to) {
+            throw new CalculationException(sprintf(
+                'Meter deltas end at %s; complete coverage through %s is required for temporal netting.',
+                $expectedDeltaFrom->format(DATE_ATOM),
+                $range->to->format(DATE_ATOM),
+            ));
+        }
+
+        foreach ($activeNettingWindows as $window) {
+            $finalizeNettingWindow($window);
         }
 
         ksort($usage);
@@ -173,6 +357,7 @@ final class CostCalculator
             ],
             $processed,
             $intervals,
+            $charges,
         );
     }
 
@@ -255,5 +440,39 @@ final class CostCalculator
         $from = $period->validFrom !== null && $period->validFrom > $requested->from ? $period->validFrom : $requested->from;
         $to = $period->validTo !== null && $period->validTo < $requested->to ? $period->validTo : $requested->to;
         return $from < $to ? new TimeRange($from, $to) : null;
+    }
+
+
+    private function definitionUsesTemporalNetting(BillingDefinition $definition, TimeRange $range): bool
+    {
+        foreach ($definition->periods as $period) {
+            if ($this->periodRange($period, $range) === null) {
+                continue;
+            }
+            foreach ($period->components as $component) {
+                if (!$component->isPeriodic() && $component->quantity->usesTemporalNetting()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private function nettingWindow(\DateTimeImmutable $timestamp, int $periodInMinutes, string $timezone): TimeRange
+    {
+        if ($periodInMinutes < 1) {
+            throw new CalculationException('Netting periodInMinutes must be positive.');
+        }
+
+        $tz = new \DateTimeZone($timezone);
+        $periodSeconds = $periodInMinutes * 60;
+        $offset = $tz->getOffset($timestamp);
+        $localEpoch = $timestamp->getTimestamp() + $offset;
+        $bucketLocalEpoch = intdiv($localEpoch, $periodSeconds) * $periodSeconds;
+        $fromTimestamp = $bucketLocalEpoch - $offset;
+
+        $from = (new \DateTimeImmutable('@' . $fromTimestamp))->setTimezone($tz);
+        $to = (new \DateTimeImmutable('@' . ($fromTimestamp + $periodSeconds)))->setTimezone($tz);
+        return new TimeRange($from, $to);
     }
 }

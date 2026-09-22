@@ -53,7 +53,9 @@ Suggested external reference IDs include:
 
 ```text
 PL.TGE.FIXING1
+PL.TGE.FIXING1_HOURLY
 PL.TGE.FIXING2
+PL.TGE.FIXING2_HOURLY
 PL.PSE.RCE
 PL.PSE.PDGSZ
 ```
@@ -188,7 +190,7 @@ The caller may request any `TimeRange` (hour, day, week, month, arbitrary range,
 }
 ```
 
-Usage-based interval costs must always be calculated exactly for the requested range. Periodic/fixed charges must never be distributed into interval facts or chart buckets.
+Usage-based charges must be calculated only at their natural resolution. Periodic/fixed charges must never be distributed into interval facts or chart buckets. A component with temporal netting may only produce a charge for a complete netting window; do not smear that charge back into the underlying meter intervals.
 
 For a partial billing-period request:
 
@@ -211,3 +213,29 @@ rules + meter/reference facts + query -> expected result
 ```
 
 Prefer adding scenario data to `tests/Fixtures/Tariffs/*.yml` using `query` and `expected.result`. The test harness supports recursive subset assertions so scenarios only need to state fields relevant to the behavior under test.
+
+
+## Temporal netting invariant
+
+A metered quantity may opt into temporal netting directly on `quantity`:
+
+```json
+{
+  "type": "ACTIVE_ENERGY_IMPORT",
+  "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+  "periodInMinutes": 60
+}
+```
+
+Supported strategies are:
+
+- `IMPORT_MINUS_EXPORT` = signed `sum(import) - sum(export)`,
+- `IMPORT_MINUS_EXPORT_CAP_ZERO` = `max(sum(import) - sum(export), 0)`.
+
+Without `strategy`, quantities keep the existing per-delta behavior. Temporal netting currently applies to `ACTIVE_ENERGY_IMPORT` and requires both `ACTIVE_ENERGY_IMPORT` and `ACTIVE_ENERGY_EXPORT` in every source delta.
+
+Netting windows are aligned using `BillingDefinition.timezone`. Raw meter deltas remain canonical source facts. A netting charge may be emitted only when the full window is covered contiguously. A requested range that cuts a netting window, a gap in meter deltas, a billing-definition change inside a window, a selector change inside a window, or a rate change inside a window must fail explicitly.
+
+This means `periodInMinutes: 60` is compatible with an hourly Fixing series such as `PL.TGE.FIXING1_HOURLY` or `PL.TGE.FIXING2_HOURLY`, but not with a 15-minute-changing price/selector on the same component.
+
+`charges[]` is the authoritative cost-fact series for charting. Ordinary components produce charge facts at meter-delta resolution; temporally netted components produce one charge fact per netting window. `intervals[]` remains a raw meter-interval diagnostic view and must not contain an allocated share of a wider netting-window charge.

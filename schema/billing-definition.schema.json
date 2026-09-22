@@ -82,9 +82,79 @@
           "minLength": 1
         },
         "quantity": {
-          "$ref": "#/$defs/quantity"
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "ACTIVE_ENERGY_IMPORT",
+                "ACTIVE_ENERGY_EXPORT",
+                "ACTIVE_ENERGY_BALANCED_IMPORT",
+                "ACTIVE_ENERGY_BALANCED_EXPORT",
+                "REACTIVE_ENERGY_IMPORT",
+                "REACTIVE_ENERGY_EXPORT"
+              ]
+            }
+          },
+          "additionalProperties": false
         },
-        "selector": {
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "strategy",
+            "periodInMinutes"
+          ],
+          "properties": {
+            "type": {
+              "const": "ACTIVE_ENERGY_IMPORT"
+            },
+            "strategy": {
+              "enum": [
+                "IMPORT_MINUS_EXPORT",
+                "IMPORT_MINUS_EXPORT_CAP_ZERO"
+              ]
+            },
+            "periodInMinutes": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "period"
+          ],
+          "properties": {
+            "type": {
+              "const": "PERIOD"
+            },
+            "period": {
+              "enum": [
+                "DAY",
+                "WEEK",
+                "MONTH",
+                "YEAR",
+                "BILLING_PERIOD"
+              ]
+            },
+            "prorate": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "selector": {
           "$ref": "#/$defs/selector"
         },
         "rate": {

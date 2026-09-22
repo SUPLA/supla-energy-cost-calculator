@@ -1,0 +1,42 @@
+cases:
+  hourly_fixing_is_compatible:
+    query:
+      from: '2026-01-02T10:00:00+01:00'
+      to: '2026-01-02T11:00:00+01:00'
+    deltas:
+      - {datetime: '2026-01-02T10:15:00+01:00', import: '1.0', export: '0'}
+      - {datetime: '2026-01-02T10:30:00+01:00', import: '0', export: '0.6'}
+      - {datetime: '2026-01-02T10:45:00+01:00', import: '0.2', export: '0'}
+      - {datetime: '2026-01-02T11:00:00+01:00', import: '0', export: '0.1'}
+    references:
+      PL.TGE.FIXING1_HOURLY:
+        - {from: '2026-01-02T10:00:00+01:00', to: '2026-01-02T11:00:00+01:00', value: '450', unit: 'PLN/MWh'}
+    expected:
+      result:
+        costs:
+          usageBased:
+            total: '0.25'
+        charges:
+          - quantity:
+              value: '0.5'
+            rate: '0.5'
+            cost: '0.25'
+
+  changing_rate_inside_hour_is_rejected:
+    query:
+      from: '2026-01-02T10:00:00+01:00'
+      to: '2026-01-02T11:00:00+01:00'
+    deltas:
+      - {datetime: '2026-01-02T10:15:00+01:00', import: '0.25', export: '0'}
+      - {datetime: '2026-01-02T10:30:00+01:00', import: '0.25', export: '0'}
+      - {datetime: '2026-01-02T10:45:00+01:00', import: '0.25', export: '0'}
+      - {datetime: '2026-01-02T11:00:00+01:00', import: '0.25', export: '0'}
+    references:
+      PL.TGE.FIXING1_HOURLY:
+        - {from: '2026-01-02T10:00:00+01:00', to: '2026-01-02T10:15:00+01:00', value: '400', unit: 'PLN/MWh'}
+        - {from: '2026-01-02T10:15:00+01:00', to: '2026-01-02T10:30:00+01:00', value: '450', unit: 'PLN/MWh'}
+        - {from: '2026-01-02T10:30:00+01:00', to: '2026-01-02T10:45:00+01:00', value: '500', unit: 'PLN/MWh'}
+        - {from: '2026-01-02T10:45:00+01:00', to: '2026-01-02T11:00:00+01:00', value: '550', unit: 'PLN/MWh'}
+    expected:
+      exception: 'Supla\EnergyCostCalculator\Exception\CalculationException'
+      messageContains: 'changes rate inside netting window'

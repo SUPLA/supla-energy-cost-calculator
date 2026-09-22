@@ -22,7 +22,11 @@ final class CostCalculatorTest extends TestCase
     public function testTariffProfile(string $name, array $definition, array $case): void
     {
         $deltas = array_map(
-            fn(array $delta): EnergyDelta => $this->deltaFromEnd($delta['datetime'], (string)$delta['import']),
+            fn(array $delta): EnergyDelta => $this->deltaFromEnd(
+                $delta['datetime'],
+                (string)$delta['import'],
+                (string)($delta['export'] ?? '0'),
+            ),
             $case['deltas'],
         );
         $references = [];
@@ -43,8 +47,25 @@ final class CostCalculatorTest extends TestCase
             : new TimeRange($deltas[0]->from, $deltas[array_key_last($deltas)]->to);
 
         $expected = $case['expected'];
-        $includeIntervals = isset($expected['selections']) || isset($expected['result']['intervals']);
+        $includeIntervals = isset($expected['selections'])
+            || isset($expected['result']['intervals'])
+            || isset($expected['result']['charges']);
         $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource($references));
+
+        if (isset($expected['exception'])) {
+            $this->expectException((string)$expected['exception']);
+            if (isset($expected['messageContains'])) {
+                $this->expectExceptionMessage((string)$expected['messageContains']);
+            }
+            $calculator->calculate(
+                'meter',
+                $range,
+                $definition,
+                new CalculationOptions(includeIntervals: $includeIntervals),
+            );
+            return;
+        }
+
         $result = $calculator->calculate(
             'meter',
             $range,
@@ -322,20 +343,25 @@ final class CostCalculatorTest extends TestCase
         self::assertSame('1.25', $result->total);
     }
 
-    private function delta(string $from, string $to, string $import): EnergyDelta
+    private function delta(string $from, string $to, string $import, string $export = '0'): EnergyDelta
     {
         return new EnergyDelta(new \DateTimeImmutable($from), new \DateTimeImmutable($to), [
             QuantityType::ACTIVE_ENERGY_IMPORT->value => $import,
-            QuantityType::ACTIVE_ENERGY_EXPORT->value => '0',
+            QuantityType::ACTIVE_ENERGY_EXPORT->value => $export,
             QuantityType::ACTIVE_ENERGY_BALANCED_IMPORT->value => $import,
-            QuantityType::ACTIVE_ENERGY_BALANCED_EXPORT->value => '0',
+            QuantityType::ACTIVE_ENERGY_BALANCED_EXPORT->value => $export,
         ]);
     }
 
-    private function deltaFromEnd(string $end, string $import): EnergyDelta
+    private function deltaFromEnd(string $end, string $import, string $export = '0'): EnergyDelta
     {
         $to = new \DateTimeImmutable($end);
-        return $this->delta($to->modify('-15 minutes')->format(DATE_ATOM), $to->format(DATE_ATOM), $import);
+        return $this->delta(
+            $to->modify('-15 minutes')->format(DATE_ATOM),
+            $to->format(DATE_ATOM),
+            $import,
+            $export,
+        );
     }
 
     private function singleComponentDefinition(array $component): array

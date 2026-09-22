@@ -1,0 +1,66 @@
+cases:
+  positive_net:
+    query:
+      from: '2026-01-02T10:00:00+01:00'
+      to: '2026-01-02T11:00:00+01:00'
+    deltas:
+      - {datetime: '2026-01-02T10:15:00+01:00', import: '1.0', export: '0'}
+      - {datetime: '2026-01-02T10:30:00+01:00', import: '0', export: '0.6'}
+      - {datetime: '2026-01-02T10:45:00+01:00', import: '0.2', export: '0'}
+      - {datetime: '2026-01-02T11:00:00+01:00', import: '0', export: '0.1'}
+    expected:
+      result:
+        usage:
+          ACTIVE_ENERGY_IMPORT: '1.2'
+          ACTIVE_ENERGY_EXPORT: '0.7'
+        costs:
+          usageBased:
+            total: '0.5'
+            byComponent:
+              energy: '0.5'
+        charges:
+          - componentId: energy
+            from: '2026-01-02T10:00:00+01:00'
+            to: '2026-01-02T11:00:00+01:00'
+            quantity:
+              type: ACTIVE_ENERGY_IMPORT
+              strategy: IMPORT_MINUS_EXPORT_CAP_ZERO
+              periodInMinutes: 60
+              import: '1.2'
+              export: '0.7'
+              value: '0.5'
+            rate: '1.00'
+            cost: '0.5'
+
+  export_dominates:
+    query:
+      from: '2026-01-02T11:00:00+01:00'
+      to: '2026-01-02T12:00:00+01:00'
+    deltas:
+      - {datetime: '2026-01-02T11:15:00+01:00', import: '0.2', export: '0'}
+      - {datetime: '2026-01-02T11:30:00+01:00', import: '0', export: '0.4'}
+      - {datetime: '2026-01-02T11:45:00+01:00', import: '0.1', export: '0'}
+      - {datetime: '2026-01-02T12:00:00+01:00', import: '0', export: '0.2'}
+    expected:
+      result:
+        costs:
+          usageBased:
+            total: '0'
+        charges:
+          - quantity:
+              import: '0.3'
+              export: '0.6'
+              value: '0'
+            cost: '0'
+
+  partial_window_rejected:
+    query:
+      from: '2026-01-02T10:15:00+01:00'
+      to: '2026-01-02T11:00:00+01:00'
+    deltas:
+      - {datetime: '2026-01-02T10:30:00+01:00', import: '0.2', export: '0'}
+      - {datetime: '2026-01-02T10:45:00+01:00', import: '0.2', export: '0'}
+      - {datetime: '2026-01-02T11:00:00+01:00', import: '0.2', export: '0'}
+    expected:
+      exception: 'Supla\EnergyCostCalculator\Exception\CalculationException'
+      messageContains: 'requires a complete netting window'

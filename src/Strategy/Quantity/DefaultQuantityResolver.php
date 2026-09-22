@@ -16,6 +16,9 @@ final class DefaultQuantityResolver implements QuantityResolver
         if ($definition->type === QuantityType::PERIOD) {
             throw new CalculationException('PERIOD quantity is not resolved from meter deltas.');
         }
+        if ($definition->usesTemporalNetting()) {
+            throw new CalculationException('Temporal netting quantity must be resolved from a complete quantity window.');
+        }
 
         $value = $delta->quantity($definition->type);
         if ($value === null) {

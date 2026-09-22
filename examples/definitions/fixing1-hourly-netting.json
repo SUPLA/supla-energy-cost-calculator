@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "periods": [
+    {
+      "validFrom": "2026-01-01T00:00:00+01:00",
+      "validTo": null,
+      "components": [
+        {
+          "id": "energy",
+          "category": "ENERGY",
+          "quantity": {
+            "type": "ACTIVE_ENERGY_IMPORT",
+            "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+            "periodInMinutes": 60
+          },
+          "rate": {
+            "type": "REFERENCE",
+            "source": "PL.TGE.FIXING1_HOURLY",
+            "sourceUnit": "PLN/MWh",
+            "multiplier": "0.001",
+            "add": "0.05",
+            "unit": "PLN/kWh"
+          }
+        }
+      ]
+    }
+  ]
+}

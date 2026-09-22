@@ -1,0 +1,51 @@
+cases:
+  hourly_energy_and_quarter_hour_distribution:
+    query:
+      from: '2026-01-02T10:00:00+01:00'
+      to: '2026-01-02T11:00:00+01:00'
+    deltas:
+      - {datetime: '2026-01-02T10:15:00+01:00', import: '1.0', export: '0'}
+      - {datetime: '2026-01-02T10:30:00+01:00', import: '0', export: '0.6'}
+      - {datetime: '2026-01-02T10:45:00+01:00', import: '0.2', export: '0'}
+      - {datetime: '2026-01-02T11:00:00+01:00', import: '0', export: '0.1'}
+    expected:
+      result:
+        costs:
+          usageBased:
+            total: '1.7'
+            byComponent:
+              distribution-variable: '1.2'
+              energy: '0.5'
+        intervals:
+          - costs:
+              total: '1'
+              byComponent:
+                distribution-variable: '1'
+          - costs:
+              total: '0'
+              byComponent:
+                distribution-variable: '0'
+          - costs:
+              total: '0.2'
+              byComponent:
+                distribution-variable: '0.2'
+          - costs:
+              total: '0'
+              byComponent:
+                distribution-variable: '0'
+        charges:
+          - componentId: distribution-variable
+            from: '2026-01-02T10:00:00+01:00'
+            to: '2026-01-02T10:15:00+01:00'
+          - componentId: distribution-variable
+            from: '2026-01-02T10:15:00+01:00'
+            to: '2026-01-02T10:30:00+01:00'
+          - componentId: distribution-variable
+            from: '2026-01-02T10:30:00+01:00'
+            to: '2026-01-02T10:45:00+01:00'
+          - componentId: distribution-variable
+            from: '2026-01-02T10:45:00+01:00'
+            to: '2026-01-02T11:00:00+01:00'
+          - componentId: energy
+            from: '2026-01-02T10:00:00+01:00'
+            to: '2026-01-02T11:00:00+01:00'
