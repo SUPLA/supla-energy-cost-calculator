@@ -78,6 +78,8 @@ resources/tariff-presets/
 
 Host applications must not resolve package resource paths directly. A preset revision is the SHA-256 hash of its deterministically encoded JSON document, independent of file formatting and line endings.
 
+Cost-plan compilation also belongs to this package. Persisted cost plans reference stable preset IDs plus user-specific values/overrides and are compiled with `CostPlanCompiler` into executable `BillingDefinition` objects. Compatible fixes to an existing preset ID intentionally affect existing plans; real tariff changes require a new preset ID. Do not pin a cost plan to a preset revision. Preset revision hashes are for diagnostics/cache invalidation. Adjacent plan entries with identical billing-cycle definitions must not create artificial billing-cycle boundaries.
+
 The current bundled calendar is:
 
 ```text
@@ -172,6 +174,8 @@ README.md
 AGENTS.md
 docs/architecture.md
 schema/billing-definition.schema.json
+schema/cost-plan.schema.json
+schema/frontend-tariff-preset.schema.json
 schema/holiday-calendar.schema.json
 examples/
 ```

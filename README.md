@@ -181,7 +181,31 @@ $preset->document; // Complete preset document.
 $preset->revision; // SHA-256 of the deterministically encoded JSON document.
 ```
 
-`presets()` returns catalogue metadata with a `revision` and without internal resource paths. `get()` rejects unknown identifiers and resources outside the bundled preset directory. Revisions are suitable for recording which preset content was used to create a persisted definition; calculations should use that persisted definition rather than reload the preset.
+`presets()` returns catalogue metadata with a `revision` and without internal resource paths. `get()` rejects unknown identifiers and resources outside the bundled preset directory. A preset ID is a stable reference to one real tariff definition; compatible corrections to that definition may change its revision without changing its ID. A real operator/tariff change must use a new preset ID.
+
+Use `TariffPresetCompiler` when compiling one preset and `CostPlanCompiler` for persisted user plans:
+
+```php
+use Supla\EnergyCostCalculator\Plan\CostPlanCompiler;
+
+$plan = [
+    'version' => 1,
+    'entries' => [[
+        'validFrom' => '2026-01-01T00:00:00+01:00',
+        'validTo' => '2027-01-01T00:00:00+01:00',
+        'presetId' => 'PL.TAURON_DYSTRYBUCJA.G12.2026',
+        'values' => [
+            'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+            'energy.DAY' => '0.98',
+            'energy.NIGHT' => '0.62',
+        ],
+    ]],
+];
+
+$definition = (new CostPlanCompiler())->compile($plan);
+```
+
+The cost-plan JSON stores stable preset IDs and user values/overrides, not a copied executable definition. Compiling later uses the current document for the same preset ID, so package-owned corrections automatically apply to existing plans. Omit preset-default values from `values` unless the user explicitly overrides them; this preserves inheritance of corrected defaults. Adjacent plan entries with the same billing-cycle configuration are merged on the billing-cycle timeline, so a price-only change does not create an artificial invoice boundary. See `schema/cost-plan.schema.json` and `docs/cost-plans.md`.
 
 These presets intentionally cover only the first UI scope: energy purchase input, variable distribution component, tariff-zone schedule and billing cycle. Fixed/phase-dependent/statutory charges are not baked into the presets. See `examples/tariff-presets/README.md`.
 

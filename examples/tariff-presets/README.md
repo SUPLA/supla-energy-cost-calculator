@@ -15,12 +15,14 @@ All bundled distribution defaults are **net PLN/kWh** and can be overwritten by 
 1. Use `TariffPresetCatalog::presets()` and let the user choose OSD + tariff group.
 2. Load the selected preset with `TariffPresetCatalog::get()`.
 3. Render `inputs[]`. The current value at the first target can be used as the initial form value; `null` means the user must provide it.
-4. Apply a submitted value to every path in `targets[]`.
-5. Ensure all required inputs are filled and no required calculator rate remains `null`.
-6. Validate the resulting object against `schema/billing-definition.schema.json`.
-7. Persist the completed `BillingDefinition` (and ideally also the preset id used to create it).
+4. Persist a cost-plan entry containing the stable `presetId`, optional user-specific effective-range constraints, and only user-specific values/explicit overrides. Omitted range boundaries inherit the preset validity.
+5. Use `CostPlanCompiler` to turn the persisted cost plan into the executable `BillingDefinition`.
 
-`apply-preset.js` contains a dependency-free example of step 4. `compiled-examples/` contains four synthetic, fully filled results for G11, G12, G13 and G14dynamic. The energy prices in those compiled files are examples only.
+Do not persist a copied preset template as the authoritative user plan. Compatible corrections to an existing preset ID are intentionally picked up the next time the plan is compiled. A real tariff change is published under a new preset ID and should become a new cost-plan entry.
+
+Values already present in the preset template are inherited when omitted from `values`. Frontends should therefore avoid blindly persisting every initial form value: persist required user-specific values and fields the user actually overrides. This is what lets a corrected package default flow into existing plans.
+
+`TariffPresetCompiler` owns input validation and JSON Pointer application. `apply-preset.js` remains only a dependency-free illustration of the pointer mechanics. `compiled-examples/` contains four synthetic, fully filled BillingDefinition results for G11, G12, G13 and G14dynamic. The energy prices in those compiled files are examples only.
 
 ## Presets
 
