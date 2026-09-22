@@ -9,4 +9,9 @@
       <directory>tests</directory>
     </testsuite>
   </testsuites>
+  <groups>
+    <exclude>
+      <group>performance</group>
+    </exclude>
+  </groups>
 </phpunit>

@@ -1,0 +1,46 @@
+---
+kind: secret
+name: rocket_url
+data: j5lwLudVn5dvTbvimI0akSKWvmEshn5/DXs85oHjAFPz47Wo6wcUExrI34jh09q+zGVXdw==
+
+---
+kind: secret
+name: rocket_user
+data: H8zcywiTRXuhdyhWwbxPt72rSL8L/RLfntVRRDYU9HH+idBdocrbDfjYESzn
+
+---
+kind: secret
+name: rocket_token
+data: vqcfI76p/0S34u6I3jXDX9b6Prgp0LLHhkG/O0TleQ8E33WVFbMaQXKaDtHcjP/9EWycO++JGe0wFAcGvUzHIDilRAWzL68=
+
+---
+kind: pipeline
+name: default
+
+steps:
+  - name: install-backend
+    image: composer:2.8.2
+    depends_on: [ clone ]
+    commands:
+      - composer install --optimize-autoloader
+
+  - name: backend-tests
+    image: php:8.3.22-cli
+    depends_on: [ install-backend ]
+    commands:
+      - ./vendor/bin/phpunit ./tests
+
+  - name: notify
+    image: mike1pol/drone-rocket
+    depends_on: [ backend-tests ]
+    settings:
+      url: { from_secret: rocket_url }
+      user_id: { from_secret: rocket_user }
+      token: { from_secret: rocket_token }
+      channel: github
+    when:
+      status: [ success, failure ]
+    trigger:
+      status: [ success, failure ]
+      event:
+        exclude: [ pull_request ]
