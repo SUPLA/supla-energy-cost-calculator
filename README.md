@@ -60,6 +60,33 @@ A billing definition may declare an anchor and cycle length:
 
 This produces cycles such as `15 Jan -> 15 Feb`, `15 Feb -> 15 Mar`, etc. If `billingCycle` is omitted, the default is a natural one-month cycle.
 
+If invoice boundaries change over time, use `billingCycles[]` instead of `billingCycle`:
+
+```json
+{
+  "billingCycles": [
+    {
+      "validFrom": null,
+      "validTo": "2026-07-01T00:00:00+02:00",
+      "anchor": "2026-01-15T00:00:00+01:00",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    {
+      "validFrom": "2026-07-01T00:00:00+02:00",
+      "validTo": null,
+      "anchor": "2026-07-01T00:00:00+02:00",
+      "length": 1,
+      "unit": "MONTH"
+    }
+  ]
+}
+```
+
+A validity boundary cuts the nominal cycle. In the example above, `15 Jun -> 15 Jul` becomes a transitional `15 Jun -> 1 Jul` period, followed by `1 Jul -> 1 Aug`. There is no gap or overlap. `prorate: true` is calculated against the nominal, uncut period.
+
+The result exposes `billingPeriods[]` summaries with usage, usage-based costs, periodic costs and totals for every effective billing period. Usage-based costs also expose `byZone`, both globally and per billing-period summary.
+
 Usage-based costs are calculated from their natural charge windows. Periodic charges are deliberately kept out of time-series charge facts. Use `charges[]` for cost charts: ordinary components produce charges at meter-delta resolution, while temporally netted components produce one charge per complete netting window. `intervals[]` remains a meter-interval diagnostic view and never receives an artificial share of a wider netting-window cost.
 
 When the requested range covers complete billing cycles, periodic charges are also calculated and `costs.total` contains the full amount. When the range covers only part of a billing cycle and periodic charges exist, `costs.periodic.total` and `costs.total` are `null`; `periodicCharges[]` still contains the fee definitions so the UI can display e.g. `+ 12 PLN/month`.

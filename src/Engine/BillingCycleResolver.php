@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Supla\EnergyCostCalculator\Engine;
 
 use Supla\EnergyCostCalculator\Definition\BillingCycleDefinition;
+use Supla\EnergyCostCalculator\Definition\BillingCyclePeriodDefinition;
 use Supla\EnergyCostCalculator\Definition\BillingCycleUnit;
 use Supla\EnergyCostCalculator\Model\TimeRange;
 
@@ -37,6 +38,97 @@ final class BillingCycleResolver
         $start = $this->alignNaturalStart($local, $cycle->length, $cycle->unit);
         $end = $this->advance($start, $cycle->length, $cycle->unit);
         return new TimeRange($start, $end);
+    }
+
+    /**
+     * Resolves the effective billing periods for a history of billing-cycle rules.
+     * A validity boundary cuts a nominal cycle, producing a shorter transitional period.
+     *
+     * @param list<BillingCyclePeriodDefinition> $cyclePeriods
+     * @return list<ResolvedBillingPeriod>
+     */
+    public function periodsOverlappingTimeline(
+        TimeRange $range,
+        array $cyclePeriods,
+        string $timezone,
+    ): array {
+        $resolved = [];
+
+        foreach ($cyclePeriods as $cyclePeriod) {
+            $overlapFrom = $cyclePeriod->validFrom !== null && $cyclePeriod->validFrom > $range->from
+                ? $cyclePeriod->validFrom
+                : $range->from;
+            $overlapTo = $cyclePeriod->validTo !== null && $cyclePeriod->validTo < $range->to
+                ? $cyclePeriod->validTo
+                : $range->to;
+            if ($overlapFrom >= $overlapTo) {
+                continue;
+            }
+
+            $nominal = $this->periodContaining($overlapFrom, $cyclePeriod->cycle, $timezone);
+            while ($nominal->from < $overlapTo) {
+                $effectiveFrom = $cyclePeriod->validFrom !== null && $cyclePeriod->validFrom > $nominal->from
+                    ? $cyclePeriod->validFrom
+                    : $nominal->from;
+                $effectiveTo = $cyclePeriod->validTo !== null && $cyclePeriod->validTo < $nominal->to
+                    ? $cyclePeriod->validTo
+                    : $nominal->to;
+
+                if ($effectiveFrom < $effectiveTo) {
+                    $effective = new TimeRange($effectiveFrom, $effectiveTo);
+                    if ($effective->overlaps($range)) {
+                        $resolved[] = new ResolvedBillingPeriod($effective, $nominal, $cyclePeriod);
+                    }
+                }
+
+                $nominal = new TimeRange(
+                    $nominal->to,
+                    $this->advance($nominal->to, $cyclePeriod->cycle->length, $cyclePeriod->cycle->unit),
+                );
+            }
+        }
+
+        usort(
+            $resolved,
+            static fn(ResolvedBillingPeriod $a, ResolvedBillingPeriod $b) =>
+                $a->range->from->getTimestamp() <=> $b->range->from->getTimestamp(),
+        );
+
+        return $resolved;
+    }
+
+    /** @param list<ResolvedBillingPeriod> $periods */
+    public function rangeCoversWholeResolvedPeriods(TimeRange $range, array $periods): bool
+    {
+        if ($periods === []) {
+            return false;
+        }
+
+        if (!$this->sameInstant($range->from, $periods[0]->range->from)
+            || !$this->sameInstant($range->to, $periods[array_key_last($periods)]->range->to)) {
+            return false;
+        }
+
+        for ($i = 1, $count = count($periods); $i < $count; $i++) {
+            if (!$this->sameInstant($periods[$i - 1]->range->to, $periods[$i]->range->from)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * @param list<ResolvedBillingPeriod> $periods
+     */
+    public function periodContainingRange(TimeRange $range, array $periods): ?ResolvedBillingPeriod
+    {
+        foreach ($periods as $period) {
+            if ($range->from >= $period->range->from && $range->from < $period->range->to) {
+                return $range->to <= $period->range->to ? $period : null;
+            }
+        }
+        return null;
     }
 
     /** @return list<TimeRange> */

@@ -54,15 +54,17 @@ final class CostCalculator
         $references = new ReferenceDataCache($this->referenceDataSource, $range);
         $references->preload($definition->referenceDataIds($range));
 
-        $billingPeriods = $this->billingCycleResolver->periodsOverlapping(
+        $billingPeriods = $this->billingCycleResolver->periodsOverlappingTimeline(
             $range,
-            $definition->billingCycle,
+            $definition->billingCycles,
             $definition->timezone,
         );
-        $coversWholeBillingPeriods = $this->billingCycleResolver->rangeCoversWholePeriods($range, $billingPeriods);
+        $this->assertBillingPeriodCoverage($range, $billingPeriods);
+        $coversWholeBillingPeriods = $this->billingCycleResolver->rangeCoversWholeResolvedPeriods($range, $billingPeriods);
 
         $usageBasedTotal = '0';
         $usageBasedByComponent = [];
+        $usageBasedByZone = [];
         $usage = [];
         $intervals = [];
         $charges = [];
@@ -70,13 +72,28 @@ final class CostCalculator
         $requiresCompleteDeltaCoverage = $this->definitionUsesTemporalNetting($definition, $range);
         $expectedDeltaFrom = $range->from;
 
+        /** @var array<string, array<string, mixed>> $billingSummaryState */
+        $billingSummaryState = [];
+        foreach ($billingPeriods as $billingPeriod) {
+            $billingSummaryState[$this->billingPeriodKey($billingPeriod)] = [
+                'period' => $billingPeriod,
+                'usage' => [],
+                'usageBasedTotal' => '0',
+                'usageBasedByComponent' => [],
+                'usageBasedByZone' => [],
+            ];
+        }
+
         /** @var array<string, array<string, mixed>> $activeNettingWindows */
         $activeNettingWindows = [];
 
         $finalizeNettingWindow = function (array $window) use (
             &$usageBasedTotal,
             &$usageBasedByComponent,
+            &$usageBasedByZone,
+            &$billingSummaryState,
             &$charges,
+            $billingPeriods,
             $options,
         ): void {
             /** @var list<EnergyDelta> $deltas */
@@ -93,6 +110,17 @@ final class CostCalculator
                 ));
             }
 
+            $windowRange = new TimeRange($window['from'], $window['to']);
+            $billingPeriod = $this->billingCycleResolver->periodContainingRange($windowRange, $billingPeriods);
+            if ($billingPeriod === null) {
+                throw new CalculationException(sprintf(
+                    "Netting window %s..%s for component '%s' crosses a billing-period boundary.",
+                    $window['from']->format(DATE_ATOM),
+                    $window['to']->format(DATE_ATOM),
+                    $window['component']->id,
+                ));
+            }
+
             $resolution = $this->quantityWindowResolver->resolve(
                 $deltas,
                 $window['component']->quantity,
@@ -100,12 +128,21 @@ final class CostCalculator
             );
             $cost = $this->math->multiply($resolution->value, $window['rate']);
 
-            $usageBasedTotal = $this->math->add($usageBasedTotal, $cost);
             $componentId = $window['component']->id;
-            $usageBasedByComponent[$componentId] = $this->math->add(
-                $usageBasedByComponent[$componentId] ?? '0',
-                $cost,
-            );
+            $usageBasedTotal = $this->math->add($usageBasedTotal, $cost);
+            $this->addAmount($usageBasedByComponent, $componentId, $cost);
+            if ($window['selection'] !== null) {
+                $this->addAmount($usageBasedByZone, (string)$window['selection'], $cost);
+            }
+
+            $summaryKey = $this->billingPeriodKey($billingPeriod);
+            $summary = &$billingSummaryState[$summaryKey];
+            $summary['usageBasedTotal'] = $this->math->add($summary['usageBasedTotal'], $cost);
+            $this->addAmount($summary['usageBasedByComponent'], $componentId, $cost);
+            if ($window['selection'] !== null) {
+                $this->addAmount($summary['usageBasedByZone'], (string)$window['selection'], $cost);
+            }
+            unset($summary);
 
             if ($options->includeIntervals) {
                 $charges[] = [
@@ -154,18 +191,33 @@ final class CostCalculator
                 }
             }
 
-            $period = $definition->periodAt($delta->from)
+            $definitionPeriod = $definition->periodAt($delta->from)
                 ?? throw new MissingBillingPeriodException('No billing definition period at ' . $delta->from->format(DATE_ATOM));
-            $this->assertDeltaInsidePeriod($delta, $period);
+            $this->assertDeltaInsidePeriod($delta, $definitionPeriod);
+
+            $billingPeriod = $this->billingCycleResolver->periodContainingRange($delta->range(), $billingPeriods);
+            if ($billingPeriod === null) {
+                throw new IntervalCrossesBillingPeriodException(sprintf(
+                    'Delta %s..%s crosses a billing-cycle boundary.',
+                    $delta->from->format(DATE_ATOM),
+                    $delta->to->format(DATE_ATOM),
+                ));
+            }
+            $summaryKey = $this->billingPeriodKey($billingPeriod);
 
             foreach ($delta->quantities as $type => $value) {
                 $usage[$type] = $this->math->add($usage[$type] ?? '0', (string)$value);
+                $billingSummaryState[$summaryKey]['usage'][$type] = $this->math->add(
+                    $billingSummaryState[$summaryKey]['usage'][$type] ?? '0',
+                    (string)$value,
+                );
             }
 
             $intervalComponents = [];
             $intervalTotal = '0';
             $intervalByComponent = [];
-            foreach ($period->components as $component) {
+            $intervalByZone = [];
+            foreach ($definitionPeriod->components as $component) {
                 if ($component->isPeriodic()) {
                     continue;
                 }
@@ -181,6 +233,14 @@ final class CostCalculator
                             "Delta %s..%s crosses netting window boundary %s for component '%s'.",
                             $delta->from->format(DATE_ATOM),
                             $delta->to->format(DATE_ATOM),
+                            $window->to->format(DATE_ATOM),
+                            $component->id,
+                        ));
+                    }
+                    if ($this->billingCycleResolver->periodContainingRange($window, $billingPeriods) === null) {
+                        throw new CalculationException(sprintf(
+                            "Netting window %s..%s for component '%s' crosses a billing-period boundary.",
+                            $window->from->format(DATE_ATOM),
                             $window->to->format(DATE_ATOM),
                             $component->id,
                         ));
@@ -254,9 +314,25 @@ final class CostCalculator
                 $cost = $this->math->multiply($quantity, $rate);
 
                 $usageBasedTotal = $this->math->add($usageBasedTotal, $cost);
-                $usageBasedByComponent[$component->id] = $this->math->add($usageBasedByComponent[$component->id] ?? '0', $cost);
+                $this->addAmount($usageBasedByComponent, $component->id, $cost);
+                if ($selection !== null) {
+                    $this->addAmount($usageBasedByZone, $selection, $cost);
+                }
+
+                $billingSummaryState[$summaryKey]['usageBasedTotal'] = $this->math->add(
+                    $billingSummaryState[$summaryKey]['usageBasedTotal'],
+                    $cost,
+                );
+                $this->addAmount($billingSummaryState[$summaryKey]['usageBasedByComponent'], $component->id, $cost);
+                if ($selection !== null) {
+                    $this->addAmount($billingSummaryState[$summaryKey]['usageBasedByZone'], $selection, $cost);
+                }
+
                 $intervalTotal = $this->math->add($intervalTotal, $cost);
-                $intervalByComponent[$component->id] = $this->math->add($intervalByComponent[$component->id] ?? '0', $cost);
+                $this->addAmount($intervalByComponent, $component->id, $cost);
+                if ($selection !== null) {
+                    $this->addAmount($intervalByZone, $selection, $cost);
+                }
 
                 if ($options->includeIntervals) {
                     $intervalComponents[] = [
@@ -288,6 +364,7 @@ final class CostCalculator
                 $intervalUsage = $delta->quantities;
                 ksort($intervalUsage);
                 ksort($intervalByComponent);
+                ksort($intervalByZone);
                 $intervals[] = [
                     'from' => $delta->from->format(DATE_ATOM),
                     'to' => $delta->to->format(DATE_ATOM),
@@ -295,6 +372,7 @@ final class CostCalculator
                     'costs' => [
                         'total' => $intervalTotal,
                         'byComponent' => $intervalByComponent,
+                        'byZone' => $intervalByZone,
                     ],
                     'components' => $intervalComponents,
                 ];
@@ -316,6 +394,7 @@ final class CostCalculator
 
         ksort($usage);
         ksort($usageBasedByComponent);
+        ksort($usageBasedByZone);
 
         [$periodicCharges, $periodicTotal, $periodicByComponent] = $this->periodicCharges(
             $definition,
@@ -333,20 +412,37 @@ final class CostCalculator
 
         $billingContextPeriods = [];
         foreach ($billingPeriods as $billingPeriod) {
+            $fullyCovered = $this->rangeContains($range, $billingPeriod->range);
             $billingContextPeriods[] = [
-                'from' => $billingPeriod->from->format(DATE_ATOM),
-                'to' => $billingPeriod->to->format(DATE_ATOM),
-                'fullyCovered' => $range->from <= $billingPeriod->from && $range->to >= $billingPeriod->to,
+                'from' => $billingPeriod->range->from->format(DATE_ATOM),
+                'to' => $billingPeriod->range->to->format(DATE_ATOM),
+                'fullyCovered' => $fullyCovered,
+                'transitional' => $billingPeriod->isTransitional(),
             ];
         }
+
+        $billingPeriodSummaries = $this->billingPeriodSummaries(
+            $definition,
+            $range,
+            $billingPeriods,
+            $billingSummaryState,
+        );
+
+        $legacyBillingCycle = count($definition->billingCycles) === 1
+            && $definition->billingCycles[0]->validFrom === null
+            && $definition->billingCycles[0]->validTo === null
+                ? $definition->billingCycle
+                : null;
 
         return new CalculationResult(
             $definition->currency,
             $range,
-            $definition->billingCycle,
+            $legacyBillingCycle,
+            $definition->billingCycles,
             $usage,
             $usageBasedTotal,
             $usageBasedByComponent,
+            $usageBasedByZone,
             $periodicTotal,
             $periodicByComponent,
             $total,
@@ -355,6 +451,7 @@ final class CostCalculator
                 'requestedRangeCoversWholePeriods' => $coversWholeBillingPeriods,
                 'periods' => $billingContextPeriods,
             ],
+            $billingPeriodSummaries,
             $processed,
             $intervals,
             $charges,
@@ -362,7 +459,7 @@ final class CostCalculator
     }
 
     /**
-     * @param list<TimeRange> $billingPeriods
+     * @param list<ResolvedBillingPeriod> $billingPeriods
      * @return array{0: list<array<string, mixed>>, 1: ?string, 2: array<string, string>}
      */
     private function periodicCharges(
@@ -394,10 +491,7 @@ final class CostCalculator
                         'amount' => $calculation->amount,
                     ];
                     $total = $this->math->add($total ?? '0', $calculation->amount);
-                    $byComponent[$component->id] = $this->math->add(
-                        $byComponent[$component->id] ?? '0',
-                        $calculation->amount,
-                    );
+                    $this->addAmount($byComponent, $component->id, $calculation->amount);
                 }
 
                 $charges[] = [
@@ -423,6 +517,98 @@ final class CostCalculator
         return [$charges, $total, $byComponent];
     }
 
+    /**
+     * @param list<ResolvedBillingPeriod> $billingPeriods
+     * @param array<string, array<string, mixed>> $summaryState
+     * @return list<array<string, mixed>>
+     */
+    private function billingPeriodSummaries(
+        BillingDefinition $definition,
+        TimeRange $requestedRange,
+        array $billingPeriods,
+        array $summaryState,
+    ): array {
+        $summaries = [];
+        foreach ($billingPeriods as $billingPeriod) {
+            $key = $this->billingPeriodKey($billingPeriod);
+            $state = $summaryState[$key];
+            $fullyCovered = $this->rangeContains($requestedRange, $billingPeriod->range);
+
+            [$periodicCharges, $periodicTotal, $periodicByComponent] = $this->periodicCharges(
+                $definition,
+                $billingPeriod->range,
+                [$billingPeriod],
+                $fullyCovered,
+            );
+            $hasPeriodicCharges = $periodicCharges !== [];
+            $periodTotal = match (true) {
+                !$hasPeriodicCharges => $state['usageBasedTotal'],
+                $fullyCovered => $this->math->add($state['usageBasedTotal'], $periodicTotal ?? '0'),
+                default => null,
+            };
+
+            $periodUsage = $state['usage'];
+            $byComponent = $state['usageBasedByComponent'];
+            $byZone = $state['usageBasedByZone'];
+            ksort($periodUsage);
+            ksort($byComponent);
+            ksort($byZone);
+            ksort($periodicByComponent);
+
+            $summaries[] = [
+                'from' => $billingPeriod->range->from->format(DATE_ATOM),
+                'to' => $billingPeriod->range->to->format(DATE_ATOM),
+                'fullyCovered' => $fullyCovered,
+                'transitional' => $billingPeriod->isTransitional(),
+                'billingCycle' => $billingPeriod->definition->cycle->jsonSerialize(),
+                'usage' => $periodUsage,
+                'costs' => [
+                    'usageBased' => [
+                        'total' => $state['usageBasedTotal'],
+                        'byComponent' => $byComponent,
+                        'byZone' => $byZone,
+                    ],
+                    'periodic' => [
+                        'total' => $periodicTotal,
+                        'byComponent' => $periodicByComponent,
+                    ],
+                    'total' => $periodTotal,
+                ],
+            ];
+        }
+        return $summaries;
+    }
+
+    /** @param list<ResolvedBillingPeriod> $billingPeriods */
+    private function assertBillingPeriodCoverage(TimeRange $range, array $billingPeriods): void
+    {
+        if ($billingPeriods === []) {
+            throw new CalculationException('No billing cycle is defined for the requested range.');
+        }
+
+        $expected = $range->from;
+        foreach ($billingPeriods as $billingPeriod) {
+            $overlap = $billingPeriod->range->intersection($range);
+            if ($overlap === null) {
+                continue;
+            }
+            if ($overlap->from->getTimestamp() !== $expected->getTimestamp()) {
+                throw new CalculationException(sprintf(
+                    'Billing-cycle history contains a gap at %s.',
+                    $expected->format(DATE_ATOM),
+                ));
+            }
+            $expected = $overlap->to;
+        }
+
+        if ($expected->getTimestamp() !== $range->to->getTimestamp()) {
+            throw new CalculationException(sprintf(
+                'Billing-cycle history does not cover the requested range through %s.',
+                $range->to->format(DATE_ATOM),
+            ));
+        }
+    }
+
     private function assertDeltaInsidePeriod(EnergyDelta $delta, BillingPeriodDefinition $period): void
     {
         if ($period->validTo !== null && $delta->to > $period->validTo) {
@@ -441,7 +627,6 @@ final class CostCalculator
         $to = $period->validTo !== null && $period->validTo < $requested->to ? $period->validTo : $requested->to;
         return $from < $to ? new TimeRange($from, $to) : null;
     }
-
 
     private function definitionUsesTemporalNetting(BillingDefinition $definition, TimeRange $range): bool
     {
@@ -474,5 +659,21 @@ final class CostCalculator
         $from = (new \DateTimeImmutable('@' . $fromTimestamp))->setTimezone($tz);
         $to = (new \DateTimeImmutable('@' . ($fromTimestamp + $periodSeconds)))->setTimezone($tz);
         return new TimeRange($from, $to);
+    }
+
+    /** @param array<string, string> $target */
+    private function addAmount(array &$target, string $key, string $amount): void
+    {
+        $target[$key] = $this->math->add($target[$key] ?? '0', $amount);
+    }
+
+    private function billingPeriodKey(ResolvedBillingPeriod $period): string
+    {
+        return $period->range->from->getTimestamp() . ':' . $period->range->to->getTimestamp();
+    }
+
+    private function rangeContains(TimeRange $outer, TimeRange $inner): bool
+    {
+        return $outer->from <= $inner->from && $outer->to >= $inner->to;
     }
 }

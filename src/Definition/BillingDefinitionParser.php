@@ -21,7 +21,7 @@ final class BillingDefinitionParser
         $currency = $this->requiredString($data, 'currency');
         $timezone = (string)($data['timezone'] ?? 'UTC');
         $this->assertTimezone($timezone);
-        $billingCycle = $this->parseBillingCycle($data['billingCycle'] ?? null, 'definition.billingCycle');
+        $billingCycles = $this->parseBillingCycles($data);
 
         $rawPeriods = $data['periods'] ?? null;
         if (!is_array($rawPeriods) || $rawPeriods === []) {
@@ -64,7 +64,7 @@ final class BillingDefinitionParser
         usort($periods, static fn(BillingPeriodDefinition $a, BillingPeriodDefinition $b) => ($a->validFrom?->getTimestamp() ?? PHP_INT_MIN) <=> ($b->validFrom?->getTimestamp() ?? PHP_INT_MIN));
         $this->assertNoOverlappingPeriods($periods);
 
-        return new BillingDefinition($version, $currency, $timezone, $billingCycle, $periods);
+        return new BillingDefinition($version, $currency, $timezone, $billingCycles, $periods);
     }
 
     private function parseComponent(array $data, string $path): ComponentDefinition
@@ -312,6 +312,49 @@ final class BillingDefinitionParser
         return $value;
     }
 
+    /** @return list<BillingCyclePeriodDefinition> */
+    private function parseBillingCycles(array $data): array
+    {
+        if (array_key_exists('billingCycle', $data) && array_key_exists('billingCycles', $data)) {
+            throw new DefinitionException('Definition cannot contain both billingCycle and billingCycles.');
+        }
+
+        if (!array_key_exists('billingCycles', $data)) {
+            $cycle = $this->parseBillingCycle($data['billingCycle'] ?? null, 'definition.billingCycle');
+            return [new BillingCyclePeriodDefinition(null, null, $cycle)];
+        }
+
+        $rawPeriods = $data['billingCycles'];
+        if (!is_array($rawPeriods) || $rawPeriods === []) {
+            throw new DefinitionException('Definition.billingCycles must be a non-empty array.');
+        }
+
+        $periods = [];
+        foreach ($rawPeriods as $i => $rawPeriod) {
+            if (!is_array($rawPeriod)) {
+                throw new DefinitionException("billingCycles[$i] must be an object.");
+            }
+            $validFrom = $this->dateOrNull($rawPeriod['validFrom'] ?? null, "billingCycles[$i].validFrom");
+            $validTo = $this->dateOrNull($rawPeriod['validTo'] ?? null, "billingCycles[$i].validTo");
+            if ($validFrom !== null && $validTo !== null && $validFrom >= $validTo) {
+                throw new DefinitionException("billingCycles[$i].validFrom must be before validTo.");
+            }
+
+            $cycleData = $rawPeriod;
+            unset($cycleData['validFrom'], $cycleData['validTo']);
+            $cycle = $this->parseBillingCycle($cycleData, "billingCycles[$i]");
+            $periods[] = new BillingCyclePeriodDefinition($validFrom, $validTo, $cycle);
+        }
+
+        usort(
+            $periods,
+            static fn(BillingCyclePeriodDefinition $a, BillingCyclePeriodDefinition $b) =>
+                ($a->validFrom?->getTimestamp() ?? PHP_INT_MIN) <=> ($b->validFrom?->getTimestamp() ?? PHP_INT_MIN),
+        );
+        $this->assertNoOverlappingBillingCycles($periods);
+        return $periods;
+    }
+
     private function parseBillingCycle(mixed $value, string $path): BillingCycleDefinition
     {
         if ($value === null) {
@@ -355,6 +398,18 @@ final class BillingDefinitionParser
             new \DateTimeZone($timezone);
         } catch (\Exception $e) {
             throw new DefinitionException("Invalid timezone '$timezone'.", previous: $e);
+        }
+    }
+
+    /** @param list<BillingCyclePeriodDefinition> $periods */
+    private function assertNoOverlappingBillingCycles(array $periods): void
+    {
+        for ($i = 1, $count = count($periods); $i < $count; $i++) {
+            $previous = $periods[$i - 1];
+            $current = $periods[$i];
+            if ($previous->validTo === null || $current->validFrom === null || $current->validFrom < $previous->validTo) {
+                throw new DefinitionException('Billing cycle periods must not overlap.');
+            }
         }
     }
 

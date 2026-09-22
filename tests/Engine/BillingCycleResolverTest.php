@@ -6,6 +6,7 @@ namespace Supla\EnergyCostCalculator\Tests\Engine;
 
 use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Definition\BillingCycleDefinition;
+use Supla\EnergyCostCalculator\Definition\BillingCyclePeriodDefinition;
 use Supla\EnergyCostCalculator\Definition\BillingCycleUnit;
 use Supla\EnergyCostCalculator\Engine\BillingCycleResolver;
 use Supla\EnergyCostCalculator\Model\TimeRange;
@@ -48,6 +49,47 @@ final class BillingCycleResolverTest extends TestCase
 
         self::assertCount(2, $periods);
         self::assertTrue($resolver->rangeCoversWholePeriods($range, $periods));
+    }
+
+    public function testBillingCycleChangeCutsNominalPeriodIntoTransitionalPeriod(): void
+    {
+        $resolver = new BillingCycleResolver();
+        $cycles = [
+            new BillingCyclePeriodDefinition(
+                null,
+                new \DateTimeImmutable('2026-07-01T00:00:00+02:00'),
+                new BillingCycleDefinition(
+                    new \DateTimeImmutable('2026-01-15T00:00:00+01:00'),
+                    1,
+                    BillingCycleUnit::MONTH,
+                ),
+            ),
+            new BillingCyclePeriodDefinition(
+                new \DateTimeImmutable('2026-07-01T00:00:00+02:00'),
+                null,
+                new BillingCycleDefinition(
+                    new \DateTimeImmutable('2026-07-01T00:00:00+02:00'),
+                    1,
+                    BillingCycleUnit::MONTH,
+                ),
+            ),
+        ];
+        $range = new TimeRange(
+            new \DateTimeImmutable('2026-06-15T00:00:00+02:00'),
+            new \DateTimeImmutable('2026-08-01T00:00:00+02:00'),
+        );
+
+        $periods = $resolver->periodsOverlappingTimeline($range, $cycles, 'Europe/Warsaw');
+
+        self::assertCount(2, $periods);
+        self::assertSame('2026-06-15T00:00:00+02:00', $periods[0]->range->from->format(DATE_ATOM));
+        self::assertSame('2026-07-01T00:00:00+02:00', $periods[0]->range->to->format(DATE_ATOM));
+        self::assertSame('2026-07-15T00:00:00+02:00', $periods[0]->nominalRange->to->format(DATE_ATOM));
+        self::assertTrue($periods[0]->isTransitional());
+        self::assertSame('2026-07-01T00:00:00+02:00', $periods[1]->range->from->format(DATE_ATOM));
+        self::assertSame('2026-08-01T00:00:00+02:00', $periods[1]->range->to->format(DATE_ATOM));
+        self::assertFalse($periods[1]->isTransitional());
+        self::assertTrue($resolver->rangeCoversWholeResolvedPeriods($range, $periods));
     }
 
     public function testArbitraryWeekIsOnlyContextualizedInsideBillingPeriod(): void

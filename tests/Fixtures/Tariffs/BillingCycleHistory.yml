@@ -1,0 +1,70 @@
+cases:
+  transition_between_billing_days:
+    query:
+      from: '2026-06-15T00:00:00+02:00'
+      to: '2026-08-01T00:00:00+02:00'
+    deltas:
+      - { datetime: '2026-06-16T10:15:00+02:00', import: '1' }
+      - { datetime: '2026-07-02T10:15:00+02:00', import: '1' }
+    expected:
+      result:
+        costs:
+          usageBased:
+            total: '4'
+            byZone: { Z1: '4' }
+          periodic:
+            total: '14'
+          total: '18'
+        billingContext:
+          requestedRangeCoversWholePeriods: true
+          periods:
+            - { from: '2026-06-15T00:00:00+02:00', to: '2026-07-01T00:00:00+02:00', fullyCovered: true, transitional: true }
+            - { from: '2026-07-01T00:00:00+02:00', to: '2026-08-01T00:00:00+02:00', fullyCovered: true, transitional: false }
+        billingPeriods:
+          - from: '2026-06-15T00:00:00+02:00'
+            to: '2026-07-01T00:00:00+02:00'
+            fullyCovered: true
+            transitional: true
+            costs:
+              usageBased:
+                total: '2'
+                byZone: { Z1: '2' }
+              periodic:
+                total: '7'
+              total: '9'
+          - from: '2026-07-01T00:00:00+02:00'
+            to: '2026-08-01T00:00:00+02:00'
+            fullyCovered: true
+            transitional: false
+            costs:
+              usageBased:
+                total: '2'
+                byZone: { Z1: '2' }
+              periodic:
+                total: '7'
+              total: '9'
+
+  partial_transitional_period:
+    query:
+      from: '2026-06-20T00:00:00+02:00'
+      to: '2026-06-25T00:00:00+02:00'
+    deltas:
+      - { datetime: '2026-06-20T10:15:00+02:00', import: '1' }
+    expected:
+      result:
+        costs:
+          usageBased:
+            total: '2'
+            byZone: { Z1: '2' }
+          periodic:
+            total: null
+          total: null
+        billingPeriods:
+          - from: '2026-06-15T00:00:00+02:00'
+            to: '2026-07-01T00:00:00+02:00'
+            fullyCovered: false
+            transitional: true
+            costs:
+              periodic:
+                total: null
+              total: null

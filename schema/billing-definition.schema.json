@@ -30,9 +30,23 @@
     },
     "billingCycle": {
       "$ref": "#/$defs/billingCycle"
+    },
+    "billingCycles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/billingCyclePeriod"
+      }
     }
   },
   "additionalProperties": false,
+  "allOf": [
+    {
+      "not": {
+        "required": ["billingCycle", "billingCycles"]
+      }
+    }
+  ],
   "$defs": {
     "period": {
       "type": "object",
@@ -493,6 +507,47 @@
     "billingCycle": {
       "type": "object",
       "properties": {
+        "anchor": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1
+        },
+        "unit": {
+          "enum": [
+            "DAY",
+            "WEEK",
+            "MONTH",
+            "YEAR"
+          ],
+          "default": "MONTH"
+        }
+      },
+      "additionalProperties": false
+    },
+    "billingCyclePeriod": {
+      "type": "object",
+      "properties": {
+        "validFrom": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "validTo": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
         "anchor": {
           "type": [
             "string",

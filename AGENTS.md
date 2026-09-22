@@ -206,6 +206,10 @@ For a request aligned to complete billing periods:
 
 Periodic units are anchored to the billing-period start. A `MONTH` fee for a billing cycle `15 Jan -> 15 Feb` is one monthly unit, not two units because two calendar months are touched.
 
+When invoice boundaries change historically, represent them with top-level `billingCycles[]` entries carrying `validFrom`/`validTo`. A validity boundary cuts the nominal cycle and creates a shorter transitional billing period; never create a gap or overlap. For `prorate: true`, use the nominal uncut period as the denominator. Keep price-rule history (`periods[]`) independent from billing-cycle history (`billingCycles[]`).
+
+`billingPeriods[]` in the result is the canonical per-invoice-period summary. It should contain usage, usage-based costs, periodic costs, total, and usage-based `byZone`. Do not force `byPhase` into the core model when phase data is not naturally available.
+
 Tariff regression fixtures should support the form:
 
 ```text
@@ -234,7 +238,7 @@ Supported strategies are:
 
 Without `strategy`, quantities keep the existing per-delta behavior. Temporal netting currently applies to `ACTIVE_ENERGY_IMPORT` and requires both `ACTIVE_ENERGY_IMPORT` and `ACTIVE_ENERGY_EXPORT` in every source delta.
 
-Netting windows are aligned using `BillingDefinition.timezone`. Raw meter deltas remain canonical source facts. A netting charge may be emitted only when the full window is covered contiguously. A requested range that cuts a netting window, a gap in meter deltas, a billing-definition change inside a window, a selector change inside a window, or a rate change inside a window must fail explicitly.
+Netting windows are aligned using `BillingDefinition.timezone`. Raw meter deltas remain canonical source facts. A netting charge may be emitted only when the full window is covered contiguously. A requested range that cuts a netting window, a gap in meter deltas, a billing-definition or billing-cycle boundary inside a window, a selector change inside a window, or a rate change inside a window must fail explicitly.
 
 This means `periodInMinutes: 60` is compatible with an hourly Fixing series such as `PL.TGE.FIXING1_HOURLY` or `PL.TGE.FIXING2_HOURLY`, but not with a 15-minute-changing price/selector on the same component.
 

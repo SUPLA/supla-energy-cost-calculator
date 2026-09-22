@@ -18,7 +18,7 @@ final class PeriodicChargeCalculator
     }
 
     /**
-     * @param list<TimeRange> $billingPeriods
+     * @param list<ResolvedBillingPeriod> $billingPeriods
      */
     public function calculate(
         ComponentDefinition $component,
@@ -31,25 +31,25 @@ final class PeriodicChargeCalculator
         $totalUnits = '0';
 
         foreach ($billingPeriods as $billingPeriod) {
-            $effective = $billingPeriod->intersection($applicableRange);
+            $effective = $billingPeriod->range->intersection($applicableRange);
             if ($effective === null) {
                 continue;
             }
 
             if ($period === 'BILLING_PERIOD') {
                 $units = $prorate
-                    ? $this->fraction($effective, $billingPeriod)
+                    ? $this->fraction($effective, $billingPeriod->nominalRange)
                     : '1';
                 $totalUnits = $this->math->add($totalUnits, $units);
                 continue;
             }
 
             $unit = $this->periodUnit($period);
-            $cursor = $billingPeriod->from;
-            while ($cursor < $billingPeriod->to) {
+            $cursor = $billingPeriod->nominalRange->from;
+            while ($cursor < $billingPeriod->nominalRange->to) {
                 $next = $this->billingCycleResolver->advance($cursor, 1, $unit);
-                if ($next > $billingPeriod->to) {
-                    $next = $billingPeriod->to;
+                if ($next > $billingPeriod->nominalRange->to) {
+                    $next = $billingPeriod->nominalRange->to;
                 }
                 $bucket = new TimeRange($cursor, $next);
                 $overlap = $bucket->intersection($effective);

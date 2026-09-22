@@ -235,6 +235,7 @@ final class CostCalculatorTest extends TestCase
         );
 
         self::assertSame('2.5', $result->usageBasedTotal);
+        self::assertSame('2.5', $result->usageBasedByZone['S4']);
         self::assertSame('S4', $result->intervals[0]['components'][0]['selection']);
     }
 
@@ -341,6 +342,141 @@ final class CostCalculatorTest extends TestCase
 
         self::assertSame('1.25', $result->usageBasedTotal);
         self::assertSame('1.25', $result->total);
+    }
+
+    public function testBillingCycleHistoryBuildsTransitionalSummaryAndByZone(): void
+    {
+        $definition = [
+            'version' => 1,
+            'currency' => 'PLN',
+            'timezone' => 'Europe/Warsaw',
+            'billingCycles' => [
+                [
+                    'validFrom' => null,
+                    'validTo' => '2026-07-01T00:00:00+02:00',
+                    'anchor' => '2026-01-15T00:00:00+01:00',
+                    'length' => 1,
+                    'unit' => 'MONTH',
+                ],
+                [
+                    'validFrom' => '2026-07-01T00:00:00+02:00',
+                    'validTo' => null,
+                    'anchor' => '2026-07-01T00:00:00+02:00',
+                    'length' => 1,
+                    'unit' => 'MONTH',
+                ],
+            ],
+            'periods' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'components' => [
+                    [
+                        'id' => 'energy',
+                        'category' => 'ENERGY',
+                        'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+                        'selector' => [
+                            'type' => 'WEEKLY_SCHEDULE',
+                            'timezone' => 'Europe/Warsaw',
+                            'rules' => [[
+                                'zone' => 'Z1',
+                                'days' => ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
+                                'from' => '00:00',
+                                'to' => '24:00',
+                            ]],
+                        ],
+                        'rate' => ['type' => 'ZONED', 'rates' => ['Z1' => '2']],
+                    ],
+                    [
+                        'id' => 'billing-fee',
+                        'category' => 'SERVICE',
+                        'quantity' => ['type' => 'PERIOD', 'period' => 'BILLING_PERIOD', 'prorate' => false],
+                        'rate' => ['type' => 'CONSTANT', 'value' => '7'],
+                    ],
+                ],
+            ]],
+        ];
+        $deltas = [
+            $this->delta('2026-06-16T10:00:00+02:00', '2026-06-16T10:15:00+02:00', '1'),
+            $this->delta('2026-07-02T10:00:00+02:00', '2026-07-02T10:15:00+02:00', '1'),
+        ];
+
+        $result = (new CostCalculator(
+            new InMemoryEnergyDeltaSource($deltas),
+            new InMemoryReferenceDataSource(),
+        ))->calculate(
+            'meter',
+            new TimeRange(
+                new \DateTimeImmutable('2026-06-15T00:00:00+02:00'),
+                new \DateTimeImmutable('2026-08-01T00:00:00+02:00'),
+            ),
+            $definition,
+        );
+
+        self::assertNull($result->billingCycle);
+        self::assertSame('4', $result->usageBasedTotal);
+        self::assertSame('4', $result->usageBasedByZone['Z1']);
+        self::assertSame('14', $result->periodicTotal);
+        self::assertSame('18', $result->total);
+        self::assertCount(2, $result->billingPeriods);
+        self::assertTrue($result->billingPeriods[0]['transitional']);
+        self::assertSame('2026-06-15T00:00:00+02:00', $result->billingPeriods[0]['from']);
+        self::assertSame('2026-07-01T00:00:00+02:00', $result->billingPeriods[0]['to']);
+        self::assertSame('2', $result->billingPeriods[0]['costs']['usageBased']['byZone']['Z1']);
+        self::assertSame('7', $result->billingPeriods[0]['costs']['periodic']['total']);
+        self::assertSame('9', $result->billingPeriods[0]['costs']['total']);
+        self::assertFalse($result->billingPeriods[1]['transitional']);
+        self::assertSame('9', $result->billingPeriods[1]['costs']['total']);
+    }
+
+    public function testProratedMonthlyFeeUsesNominalPeriodWhenBillingCycleIsCutShort(): void
+    {
+        $definition = [
+            'version' => 1,
+            'currency' => 'PLN',
+            'timezone' => 'Europe/Warsaw',
+            'billingCycles' => [
+                [
+                    'validFrom' => null,
+                    'validTo' => '2026-07-01T00:00:00+02:00',
+                    'anchor' => '2026-01-15T00:00:00+01:00',
+                    'length' => 1,
+                    'unit' => 'MONTH',
+                ],
+                [
+                    'validFrom' => '2026-07-01T00:00:00+02:00',
+                    'validTo' => null,
+                    'anchor' => '2026-07-01T00:00:00+02:00',
+                    'length' => 1,
+                    'unit' => 'MONTH',
+                ],
+            ],
+            'periods' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'components' => [[
+                    'id' => 'monthly-fee',
+                    'category' => 'SERVICE',
+                    'quantity' => ['type' => 'PERIOD', 'period' => 'MONTH', 'prorate' => true],
+                    'rate' => ['type' => 'CONSTANT', 'value' => '30'],
+                ]],
+            ]],
+        ];
+
+        $result = (new CostCalculator(
+            new InMemoryEnergyDeltaSource([]),
+            new InMemoryReferenceDataSource(),
+        ))->calculate(
+            'meter',
+            new TimeRange(
+                new \DateTimeImmutable('2026-06-15T00:00:00+02:00'),
+                new \DateTimeImmutable('2026-07-01T00:00:00+02:00'),
+            ),
+            $definition,
+        );
+
+        self::assertTrue($result->billingPeriods[0]['transitional']);
+        self::assertEqualsWithDelta(16.0, (float)$result->periodicTotal, 0.000001);
+        self::assertEqualsWithDelta(16.0, (float)$result->billingPeriods[0]['costs']['periodic']['total'], 0.000001);
     }
 
     private function delta(string $from, string $to, string $import, string $export = '0'): EnergyDelta

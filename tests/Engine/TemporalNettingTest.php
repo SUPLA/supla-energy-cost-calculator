@@ -74,6 +74,49 @@ final class TemporalNettingTest extends TestCase
         self::assertNotSame($result->charges[0]['from'], $result->charges[1]['from']);
     }
 
+    public function testNettingWindowCannotCrossBillingCycleBoundary(): void
+    {
+        $definition = $this->definition([
+            'type' => 'ACTIVE_ENERGY_IMPORT',
+            'strategy' => 'IMPORT_MINUS_EXPORT_CAP_ZERO',
+            'periodInMinutes' => 60,
+        ]);
+        $definition['billingCycles'] = [
+            [
+                'validFrom' => null,
+                'validTo' => '2026-01-02T10:30:00+01:00',
+                'anchor' => '2026-01-01T00:00:00+01:00',
+                'length' => 1,
+                'unit' => 'MONTH',
+            ],
+            [
+                'validFrom' => '2026-01-02T10:30:00+01:00',
+                'validTo' => null,
+                'anchor' => '2026-01-02T10:30:00+01:00',
+                'length' => 1,
+                'unit' => 'MONTH',
+            ],
+        ];
+        $deltas = [];
+        $from = new \DateTimeImmutable('2026-01-02T10:00:00+01:00');
+        for ($i = 0; $i < 4; $i++) {
+            $deltaFrom = $from->modify(sprintf('+%d minutes', $i * 15));
+            $deltas[] = $this->delta($deltaFrom, $deltaFrom->modify('+15 minutes'), '0.25', '0');
+        }
+
+        $this->expectException(\Supla\EnergyCostCalculator\Exception\CalculationException::class);
+        $this->expectExceptionMessage('crosses a billing-period boundary');
+
+        (new CostCalculator(
+            new InMemoryEnergyDeltaSource($deltas),
+            new InMemoryReferenceDataSource(),
+        ))->calculate(
+            'meter',
+            new TimeRange($deltas[0]->from, $deltas[array_key_last($deltas)]->to),
+            $definition,
+        );
+    }
+
     private function definition(array $quantity): array
     {
         return [

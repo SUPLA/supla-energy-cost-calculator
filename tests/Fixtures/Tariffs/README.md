@@ -28,3 +28,5 @@ cases:
 ```
 
 `expected.result` is matched as a recursive subset of the serialized `CalculationResult`, so a case can assert only the fields relevant to the scenario. This gives the fixtures the form: **rules + logs/reference data + query -> expected result**.
+
+`BillingCycleHistory.*` covers a historical change of invoice boundary (day 15 -> day 1), the resulting shortened transitional period, per-billing-period summaries, and `byZone` aggregation.

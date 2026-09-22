@@ -54,7 +54,11 @@ When both a holiday rule and an ordinary weekday rule could match a timestamp, t
 
 ## Requested range and billing cycle
 
-`TimeRange` is the caller's analytical range and may be arbitrary. `billingCycle` describes invoice boundaries and does not constrain `TimeRange`.
+`TimeRange` is the caller's analytical range and may be arbitrary. `billingCycle` describes one invoice-boundary rule and does not constrain `TimeRange`. `billingCycles[]` is the historical form when that rule changes over time.
+
+Billing-cycle validity boundaries are hard boundaries. They cut the nominal period instead of creating a gap or overlapping invoices. For example, changing from a cycle anchored on day 15 to a cycle anchored on day 1 at `2026-07-01` yields an effective transitional period `2026-06-15 -> 2026-07-01`, then `2026-07-01 -> 2026-08-01`. A prorated fee uses the nominal uncut period as its denominator.
+
+`CalculationResult.billingPeriods[]` contains per-effective-period usage and cost summaries. `costs.usageBased.byZone` is available both globally and inside these summaries; phase-specific reporting remains an adapter/application concern.
 
 Periodic fees are not distributed into 15-minute/hour/day chart facts. For partial billing-cycle queries the result exposes their definitions but leaves the periodic/full total unknown (`null`). For ranges aligned to complete billing cycles the engine calculates them. Periodic units are anchored to the billing period start, so a `MONTH` fee on a `15 Jan -> 15 Feb` billing cycle counts as one unit, not two calendar-month overlaps.
 
@@ -75,4 +79,4 @@ A metered quantity may declare a temporal strategy, for example:
 
 Netting windows are aligned using the billing-definition timezone. The engine keeps raw meter deltas as source facts and combines them only for the component that declares the strategy. `IMPORT_MINUS_EXPORT` returns signed `sum(import) - sum(export)`. `IMPORT_MINUS_EXPORT_CAP_ZERO` returns `max(sum(import) - sum(export), 0)`.
 
-A charge exists only for a complete netting window. Missing meter intervals, requested ranges cutting a window, billing-definition changes inside a window, selector changes inside a window, or rate changes inside a window are explicit calculation errors. This makes a 60-minute netting component compatible with hourly Fixing data and intentionally incompatible with a price or selector that changes every 15 minutes.
+A charge exists only for a complete netting window. Missing meter intervals, requested ranges cutting a window, billing-definition or billing-cycle boundaries inside a window, selector changes inside a window, or rate changes inside a window are explicit calculation errors. This makes a 60-minute netting component compatible with hourly Fixing data and intentionally incompatible with a price or selector that changes every 15 minutes.
