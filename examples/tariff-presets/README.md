@@ -12,8 +12,8 @@ All bundled distribution defaults are **net PLN/kWh** and can be overwritten by 
 
 ## First frontend flow
 
-1. Load `index.json` and let the user choose OSD + tariff group.
-2. Load the selected preset.
+1. Use `TariffPresetCatalog::presets()` and let the user choose OSD + tariff group.
+2. Load the selected preset with `TariffPresetCatalog::get()`.
 3. Render `inputs[]`. The current value at the first target can be used as the initial form value; `null` means the user must provide it.
 4. Apply a submitted value to every path in `targets[]`.
 5. Ensure all required inputs are filled and no required calculator rate remains `null`.

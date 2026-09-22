@@ -164,11 +164,26 @@ Example: dynamic energy (`Fixing1`) plus dynamic network zones (`PDGSZ`) plus a 
 
 See `examples/definitions/` and `schema/billing-definition.schema.json`.
 
-## Frontend tariff presets
+## Tariff presets
 
-`examples/frontend-tariff-presets/` contains UI-oriented 2026 presets for Polish household groups G11, G12, TAURON G13, ENEA G13active and TAURON G14dynamic, split by OSD where schedule/rates differ. A preset contains a partial `billingDefinitionTemplate` plus `inputs[]` whose JSON Pointer targets tell the frontend exactly where to write user values. After filling the required fields, the result is an ordinary `BillingDefinition`.
+`resources/tariff-presets/` contains UI-oriented 2026 presets for Polish household groups G11, G12, TAURON G13, ENEA G13active and TAURON G14dynamic, split by OSD where schedule/rates differ. A preset contains a partial `billingDefinitionTemplate` plus `inputs[]` whose JSON Pointer targets tell the host application exactly where to write user values. After filling the required fields, the result is an ordinary `BillingDefinition`.
 
-These presets intentionally cover only the first UI scope: energy purchase input, variable distribution component, tariff-zone schedule and billing cycle. Fixed/phase-dependent/statutory charges are not baked into the presets. See `examples/frontend-tariff-presets/README.md`.
+Use the production-facing catalogue API instead of resolving package paths directly:
+
+```php
+use Supla\EnergyCostCalculator\Preset\TariffPresetCatalog;
+
+$catalog = new TariffPresetCatalog();
+$summaries = $catalog->presets();
+$preset = $catalog->get('PL.TAURON_DYSTRYBUCJA.G12.2026');
+
+$preset->document; // Complete preset document.
+$preset->revision; // SHA-256 of the deterministically encoded JSON document.
+```
+
+`presets()` returns catalogue metadata with a `revision` and without internal resource paths. `get()` rejects unknown identifiers and resources outside the bundled preset directory. Revisions are suitable for recording which preset content was used to create a persisted definition; calculations should use that persisted definition rather than reload the preset.
+
+These presets intentionally cover only the first UI scope: energy purchase input, variable distribution component, tariff-zone schedule and billing cycle. Fixed/phase-dependent/statutory charges are not baked into the presets. See `examples/tariff-presets/README.md`.
 
 ## SUPLA integration
 

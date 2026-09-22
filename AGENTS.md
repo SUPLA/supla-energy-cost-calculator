@@ -70,6 +70,14 @@ Bundled calendars live in:
 resources/calendars/
 ```
 
+Bundled tariff presets are production resources exposed through `TariffPresetCatalog` and live in:
+
+```text
+resources/tariff-presets/
+```
+
+Host applications must not resolve package resource paths directly. A preset revision is the SHA-256 hash of its deterministically encoded JSON document, independent of file formatting and line endings.
+
 The current bundled calendar is:
 
 ```text
