@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "id": "PL.TAURON_DYSTRYBUCJA.G14dynamic.2026",
+  "label": "TAURON Dystrybucja - G14dynamic",
+  "operator": {
+    "id": "TAURON_DYSTRYBUCJA",
+    "label": "TAURON Dystrybucja"
+  },
+  "tariffGroup": "G14dynamic",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "billingCycle.anchor",
+      "label": "Początek okresu rozliczeniowego",
+      "type": "DATETIME",
+      "required": true,
+      "targets": [
+        "/billingCycle/anchor"
+      ],
+      "help": "Data i czas początku znanego okresu rozliczeniowego z umowy lub faktury."
+    },
+    {
+      "id": "energy.rate",
+      "label": "Cena energii czynnej",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/value"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "distribution.S1",
+      "label": "Dystrybucja - S1 - zalecane użytkowanie",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/rates/S1"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.S2",
+      "label": "Dystrybucja - S2 - normalne użytkowanie",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/rates/S2"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.S3",
+      "label": "Dystrybucja - S3 - zalecane oszczędzanie",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/rates/S3"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.S4",
+      "label": "Dystrybucja - S4 - wymagane ograniczenie",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/rates/S4"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": null,
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": null,
+              "unit": "PLN/kWh"
+            }
+          },
+          {
+            "id": "distribution-variable",
+            "category": "NETWORK",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "REFERENCE",
+              "source": "PL.PSE.PDGSZ",
+              "mapping": {
+                "0": "S1",
+                "1": "S2",
+                "2": "S3",
+                "3": "S4"
+              }
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "S1": "0.0224",
+                "S2": "0.0893",
+                "S3": "0.3881",
+                "S4": "2.3756"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "G14dynamic dotyczy dynamicznych stref dystrybucyjnych PDGSZ. Cena energii w przykładzie jest niezależną, stałą wartością użytkownika; może zostać zastąpiona np. Fixing1/Fixing2/RCE.",
+    "G14dynamic jest rozliczana w jednomiesięcznych okresach; billingCycle.length pozostaje ustawione na 1 MONTH."
+  ],
+  "source": {
+    "title": "Taryfa TAURON Dystrybucja na 2026 r.",
+    "url": "https://www.tauron-dystrybucja.pl/-/media/offer-documents/dystrybucja/aktualna-taryfa/taryfa-tauron-dystrybucja-2026_ocr.ashx",
+    "retrievedAt": "2026-09-22"
+  }
+}

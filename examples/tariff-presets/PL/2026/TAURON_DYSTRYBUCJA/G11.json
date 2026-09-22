@@ -1,0 +1,113 @@
+{
+  "version": 1,
+  "id": "PL.TAURON_DYSTRYBUCJA.G11.2026",
+  "label": "TAURON Dystrybucja - G11",
+  "operator": {
+    "id": "TAURON_DYSTRYBUCJA",
+    "label": "TAURON Dystrybucja"
+  },
+  "tariffGroup": "G11",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "billingCycle.anchor",
+      "label": "Początek okresu rozliczeniowego",
+      "type": "DATETIME",
+      "required": true,
+      "targets": [
+        "/billingCycle/anchor"
+      ],
+      "help": "Data i czas początku znanego okresu rozliczeniowego z umowy lub faktury."
+    },
+    {
+      "id": "billingCycle.length",
+      "label": "Długość okresu rozliczeniowego",
+      "type": "INTEGER",
+      "required": true,
+      "targets": [
+        "/billingCycle/length"
+      ],
+      "unit": "miesiące",
+      "minimum": 1
+    },
+    {
+      "id": "energy.rate",
+      "label": "Cena energii czynnej",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/value"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "distribution.rate",
+      "label": "Składnik zmienny dystrybucji",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/value"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": null,
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": null,
+              "unit": "PLN/kWh"
+            }
+          },
+          {
+            "id": "distribution-variable",
+            "category": "NETWORK",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "0.2464",
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "source": {
+    "title": "Taryfa TAURON Dystrybucja na 2026 r.",
+    "url": "https://www.tauron-dystrybucja.pl/-/media/offer-documents/dystrybucja/aktualna-taryfa/taryfa-tauron-dystrybucja-2026_ocr.ashx",
+    "retrievedAt": "2026-09-22"
+  }
+}

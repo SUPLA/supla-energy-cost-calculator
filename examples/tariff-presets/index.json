@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "country": "PL",
+  "year": 2026,
+  "presets": [
+    {
+      "id": "PL.TAURON_DYSTRYBUCJA.G11.2026",
+      "label": "TAURON Dystrybucja - G11",
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/TAURON_DYSTRYBUCJA/G11.json"
+    },
+    {
+      "id": "PL.TAURON_DYSTRYBUCJA.G12.2026",
+      "label": "TAURON Dystrybucja - G12",
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/TAURON_DYSTRYBUCJA/G12.json"
+    },
+    {
+      "id": "PL.TAURON_DYSTRYBUCJA.G13.2026",
+      "label": "TAURON Dystrybucja - G13",
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G13",
+      "path": "PL/2026/TAURON_DYSTRYBUCJA/G13.json"
+    },
+    {
+      "id": "PL.TAURON_DYSTRYBUCJA.G14dynamic.2026",
+      "label": "TAURON Dystrybucja - G14dynamic",
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G14dynamic",
+      "path": "PL/2026/TAURON_DYSTRYBUCJA/G14dynamic.json"
+    },
+    {
+      "id": "PL.PGE_DYSTRYBUCJA.G11.2026",
+      "label": "PGE Dystrybucja - G11",
+      "operator": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/PGE_DYSTRYBUCJA/G11.json"
+    },
+    {
+      "id": "PL.PGE_DYSTRYBUCJA.G12.2026",
+      "label": "PGE Dystrybucja - G12",
+      "operator": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/PGE_DYSTRYBUCJA/G12.json"
+    },
+    {
+      "id": "PL.ENEA_OPERATOR.G11.2026",
+      "label": "ENEA Operator - G11",
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/ENEA_OPERATOR/G11.json"
+    },
+    {
+      "id": "PL.ENEA_OPERATOR.G12.2026",
+      "label": "ENEA Operator - G12",
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/ENEA_OPERATOR/G12.json"
+    },
+    {
+      "id": "PL.ENEA_OPERATOR.G13active.2026",
+      "label": "ENEA Operator - G13active",
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G13active",
+      "path": "PL/2026/ENEA_OPERATOR/G13active.json"
+    },
+    {
+      "id": "PL.ENERGA_OPERATOR.G11.2026",
+      "label": "Energa-Operator - G11",
+      "operator": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/ENERGA_OPERATOR/G11.json"
+    },
+    {
+      "id": "PL.ENERGA_OPERATOR.G12.2026",
+      "label": "Energa-Operator - G12",
+      "operator": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/ENERGA_OPERATOR/G12.json"
+    },
+    {
+      "id": "PL.STOEN_OPERATOR.G11.2026",
+      "label": "Stoen Operator - G11",
+      "operator": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/STOEN_OPERATOR/G11.json"
+    },
+    {
+      "id": "PL.STOEN_OPERATOR.G12.2026",
+      "label": "Stoen Operator - G12",
+      "operator": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/STOEN_OPERATOR/G12.json"
+    }
+  ]
+}

@@ -164,6 +164,12 @@ Example: dynamic energy (`Fixing1`) plus dynamic network zones (`PDGSZ`) plus a 
 
 See `examples/definitions/` and `schema/billing-definition.schema.json`.
 
+## Frontend tariff presets
+
+`examples/frontend-tariff-presets/` contains UI-oriented 2026 presets for Polish household groups G11, G12, TAURON G13, ENEA G13active and TAURON G14dynamic, split by OSD where schedule/rates differ. A preset contains a partial `billingDefinitionTemplate` plus `inputs[]` whose JSON Pointer targets tell the frontend exactly where to write user values. After filling the required fields, the result is an ordinary `BillingDefinition`.
+
+These presets intentionally cover only the first UI scope: energy purchase input, variable distribution component, tariff-zone schedule and billing cycle. Fixed/phase-dependent/statutory charges are not baked into the presets. See `examples/frontend-tariff-presets/README.md`.
+
 ## SUPLA integration
 
 `examples/supla-cloud/` contains adapter examples for the existing tables:

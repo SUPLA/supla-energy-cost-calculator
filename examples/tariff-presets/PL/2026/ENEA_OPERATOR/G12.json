@@ -1,0 +1,285 @@
+{
+  "version": 1,
+  "id": "PL.ENEA_OPERATOR.G12.2026",
+  "label": "ENEA Operator - G12",
+  "operator": {
+    "id": "ENEA_OPERATOR",
+    "label": "ENEA Operator"
+  },
+  "tariffGroup": "G12",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "billingCycle.anchor",
+      "label": "Początek okresu rozliczeniowego",
+      "type": "DATETIME",
+      "required": true,
+      "targets": [
+        "/billingCycle/anchor"
+      ],
+      "help": "Data i czas początku znanego okresu rozliczeniowego z umowy lub faktury."
+    },
+    {
+      "id": "billingCycle.length",
+      "label": "Długość okresu rozliczeniowego",
+      "type": "INTEGER",
+      "required": true,
+      "targets": [
+        "/billingCycle/length"
+      ],
+      "unit": "miesiące",
+      "minimum": 1
+    },
+    {
+      "id": "energy.DAY",
+      "label": "Cena energii - Dzień",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "energy.NIGHT",
+      "label": "Cena energii - Noc",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "distribution.DAY",
+      "label": "Dystrybucja - Dzień",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.NIGHT",
+      "label": "Dystrybucja - Noc",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "schedule.nightLong.from",
+      "label": "G12 ENEA: początek nocnego okna 8h",
+      "type": "TIME",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/selector/rules/0/time_ranges/0/from",
+        "/periods/0/components/1/selector/rules/0/time_ranges/0/from",
+        "/periods/0/components/0/selector/rules/1/time_ranges/1/to",
+        "/periods/0/components/1/selector/rules/1/time_ranges/1/to"
+      ]
+    },
+    {
+      "id": "schedule.nightLong.to",
+      "label": "G12 ENEA: koniec nocnego okna 8h",
+      "type": "TIME",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/selector/rules/0/time_ranges/0/to",
+        "/periods/0/components/1/selector/rules/0/time_ranges/0/to",
+        "/periods/0/components/0/selector/rules/1/time_ranges/0/from",
+        "/periods/0/components/1/selector/rules/1/time_ranges/0/from"
+      ]
+    },
+    {
+      "id": "schedule.nightShort.from",
+      "label": "G12 ENEA: początek dziennego okna 2h",
+      "type": "TIME",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/selector/rules/0/time_ranges/1/from",
+        "/periods/0/components/1/selector/rules/0/time_ranges/1/from",
+        "/periods/0/components/0/selector/rules/1/time_ranges/0/to",
+        "/periods/0/components/1/selector/rules/1/time_ranges/0/to"
+      ]
+    },
+    {
+      "id": "schedule.nightShort.to",
+      "label": "G12 ENEA: koniec dziennego okna 2h",
+      "type": "TIME",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/selector/rules/0/time_ranges/1/to",
+        "/periods/0/components/1/selector/rules/0/time_ranges/1/to",
+        "/periods/0/components/0/selector/rules/1/time_ranges/1/from",
+        "/periods/0/components/1/selector/rules/1/time_ranges/1/from"
+      ]
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": null,
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "15:00"
+                    }
+                  ]
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "13:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "22:00"
+                    }
+                  ]
+                }
+              ]
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": null,
+                "NIGHT": null
+              },
+              "unit": "PLN/kWh"
+            }
+          },
+          {
+            "id": "distribution-variable",
+            "category": "NETWORK",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "15:00"
+                    }
+                  ]
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "13:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "22:00"
+                    }
+                  ]
+                }
+              ]
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": "0.2779",
+                "NIGHT": "0.0913"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "ENEA G12 określa 10 godzin strefy nocnej, ale dokładne godziny zegarowe ustala Operator. Szablon startuje od 22:00-06:00 i 13:00-15:00; frontend powinien pozwolić je potwierdzić lub zmienić zgodnie z licznikiem/umową.",
+    "Komponent energy-purchase w tym przykładzie używa tych samych stref co dystrybucja. Jeśli sprzedawca stosuje inną strukturę cen energii, frontend powinien zastąpić ten komponent osobnym modelem sprzedaży."
+  ],
+  "source": {
+    "title": "Taryfa ENEA Operator na 2026 r.",
+    "url": "https://www.operator.enea.pl/sites/operator/files/dokumenty/Enea%20Operator_wyci%C4%85g%20z%20taryfy_01.01.2026-31.12.2026.pdf",
+    "retrievedAt": "2026-09-22"
+  }
+}

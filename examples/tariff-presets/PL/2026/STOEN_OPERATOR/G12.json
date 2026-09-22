@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "id": "PL.STOEN_OPERATOR.G12.2026",
+  "label": "Stoen Operator - G12",
+  "operator": {
+    "id": "STOEN_OPERATOR",
+    "label": "Stoen Operator"
+  },
+  "tariffGroup": "G12",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "billingCycle.anchor",
+      "label": "Początek okresu rozliczeniowego",
+      "type": "DATETIME",
+      "required": true,
+      "targets": [
+        "/billingCycle/anchor"
+      ],
+      "help": "Data i czas początku znanego okresu rozliczeniowego z umowy lub faktury."
+    },
+    {
+      "id": "billingCycle.length",
+      "label": "Długość okresu rozliczeniowego",
+      "type": "INTEGER",
+      "required": true,
+      "targets": [
+        "/billingCycle/length"
+      ],
+      "unit": "miesiące",
+      "minimum": 1
+    },
+    {
+      "id": "energy.DAY",
+      "label": "Cena energii - Dzień",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "energy.NIGHT",
+      "label": "Cena energii - Noc",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "distribution.DAY",
+      "label": "Dystrybucja - Dzień",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.NIGHT",
+      "label": "Dystrybucja - Noc",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": null,
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "15:00"
+                    }
+                  ]
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "13:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "22:00"
+                    }
+                  ]
+                }
+              ]
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": null,
+                "NIGHT": null
+              },
+              "unit": "PLN/kWh"
+            }
+          },
+          {
+            "id": "distribution-variable",
+            "category": "NETWORK",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "15:00"
+                    }
+                  ]
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "13:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "22:00"
+                    }
+                  ]
+                }
+              ]
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": "0.2545",
+                "NIGHT": "0.0555"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "Komponent energy-purchase w tym przykładzie używa tych samych stref co dystrybucja. Jeśli sprzedawca stosuje inną strukturę cen energii, frontend powinien zastąpić ten komponent osobnym modelem sprzedaży."
+  ],
+  "source": {
+    "title": "Taryfa Stoen Operator na 2026 r.",
+    "url": "https://e-bok.stoen.pl/binsource?docId=8321&index=0&language=PL&paramName=BINARYOBJ_FILE",
+    "retrievedAt": "2026-09-22"
+  }
+}

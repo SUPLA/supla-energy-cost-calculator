@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "billingCycle": {
+    "anchor": "2026-01-15T00:00:00+01:00",
+    "length": 1,
+    "unit": "MONTH"
+  },
+  "periods": [
+    {
+      "validFrom": "2026-01-01T00:00:00+01:00",
+      "validTo": "2027-01-01T00:00:00+01:00",
+      "components": [
+        {
+          "id": "energy-purchase",
+          "category": "ENERGY",
+          "quantity": {
+            "type": "ACTIVE_ENERGY_IMPORT"
+          },
+          "selector": {
+            "type": "ALWAYS"
+          },
+          "rate": {
+            "type": "CONSTANT",
+            "value": "0.7000",
+            "unit": "PLN/kWh"
+          }
+        },
+        {
+          "id": "distribution-variable",
+          "category": "NETWORK",
+          "quantity": {
+            "type": "ACTIVE_ENERGY_IMPORT"
+          },
+          "selector": {
+            "type": "REFERENCE",
+            "source": "PL.PSE.PDGSZ",
+            "mapping": {
+              "0": "S1",
+              "1": "S2",
+              "2": "S3",
+              "3": "S4"
+            }
+          },
+          "rate": {
+            "type": "ZONED",
+            "rates": {
+              "S1": "0.0224",
+              "S2": "0.0893",
+              "S3": "0.3881",
+              "S4": "2.3756"
+            },
+            "unit": "PLN/kWh"
+          }
+        }
+      ]
+    }
+  ]
+}

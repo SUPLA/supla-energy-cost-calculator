@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://supla.org/schema/energy-cost/frontend-tariff-preset-v1.json",
+  "title": "SUPLA Frontend Tariff Preset",
+  "type": "object",
+  "required": [
+    "version",
+    "id",
+    "label",
+    "operator",
+    "tariffGroup",
+    "validFrom",
+    "validTo",
+    "currency",
+    "timezone",
+    "priceBasis",
+    "inputs",
+    "billingDefinitionTemplate",
+    "source"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operator": {
+      "type": "object",
+      "required": [
+        "id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "tariffGroup": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validFrom": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validTo": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "currency": {
+      "const": "PLN"
+    },
+    "timezone": {
+      "const": "Europe/Warsaw"
+    },
+    "priceBasis": {
+      "enum": [
+        "NET",
+        "GROSS"
+      ]
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/input"
+      }
+    },
+    "billingDefinitionTemplate": {
+      "type": "object"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "title",
+        "url",
+        "retrievedAt"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "retrievedAt": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "input": {
+      "type": "object",
+      "required": [
+        "id",
+        "label",
+        "type",
+        "required",
+        "targets"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "DECIMAL",
+            "INTEGER",
+            "DATETIME",
+            "TIME"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minimum": {
+          "type": "integer"
+        },
+        "help": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

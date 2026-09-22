@@ -1,0 +1,148 @@
+{
+  "version": 1,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "billingCycle": {
+    "anchor": "2026-01-15T00:00:00+01:00",
+    "length": 1,
+    "unit": "MONTH"
+  },
+  "periods": [
+    {
+      "validFrom": "2026-01-01T00:00:00+01:00",
+      "validTo": "2027-01-01T00:00:00+01:00",
+      "components": [
+        {
+          "id": "energy-purchase",
+          "category": "ENERGY",
+          "quantity": {
+            "type": "ACTIVE_ENERGY_IMPORT"
+          },
+          "selector": {
+            "type": "WEEKLY_SCHEDULE",
+            "timezone": "Europe/Warsaw",
+            "rules": [
+              {
+                "zone": "NIGHT",
+                "days": [
+                  "MON",
+                  "TUE",
+                  "WED",
+                  "THU",
+                  "FRI",
+                  "SAT",
+                  "SUN"
+                ],
+                "time_ranges": [
+                  {
+                    "from": "22:00",
+                    "to": "06:00"
+                  },
+                  {
+                    "from": "13:00",
+                    "to": "15:00"
+                  }
+                ]
+              },
+              {
+                "zone": "DAY",
+                "days": [
+                  "MON",
+                  "TUE",
+                  "WED",
+                  "THU",
+                  "FRI",
+                  "SAT",
+                  "SUN"
+                ],
+                "time_ranges": [
+                  {
+                    "from": "06:00",
+                    "to": "13:00"
+                  },
+                  {
+                    "from": "15:00",
+                    "to": "22:00"
+                  }
+                ]
+              }
+            ]
+          },
+          "rate": {
+            "type": "ZONED",
+            "rates": {
+              "DAY": "0.7500",
+              "NIGHT": "0.5500"
+            },
+            "unit": "PLN/kWh"
+          }
+        },
+        {
+          "id": "distribution-variable",
+          "category": "NETWORK",
+          "quantity": {
+            "type": "ACTIVE_ENERGY_IMPORT"
+          },
+          "selector": {
+            "type": "WEEKLY_SCHEDULE",
+            "timezone": "Europe/Warsaw",
+            "rules": [
+              {
+                "zone": "NIGHT",
+                "days": [
+                  "MON",
+                  "TUE",
+                  "WED",
+                  "THU",
+                  "FRI",
+                  "SAT",
+                  "SUN"
+                ],
+                "time_ranges": [
+                  {
+                    "from": "22:00",
+                    "to": "06:00"
+                  },
+                  {
+                    "from": "13:00",
+                    "to": "15:00"
+                  }
+                ]
+              },
+              {
+                "zone": "DAY",
+                "days": [
+                  "MON",
+                  "TUE",
+                  "WED",
+                  "THU",
+                  "FRI",
+                  "SAT",
+                  "SUN"
+                ],
+                "time_ranges": [
+                  {
+                    "from": "06:00",
+                    "to": "13:00"
+                  },
+                  {
+                    "from": "15:00",
+                    "to": "22:00"
+                  }
+                ]
+              }
+            ]
+          },
+          "rate": {
+            "type": "ZONED",
+            "rates": {
+              "DAY": "0.2841",
+              "NIGHT": "0.0558"
+            },
+            "unit": "PLN/kWh"
+          }
+        }
+      ]
+    }
+  ]
+}
