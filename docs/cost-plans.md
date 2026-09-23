@@ -1,5 +1,50 @@
 # Cost plans and tariff presets
 
+## Component plans (version 2)
+
+Version 2 selects a fixed `CostComponentKind` for each line of each effective period. The four initial kinds are `ENERGY_PURCHASE`, `DISTRIBUTION_VARIABLE`, `DISTRIBUTION_FIXED`, and `SUPPLIER_FIXED`. The first two select a component by `componentId` from an existing preset; the fixed kinds specify a decimal rate and a `per` period. `billingCycles` are independent of preset selection. See `schema/cost-plan-v2.schema.json`.
+
+```json
+{
+  "version": 2,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "billingCycles": [{
+    "validFrom": "2026-01-01T00:00:00+01:00",
+    "validTo": "2027-01-01T00:00:00+01:00",
+    "anchor": "2026-01-15",
+    "length": 1,
+    "unit": "MONTH"
+  }],
+  "periods": [{
+    "validFrom": "2026-01-01T00:00:00+01:00",
+    "validTo": "2027-01-01T00:00:00+01:00",
+    "components": [
+      {
+        "kind": "ENERGY_PURCHASE",
+        "presetId": "PL.TAURON_DYSTRYBUCJA.G11.2026",
+        "componentId": "energy-purchase",
+        "values": {"energy.rate": "0.71"}
+      },
+      {
+        "kind": "DISTRIBUTION_VARIABLE",
+        "presetId": "PL.ENERGA_OPERATOR.G12.2026",
+        "componentId": "distribution-variable",
+        "values": {}
+      },
+      {"kind": "SUPPLIER_FIXED", "rate": "12.00", "per": "BILLING_PERIOD"}
+    ]
+  }]
+}
+```
+
+Preset input targets are applied only to the selected component. The compiler verifies the component category and quantity, compatible currency/timezone/price basis, full preset and billing-cycle coverage, and unique kinds per plan period. It splits executable periods at preset boundaries. Version 1 plans continue to compile through the existing route. A preset's simulation defaults are never applied implicitly to saved plans. Selecting a sale offer from a supplier requires actual supplier preset data; the current bundled energy components are tariff-zone examples grouped by distribution operator.
+
+For non-prorated periodic fees, the calculator charges a given component once per charge bucket even when several plan periods intersect that bucket. If its rate changes within the same bucket, calculation rejects the ambiguous fee; split the billing cycle or use explicit proration.
+
+## Legacy preset plans (version 1)
+
 `CostPlanDefinition` is the persistent user-intent model. `BillingDefinition` is the executable calculator model.
 
 ```text

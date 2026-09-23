@@ -48,6 +48,24 @@ final class TariffPresetCompilerTest extends TestCase
         ]);
     }
 
+    public function testCompilesOneComponentWithoutRequiringOtherInputsOrBillingAnchor(): void
+    {
+        $compiled = (new TariffPresetCompiler())->compileComponentToArray(
+            'PL.ENEA_OPERATOR.G12.2026',
+            'energy-purchase',
+            [
+                'energy.DAY' => '0.58',
+                'energy.NIGHT' => '0.35',
+                'schedule.nightShort.from' => '12:00',
+            ],
+        );
+
+        self::assertCount(1, $compiled['periods'][0]['components']);
+        self::assertSame('ENERGY', $compiled['periods'][0]['components'][0]['category']);
+        self::assertSame('12:00', $compiled['periods'][0]['components'][0]['selector']['rules'][0]['time_ranges'][1]['from']);
+        self::assertNull($compiled['billingCycle']['anchor']);
+    }
+
     public function testRejectsUnresolvedRequiredInput(): void
     {
         $this->expectException(TariffPresetCompilationException::class);

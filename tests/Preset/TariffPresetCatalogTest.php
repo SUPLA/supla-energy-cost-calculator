@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Exception\InvalidTariffPresetException;
 use Supla\EnergyCostCalculator\Exception\TariffPresetNotFoundException;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCatalog;
+use Supla\EnergyCostCalculator\Preset\TariffPresetCompiler;
 
 final class TariffPresetCatalogTest extends TestCase
 {
@@ -43,6 +44,36 @@ final class TariffPresetCatalogTest extends TestCase
         self::assertSame($preset->id, $preset->document['id']);
         self::assertSame('G12', $preset->metadata['tariffGroup']);
         self::assertArrayHasKey('billingDefinitionTemplate', $preset->document);
+    }
+
+    public function testEveryBundledPresetHasCompilableSimulationDefaults(): void
+    {
+        $catalog = new TariffPresetCatalog();
+        $compiler = new TariffPresetCompiler($catalog);
+
+        foreach ($catalog->presets() as $metadata) {
+            $preset = $catalog->get($metadata['id']);
+            $document = $preset->document;
+            $defaults = $document['simulationDefaults'] ?? null;
+            self::assertIsArray($defaults, $preset->id);
+            self::assertSame('STANDARD_SUPPLIER_TARIFF', $defaults['basis'] ?? null, $preset->id);
+            self::assertNotEmpty($defaults['supplier']['id'] ?? null, $preset->id);
+            self::assertNotEmpty($defaults['supplier']['label'] ?? null, $preset->id);
+            self::assertIsArray($defaults['values'] ?? null, $preset->id);
+
+            $values = $defaults['values'];
+            self::assertSame(
+                (new \DateTimeImmutable($document['validFrom']))->format('Y-m-d'),
+                $values['billingCycle.anchor'] ?? null,
+                $preset->id,
+            );
+            $inputIds = array_column($document['inputs'], 'id');
+            self::assertSame([], array_diff(array_keys($values), $inputIds), $preset->id);
+
+            $compiled = $compiler->compileToArray($preset, $values);
+            self::assertSame($values['billingCycle.anchor'], $compiled['billingCycle']['anchor'], $preset->id);
+            self::assertSame($document['billingDefinitionTemplate'], $preset->document['billingDefinitionTemplate'], $preset->id);
+        }
     }
 
     public function testRevisionIsDeterministicContentHash(): void

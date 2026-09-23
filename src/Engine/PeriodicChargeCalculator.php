@@ -6,11 +6,15 @@ namespace Supla\EnergyCostCalculator\Engine;
 
 use Supla\EnergyCostCalculator\Definition\BillingCycleUnit;
 use Supla\EnergyCostCalculator\Definition\ComponentDefinition;
+use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Math\DecimalMath;
 use Supla\EnergyCostCalculator\Model\TimeRange;
 
 final class PeriodicChargeCalculator
 {
+    /** @var array<string, string> */
+    private array $chargedBuckets = [];
+
     public function __construct(
         private readonly DecimalMath $math,
         private readonly BillingCycleResolver $billingCycleResolver = new BillingCycleResolver(),
@@ -39,7 +43,7 @@ final class PeriodicChargeCalculator
             if ($period === 'BILLING_PERIOD') {
                 $units = $prorate
                     ? $this->fraction($effective, $billingPeriod->nominalRange)
-                    : '1';
+                    : $this->once($component, $period, $billingPeriod->range->from->getTimestamp(), $billingPeriod->range->from->getTimestamp());
                 $totalUnits = $this->math->add($totalUnits, $units);
                 continue;
             }
@@ -54,7 +58,8 @@ final class PeriodicChargeCalculator
                 $bucket = new TimeRange($cursor, $next);
                 $overlap = $bucket->intersection($effective);
                 if ($overlap !== null) {
-                    $units = $prorate ? $this->fraction($overlap, $bucket) : '1';
+                    $units = $prorate ? $this->fraction($overlap, $bucket)
+                        : $this->once($component, $period, $billingPeriod->range->from->getTimestamp(), $bucket->from->getTimestamp());
                     $totalUnits = $this->math->add($totalUnits, $units);
                 }
                 $cursor = $next;
@@ -65,6 +70,20 @@ final class PeriodicChargeCalculator
             $totalUnits,
             $this->math->multiply($totalUnits, $rate),
         );
+    }
+
+    private function once(ComponentDefinition $component, string $period, int $cycleStart, int $bucketStart): string
+    {
+        $key = $component->id . ':' . $cycleStart . ':' . $bucketStart;
+        $signature = json_encode([$component->category, $period, $component->rate->config], JSON_THROW_ON_ERROR);
+        if (isset($this->chargedBuckets[$key])) {
+            if ($this->chargedBuckets[$key] !== $signature) {
+                throw new CalculationException("Periodic component '{$component->id}' changes within one charge period without proration.");
+            }
+            return '0';
+        }
+        $this->chargedBuckets[$key] = $signature;
+        return '1';
     }
 
     private function fraction(TimeRange $part, TimeRange $whole): string

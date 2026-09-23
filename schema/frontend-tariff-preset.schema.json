@@ -15,6 +15,7 @@
     "timezone",
     "priceBasis",
     "inputs",
+    "simulationDefaults",
     "billingDefinitionTemplate",
     "source"
   ],
@@ -85,6 +86,33 @@
     "billingDefinitionTemplate": {
       "type": "object"
     },
+    "simulationDefaults": {
+      "type": "object",
+      "required": ["basis", "supplier", "values"],
+      "properties": {
+        "basis": {
+          "const": "STANDARD_SUPPLIER_TARIFF"
+        },
+        "supplier": {
+          "$ref": "#/$defs/supplier"
+        },
+        "values": {
+          "type": "object",
+          "required": ["billingCycle.anchor"],
+          "minProperties": 2,
+          "propertyNames": {
+            "pattern": "^(billingCycle\\.(anchor|length)|energy\\.[A-Za-z0-9_]+)$"
+          },
+          "additionalProperties": {
+            "oneOf": [
+              { "type": "string", "minLength": 1 },
+              { "type": "integer" }
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
     "warnings": {
       "type": "array",
       "items": {
@@ -117,6 +145,15 @@
   },
   "additionalProperties": false,
   "$defs": {
+    "supplier": {
+      "type": "object",
+      "required": ["id", "label"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
     "input": {
       "type": "object",
       "required": [

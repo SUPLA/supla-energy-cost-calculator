@@ -183,6 +183,8 @@ $preset->revision; // SHA-256 of the deterministically encoded JSON document.
 
 `presets()` returns catalogue metadata with a `revision` and without internal resource paths. `get()` rejects unknown identifiers and resources outside the bundled preset directory. A preset ID is a stable reference to one real tariff definition; compatible corrections to that definition may change its revision without changing its ID. A real operator/tariff change must use a new preset ID.
 
+For new plans, use the component-based version 2 format described in `docs/cost-plans.md` and `schema/cost-plan-v2.schema.json`. Each effective period selects individual `CostComponentKind` values; `billingCycles` are configured separately. Existing version 1 plans and the example below remain supported.
+
 Use `TariffPresetCompiler` when compiling one preset and `CostPlanCompiler` for persisted user plans:
 
 ```php
@@ -208,6 +210,8 @@ $definition = (new CostPlanCompiler())->compile($plan);
 The cost-plan JSON stores stable preset IDs and user values/overrides, not a copied executable definition. Compiling later uses the current document for the same preset ID, so package-owned corrections automatically apply to existing plans. Omit preset-default values from `values` unless the user explicitly overrides them; this preserves inheritance of corrected defaults. Adjacent plan entries with the same billing-cycle configuration are merged on the billing-cycle timeline, so a price-only change does not create an artificial invoice boundary. See `schema/cost-plan.schema.json` and `docs/cost-plans.md`.
 
 For zero-input tariff comparisons, bundled presets also expose optional `simulationDefaults`. These are suggested values for transient simulations only; they do not become normal preset defaults and `TariffPresetCompiler` does not apply them automatically. The bundled 2026 presets use the standard seller naturally associated with each OSD, net energy prices including excise and excluding VAT, plus a deterministic billing-cycle anchor at the preset validity start. A host may merge `simulationDefaults.values` into a transient cost-plan entry before compiling a simulation. Sources and assumptions are included in the preset document.
+
+Each bundled preset also has `simulationDefaults`: a suggested supplier, a `STANDARD_SUPPLIER_TARIFF` basis, and `values` keyed by declared input IDs. To simulate without a form, pass those values into a temporary cost plan; do not persist the plan or assign it to a channel. The suggested energy prices are assumptions for a comparison, not preset defaults or customer contract prices. The billing-cycle anchor uses the preset start and a one-month length where the preset exposes that input. User overrides in a saved plan should remain explicit. Simulation results currently cover energy purchase and variable distribution, not a full invoice.
 
 These presets intentionally cover only the first UI scope: energy purchase input, variable distribution component, tariff-zone schedule and billing cycle. Fixed/phase-dependent/statutory charges are not baked into the presets. See `examples/tariff-presets/README.md`.
 

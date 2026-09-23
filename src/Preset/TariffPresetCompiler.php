@@ -30,6 +30,21 @@ final class TariffPresetCompiler
      */
     public function compileToArray(string|TariffPreset $preset, array $values): array
     {
+        return $this->compileTemplate($preset, $values);
+    }
+
+    /** @param array<string, mixed> $values @return array<string, mixed> */
+    public function compileComponentToArray(string|TariffPreset $preset, string $componentId, array $values): array
+    {
+        if (trim($componentId) === '') {
+            throw new TariffPresetCompilationException('Component id must be non-empty.');
+        }
+        return $this->compileTemplate($preset, $values, $componentId);
+    }
+
+    /** @param array<string, mixed> $values @return array<string, mixed> */
+    private function compileTemplate(string|TariffPreset $preset, array $values, ?string $componentId = null): array
+    {
         $preset = is_string($preset) ? $this->catalog->get($preset) : $preset;
         $document = $preset->document;
         $template = $document['billingDefinitionTemplate'] ?? null;
@@ -53,6 +68,25 @@ final class TariffPresetCompiler
             }
             if (isset($definitions[$id])) {
                 throw new TariffPresetCompilationException("Tariff preset '{$preset->id}' contains duplicate input id '$id'.");
+            }
+            if ($componentId !== null) {
+                $targets = $input['targets'] ?? null;
+                if (!is_array($targets) || !array_is_list($targets)) {
+                    throw new TariffPresetCompilationException("Tariff preset '{$preset->id}' input '$id' must contain targets array.");
+                }
+                $input['targets'] = array_values(array_filter($targets, function (mixed $target) use ($template, $componentId): bool {
+                    if (!is_string($target)) {
+                        return false;
+                    }
+                    if (!preg_match('~^/periods/(\d+)/components/(\d+)/~', $target, $matches)) {
+                        return false;
+                    }
+                    $component = $template['periods'][(int)$matches[1]]['components'][(int)$matches[2]] ?? null;
+                    return ($component['id'] ?? null) === $componentId;
+                }));
+                if ($input['targets'] === []) {
+                    continue;
+                }
             }
             $definitions[$id] = $input;
         }
@@ -96,8 +130,21 @@ final class TariffPresetCompiler
             }
         }
 
-        // The parser is the final semantic authority for the executable definition.
-        $this->definitionParser->parse($compiled);
+        if ($componentId !== null) {
+            foreach ($compiled['periods'] as &$period) {
+                $period['components'] = array_values(array_filter(
+                    $period['components'] ?? [],
+                    static fn(mixed $component): bool => is_array($component) && ($component['id'] ?? null) === $componentId,
+                ));
+                if ($period['components'] === []) {
+                    throw new TariffPresetCompilationException("Tariff preset '{$preset->id}' has no selected components in one period.");
+                }
+            }
+            unset($period);
+        } else {
+            // The parser is the final semantic authority for the executable definition.
+            $this->definitionParser->parse($compiled);
+        }
 
         return $compiled;
     }
