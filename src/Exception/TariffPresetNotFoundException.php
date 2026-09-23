@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace Supla\EnergyCostCalculator\Exception;
 
-final class TariffPresetNotFoundException extends \RuntimeException
+final class TariffPresetNotFoundException extends EnergyCostCalculatorException
 {
 }

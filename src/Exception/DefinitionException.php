@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace Supla\EnergyCostCalculator\Exception;
 
-final class DefinitionException extends \InvalidArgumentException
+final class DefinitionException extends EnergyCostCalculatorException
 {
 }

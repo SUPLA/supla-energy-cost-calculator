@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace Supla\EnergyCostCalculator\Exception;
 
-class CalculationException extends \RuntimeException
+class CalculationException extends EnergyCostCalculatorException
 {
 }
