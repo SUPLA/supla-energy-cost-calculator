@@ -14,11 +14,11 @@ final class TariffPresetCompilerTest extends TestCase
     public function testCompilesBundledG11UsingUserValuesAndPresetDefaults(): void
     {
         $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_DYSTRYBUCJA.G11.2026', [
-            'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+            'billingCycle.anchor' => '2026-01-15',
             'energy.rate' => '0.71',
         ]);
 
-        self::assertSame('2026-01-15T00:00:00+01:00', $compiled['billingCycle']['anchor']);
+        self::assertSame('2026-01-15', $compiled['billingCycle']['anchor']);
         self::assertSame(1, $compiled['billingCycle']['length']);
         self::assertSame('0.71', $compiled['periods'][0]['components'][0]['rate']['value']);
         self::assertSame('0.2464', $compiled['periods'][0]['components'][1]['rate']['value']);
@@ -27,7 +27,7 @@ final class TariffPresetCompilerTest extends TestCase
     public function testCompilesBundledG12WithZonedEnergyRates(): void
     {
         $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_DYSTRYBUCJA.G12.2026', [
-            'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+            'billingCycle.anchor' => '2026-01-15',
             'billingCycle.length' => '2',
             'energy.DAY' => '0.98',
             'energy.NIGHT' => '0.62',
@@ -64,7 +64,7 @@ final class TariffPresetCompilerTest extends TestCase
         $this->expectExceptionMessage('must be at least 1');
 
         (new TariffPresetCompiler())->compile('PL.TAURON_DYSTRYBUCJA.G11.2026', [
-            'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+            'billingCycle.anchor' => '2026-01-15',
             'billingCycle.length' => 0,
             'energy.rate' => '0.71',
         ]);
@@ -123,7 +123,7 @@ final class TariffPresetCompilerTest extends TestCase
         ];
 
         // Anchor is not an input in this synthetic preset; make it valid for BillingDefinitionParser.
-        $document['billingDefinitionTemplate']['billingCycle']['anchor'] = '2026-01-01T00:00:00+01:00';
+        $document['billingDefinitionTemplate']['billingCycle']['anchor'] = '2026-01-01';
 
         return new TariffPreset('TEST.G11.2026', str_repeat('0', 64), [], $document);
     }

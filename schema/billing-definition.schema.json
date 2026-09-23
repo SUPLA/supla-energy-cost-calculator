@@ -512,7 +512,7 @@
             "string",
             "null"
           ],
-          "format": "date-time"
+          "format": "date"
         },
         "length": {
           "type": "integer",
@@ -553,7 +553,7 @@
             "string",
             "null"
           ],
-          "format": "date-time"
+          "format": "date"
         },
         "length": {
           "type": "integer",

@@ -19,7 +19,7 @@ final readonly class BillingCycleDefinition implements \JsonSerializable
     public function jsonSerialize(): array
     {
         return [
-            'anchor' => $this->anchor?->format(DATE_ATOM),
+            'anchor' => $this->anchor?->format('Y-m-d'),
             'length' => $this->length,
             'unit' => $this->unit->value,
         ];

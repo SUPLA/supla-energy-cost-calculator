@@ -29,7 +29,7 @@ final class CostPlanCompilerTest extends TestCase
                 'validTo' => '2027-01-01T00:00:00+01:00',
                 'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                 'values' => [
-                    'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                    'billingCycle.anchor' => '2026-01-15',
                     'energy.rate' => '0.71',
                 ],
             ]],
@@ -52,7 +52,7 @@ final class CostPlanCompilerTest extends TestCase
                     'validTo' => '2026-07-01T00:00:00+02:00',
                     'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                     'values' => [
-                        'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                        'billingCycle.anchor' => '2026-01-15',
                         'energy.rate' => '0.70',
                     ],
                 ],
@@ -61,7 +61,7 @@ final class CostPlanCompilerTest extends TestCase
                     'validTo' => '2027-01-01T00:00:00+01:00',
                     'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                     'values' => [
-                        'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                        'billingCycle.anchor' => '2026-01-15',
                         'energy.rate' => '0.62',
                     ],
                 ],
@@ -86,7 +86,7 @@ final class CostPlanCompilerTest extends TestCase
                     'validTo' => '2026-07-01T00:00:00+02:00',
                     'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                     'values' => [
-                        'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                        'billingCycle.anchor' => '2026-01-15',
                         'energy.rate' => '0.70',
                     ],
                 ],
@@ -95,7 +95,7 @@ final class CostPlanCompilerTest extends TestCase
                     'validTo' => '2027-01-01T00:00:00+01:00',
                     'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                     'values' => [
-                        'billingCycle.anchor' => '2026-07-15T00:00:00+02:00',
+                        'billingCycle.anchor' => '2026-07-15',
                         'energy.rate' => '0.62',
                     ],
                 ],
@@ -103,7 +103,7 @@ final class CostPlanCompilerTest extends TestCase
         ]);
 
         self::assertCount(1, $compiled['billingCycles']);
-        self::assertSame('2026-01-15T00:00:00+01:00', $compiled['billingCycles'][0]['anchor']);
+        self::assertSame('2026-01-15', $compiled['billingCycles'][0]['anchor']);
     }
 
     public function testChangingBillingAnchorCreatesBillingCycleHistoryBoundary(): void
@@ -116,7 +116,7 @@ final class CostPlanCompilerTest extends TestCase
                     'validTo' => '2026-07-01T00:00:00+02:00',
                     'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                     'values' => [
-                        'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                        'billingCycle.anchor' => '2026-01-15',
                         'energy.rate' => '0.70',
                     ],
                 ],
@@ -125,7 +125,7 @@ final class CostPlanCompilerTest extends TestCase
                     'validTo' => '2027-01-01T00:00:00+01:00',
                     'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                     'values' => [
-                        'billingCycle.anchor' => '2026-07-01T00:00:00+02:00',
+                        'billingCycle.anchor' => '2026-07-01',
                         'energy.rate' => '0.70',
                     ],
                 ],
@@ -147,7 +147,7 @@ final class CostPlanCompilerTest extends TestCase
                     'validTo' => '2026-07-01T00:00:00+02:00',
                     'presetId' => 'PL.TAURON_DYSTRYBUCJA.G12.2026',
                     'values' => [
-                        'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                        'billingCycle.anchor' => '2026-01-15',
                         'energy.DAY' => '0.98',
                         'energy.NIGHT' => '0.62',
                     ],
@@ -157,7 +157,7 @@ final class CostPlanCompilerTest extends TestCase
                     'validTo' => '2027-01-01T00:00:00+01:00',
                     'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                     'values' => [
-                        'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                        'billingCycle.anchor' => '2026-01-15',
                         'energy.rate' => '0.71',
                     ],
                 ],
@@ -181,7 +181,7 @@ final class CostPlanCompilerTest extends TestCase
                 'validTo' => '2027-01-01T00:00:00+01:00',
                 'presetId' => 'TEST.G11.2026',
                 'values' => [
-                    'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                    'billingCycle.anchor' => '2026-01-15',
                     'energy.rate' => '0.70',
                 ],
             ]],
@@ -215,7 +215,7 @@ final class CostPlanCompilerTest extends TestCase
                     'validTo' => '2026-08-01T00:00:00+02:00',
                     'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                     'values' => [
-                        'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                        'billingCycle.anchor' => '2026-01-15',
                         'energy.rate' => '0.70',
                     ],
                 ],
@@ -224,7 +224,7 @@ final class CostPlanCompilerTest extends TestCase
                     'validTo' => '2027-01-01T00:00:00+01:00',
                     'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                     'values' => [
-                        'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                        'billingCycle.anchor' => '2026-01-15',
                         'energy.rate' => '0.62',
                     ],
                 ],
@@ -239,7 +239,7 @@ final class CostPlanCompilerTest extends TestCase
             'entries' => [[
                 'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                 'values' => [
-                    'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                    'billingCycle.anchor' => '2026-01-15',
                     'energy.rate' => '0.70',
                 ],
             ]],
@@ -258,7 +258,7 @@ final class CostPlanCompilerTest extends TestCase
                 'validTo' => '2028-01-01T00:00:00+01:00',
                 'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                 'values' => [
-                    'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                    'billingCycle.anchor' => '2026-01-15',
                     'energy.rate' => '0.70',
                 ],
             ]],
@@ -280,7 +280,7 @@ final class CostPlanCompilerTest extends TestCase
                 'validTo' => '2027-03-01T00:00:00+01:00',
                 'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                 'values' => [
-                    'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                    'billingCycle.anchor' => '2026-01-15',
                     'energy.rate' => '0.70',
                 ],
             ]],
@@ -314,7 +314,7 @@ final class CostPlanCompilerTest extends TestCase
             'inputs' => [
                 [
                     'id' => 'billingCycle.anchor',
-                    'type' => 'DATETIME',
+                    'type' => 'DATE',
                     'required' => true,
                     'targets' => ['/billingCycle/anchor'],
                 ],

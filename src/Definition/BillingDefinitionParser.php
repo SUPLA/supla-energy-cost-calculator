@@ -21,7 +21,7 @@ final class BillingDefinitionParser
         $currency = $this->requiredString($data, 'currency');
         $timezone = (string)($data['timezone'] ?? 'UTC');
         $this->assertTimezone($timezone);
-        $billingCycles = $this->parseBillingCycles($data);
+        $billingCycles = $this->parseBillingCycles($data, $timezone);
 
         $rawPeriods = $data['periods'] ?? null;
         if (!is_array($rawPeriods) || $rawPeriods === []) {
@@ -313,14 +313,14 @@ final class BillingDefinitionParser
     }
 
     /** @return list<BillingCyclePeriodDefinition> */
-    private function parseBillingCycles(array $data): array
+    private function parseBillingCycles(array $data, string $timezone): array
     {
         if (array_key_exists('billingCycle', $data) && array_key_exists('billingCycles', $data)) {
             throw new DefinitionException('Definition cannot contain both billingCycle and billingCycles.');
         }
 
         if (!array_key_exists('billingCycles', $data)) {
-            $cycle = $this->parseBillingCycle($data['billingCycle'] ?? null, 'definition.billingCycle');
+            $cycle = $this->parseBillingCycle($data['billingCycle'] ?? null, 'definition.billingCycle', $timezone);
             return [new BillingCyclePeriodDefinition(null, null, $cycle)];
         }
 
@@ -342,7 +342,7 @@ final class BillingDefinitionParser
 
             $cycleData = $rawPeriod;
             unset($cycleData['validFrom'], $cycleData['validTo']);
-            $cycle = $this->parseBillingCycle($cycleData, "billingCycles[$i]");
+            $cycle = $this->parseBillingCycle($cycleData, "billingCycles[$i]", $timezone);
             $periods[] = new BillingCyclePeriodDefinition($validFrom, $validTo, $cycle);
         }
 
@@ -355,7 +355,7 @@ final class BillingDefinitionParser
         return $periods;
     }
 
-    private function parseBillingCycle(mixed $value, string $path): BillingCycleDefinition
+    private function parseBillingCycle(mixed $value, string $path, string $timezone): BillingCycleDefinition
     {
         if ($value === null) {
             return new BillingCycleDefinition(null, 1, BillingCycleUnit::MONTH);
@@ -373,8 +373,27 @@ final class BillingDefinitionParser
         $unit = BillingCycleUnit::tryFrom($unitRaw)
             ?? throw new DefinitionException("$path.unit must be DAY, WEEK, MONTH or YEAR.");
 
-        $anchor = $this->dateOrNull($value['anchor'] ?? null, "$path.anchor");
+        $anchor = $this->localDateOrNull($value['anchor'] ?? null, "$path.anchor", $timezone);
         return new BillingCycleDefinition($anchor, $length, $unit);
+    }
+
+    private function localDateOrNull(mixed $value, string $path, string $timezone): ?\DateTimeImmutable
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        if (!is_string($value)) {
+            throw new DefinitionException("$path must be an ISO-8601 date string or null.");
+        }
+
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value, new \DateTimeZone($timezone));
+        $errors = \DateTimeImmutable::getLastErrors();
+        if ($date === false || ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))
+            || $date->format('Y-m-d') !== $value) {
+            throw new DefinitionException("$path must be an ISO-8601 date string or null.");
+        }
+
+        return $date;
     }
 
     private function dateOrNull(mixed $value, string $path): ?\DateTimeImmutable

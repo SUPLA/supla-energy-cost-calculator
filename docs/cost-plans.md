@@ -31,7 +31,7 @@ See `schema/cost-plan.schema.json`.
       "validTo": "2026-07-01T00:00:00+02:00",
       "presetId": "PL.TAURON_DYSTRYBUCJA.G12.2026",
       "values": {
-        "billingCycle.anchor": "2026-01-15T00:00:00+01:00",
+        "billingCycle.anchor": "2026-01-15",
         "energy.DAY": "0.98",
         "energy.NIGHT": "0.62"
       }

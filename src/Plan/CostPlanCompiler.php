@@ -291,8 +291,9 @@ final class CostPlanCompiler
         }
 
         try {
-            $leftAnchor = new \DateTimeImmutable($leftAnchorRaw);
-            $rightAnchor = new \DateTimeImmutable($rightAnchorRaw);
+            $tz = new \DateTimeZone($timezone);
+            $leftAnchor = $this->localDate($leftAnchorRaw, $tz);
+            $rightAnchor = $this->localDate($rightAnchorRaw, $tz);
             $unit = BillingCycleUnit::from((string)$unitRaw);
             $resolver = new BillingCycleResolver();
             $leftCycle = new BillingCycleDefinition($leftAnchor, (int)$length, $unit);
@@ -315,6 +316,17 @@ final class CostPlanCompiler
             return false;
         }
         return $this->boundaryTimestamp($left, PHP_INT_MIN) === $this->boundaryTimestamp($right, PHP_INT_MAX);
+    }
+
+    private function localDate(string $value, \DateTimeZone $timezone): \DateTimeImmutable
+    {
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value, $timezone);
+        $errors = \DateTimeImmutable::getLastErrors();
+        if ($date === false || ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))
+            || $date->format('Y-m-d') !== $value) {
+            throw new \InvalidArgumentException('Billing cycle anchor must be an ISO-8601 date.');
+        }
+        return $date;
     }
 
     private function boundaryTimestamp(mixed $value, int $nullValue): int

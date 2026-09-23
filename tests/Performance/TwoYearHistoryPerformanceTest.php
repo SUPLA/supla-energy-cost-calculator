@@ -48,7 +48,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'currency' => 'PLN',
             'timezone' => 'UTC',
             'billingCycle' => [
-                'anchor' => '2024-01-01T00:00:00Z',
+                'anchor' => '2024-01-01',
                 'length' => 1,
                 'unit' => 'MONTH',
             ],
@@ -105,7 +105,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
             'billingCycle' => [
-                'anchor' => '2024-01-01T00:00:00Z',
+                'anchor' => '2024-01-01',
                 'length' => 1,
                 'unit' => 'MONTH',
             ],
@@ -235,7 +235,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
             'billingCycle' => [
-                'anchor' => '2024-01-01T00:00:00Z',
+                'anchor' => '2024-01-01',
                 'length' => 1,
                 'unit' => 'MONTH',
             ],
@@ -354,7 +354,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'UTC',
-            'billingCycle' => ['anchor' => '2024-01-01T00:00:00Z', 'length' => 1, 'unit' => 'MONTH'],
+            'billingCycle' => ['anchor' => '2024-01-01', 'length' => 1, 'unit' => 'MONTH'],
             'periods' => [[
                 'validFrom' => null,
                 'validTo' => null,
@@ -467,14 +467,14 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                 [
                     'validFrom' => null,
                     'validTo' => '2025-01-15T00:00:00Z',
-                    'anchor' => '2024-01-01T00:00:00Z',
+                    'anchor' => '2024-01-01',
                     'length' => 1,
                     'unit' => 'MONTH',
                 ],
                 [
                     'validFrom' => '2025-01-15T00:00:00Z',
                     'validTo' => null,
-                    'anchor' => '2025-01-15T00:00:00Z',
+                    'anchor' => '2025-01-15',
                     'length' => 1,
                     'unit' => 'MONTH',
                 ],

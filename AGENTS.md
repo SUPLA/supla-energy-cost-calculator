@@ -195,7 +195,7 @@ The caller may request any `TimeRange` (hour, day, week, month, arbitrary range,
 ```json
 {
   "billingCycle": {
-    "anchor": "2026-01-15T00:00:00+01:00",
+    "anchor": "2026-01-15",
     "length": 1,
     "unit": "MONTH"
   }

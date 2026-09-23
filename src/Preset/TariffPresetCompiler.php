@@ -113,6 +113,7 @@ final class TariffPresetCompiler
         return match ($type) {
             'DECIMAL' => $this->normalizeDecimal($value, $presetId, $inputId),
             'INTEGER' => $this->normalizeInteger($value, $input, $presetId, $inputId),
+            'DATE' => $this->normalizeDate($value, $presetId, $inputId),
             'DATETIME' => $this->normalizeDateTime($value, $presetId, $inputId),
             'TIME' => $this->normalizeTime($value, $presetId, $inputId),
             default => throw new TariffPresetCompilationException("Tariff preset '$presetId' input '$inputId' uses unsupported type '$type'."),
@@ -160,6 +161,20 @@ final class TariffPresetCompiler
             new \DateTimeImmutable($value);
         } catch (\Exception $e) {
             throw new TariffPresetCompilationException("Input '$inputId' for tariff preset '$presetId' contains invalid date-time.", previous: $e);
+        }
+        return $value;
+    }
+
+    private function normalizeDate(mixed $value, string $presetId, string $inputId): string
+    {
+        if (!is_string($value)) {
+            throw new TariffPresetCompilationException("Input '$inputId' for tariff preset '$presetId' must be an ISO-8601 date.");
+        }
+        $date = \DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+        $errors = \DateTimeImmutable::getLastErrors();
+        if ($date === false || ($errors !== false && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))
+            || $date->format('Y-m-d') !== $value) {
+            throw new TariffPresetCompilationException("Input '$inputId' for tariff preset '$presetId' must be an ISO-8601 date.");
         }
         return $value;
     }

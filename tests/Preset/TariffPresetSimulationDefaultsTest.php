@@ -29,7 +29,7 @@ final class TariffPresetSimulationDefaultsTest extends TestCase
             self::assertNotSame('', $simulation['supplier']['label'] ?? '', $preset->id);
             self::assertIsArray($simulation['values'] ?? null, $preset->id);
             self::assertNotEmpty($simulation['sources'] ?? [], $preset->id);
-            self::assertSame($preset->document['validFrom'], $simulation['values']['billingCycle.anchor'] ?? null, $preset->id);
+            self::assertSame(substr($preset->document['validFrom'], 0, 10), $simulation['values']['billingCycle.anchor'] ?? null, $preset->id);
 
             $inputs = [];
             foreach ($preset->document['inputs'] as $input) {

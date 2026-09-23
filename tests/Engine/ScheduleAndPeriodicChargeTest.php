@@ -125,7 +125,7 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
                 'rate' => ['type' => 'CONSTANT', 'value' => '10.00', 'unit' => 'PLN/month'],
             ],
         ], [
-            'anchor' => '2026-01-15T00:00:00+01:00',
+            'anchor' => '2026-01-15',
             'length' => 1,
             'unit' => 'MONTH',
         ]);
@@ -171,7 +171,7 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             'quantity' => ['type' => 'PERIOD', 'period' => 'BILLING_PERIOD', 'prorate' => false],
             'rate' => ['type' => 'CONSTANT', 'value' => '7.00', 'unit' => 'PLN/period'],
         ]], [
-            'anchor' => '2026-01-15T00:00:00+01:00',
+            'anchor' => '2026-01-15',
             'length' => 2,
             'unit' => 'MONTH',
         ]);

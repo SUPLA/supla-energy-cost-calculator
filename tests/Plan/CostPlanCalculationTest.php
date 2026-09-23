@@ -24,7 +24,7 @@ final class CostPlanCalculationTest extends TestCase
                 'validTo' => '2027-01-01T00:00:00+01:00',
                 'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
                 'values' => [
-                    'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+                    'billingCycle.anchor' => '2026-01-15',
                     'energy.rate' => '0.70',
                 ],
             ]],

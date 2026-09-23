@@ -20,7 +20,7 @@
     },
     "energyPriceBasis": "NET_WITH_EXCISE",
     "values": {
-      "billingCycle.anchor": "2026-01-01T00:00:00+01:00",
+      "billingCycle.anchor": "2026-01-01",
       "energy.RECOMMENDED_LIMITATION": "0.5030",
       "energy.OTHER": "0.5030",
       "energy.RECOMMENDED_CONSUMPTION": "0.5030"
@@ -41,7 +41,7 @@
     {
       "id": "billingCycle.anchor",
       "label": "Początek okresu rozliczeniowego",
-      "type": "DATETIME",
+      "type": "DATE",
       "required": true,
       "targets": [
         "/billingCycle/anchor"

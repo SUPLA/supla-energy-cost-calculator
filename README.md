@@ -51,7 +51,7 @@ A billing definition may declare an anchor and cycle length:
 ```json
 {
   "billingCycle": {
-    "anchor": "2026-01-15T00:00:00+01:00",
+    "anchor": "2026-01-15",
     "length": 1,
     "unit": "MONTH"
   }
@@ -68,14 +68,14 @@ If invoice boundaries change over time, use `billingCycles[]` instead of `billin
     {
       "validFrom": null,
       "validTo": "2026-07-01T00:00:00+02:00",
-      "anchor": "2026-01-15T00:00:00+01:00",
+      "anchor": "2026-01-15",
       "length": 1,
       "unit": "MONTH"
     },
     {
       "validFrom": "2026-07-01T00:00:00+02:00",
       "validTo": null,
-      "anchor": "2026-07-01T00:00:00+02:00",
+      "anchor": "2026-07-01",
       "length": 1,
       "unit": "MONTH"
     }
@@ -195,7 +195,7 @@ $plan = [
         'validTo' => '2027-01-01T00:00:00+01:00',
         'presetId' => 'PL.TAURON_DYSTRYBUCJA.G12.2026',
         'values' => [
-            'billingCycle.anchor' => '2026-01-15T00:00:00+01:00',
+            'billingCycle.anchor' => '2026-01-15',
             'energy.DAY' => '0.98',
             'energy.NIGHT' => '0.62',
         ],

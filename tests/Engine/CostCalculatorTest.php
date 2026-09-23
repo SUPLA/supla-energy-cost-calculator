@@ -114,7 +114,7 @@ final class CostCalculatorTest extends TestCase
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
             'billingCycle' => [
-                'anchor' => '2026-01-15T00:00:00+01:00',
+                'anchor' => '2026-01-15',
                 'length' => 1,
                 'unit' => 'MONTH',
             ],
@@ -354,14 +354,14 @@ final class CostCalculatorTest extends TestCase
                 [
                     'validFrom' => null,
                     'validTo' => '2026-07-01T00:00:00+02:00',
-                    'anchor' => '2026-01-15T00:00:00+01:00',
+                    'anchor' => '2026-01-15',
                     'length' => 1,
                     'unit' => 'MONTH',
                 ],
                 [
                     'validFrom' => '2026-07-01T00:00:00+02:00',
                     'validTo' => null,
-                    'anchor' => '2026-07-01T00:00:00+02:00',
+                    'anchor' => '2026-07-01',
                     'length' => 1,
                     'unit' => 'MONTH',
                 ],
@@ -438,14 +438,14 @@ final class CostCalculatorTest extends TestCase
                 [
                     'validFrom' => null,
                     'validTo' => '2026-07-01T00:00:00+02:00',
-                    'anchor' => '2026-01-15T00:00:00+01:00',
+                    'anchor' => '2026-01-15',
                     'length' => 1,
                     'unit' => 'MONTH',
                 ],
                 [
                     'validFrom' => '2026-07-01T00:00:00+02:00',
                     'validTo' => null,
-                    'anchor' => '2026-07-01T00:00:00+02:00',
+                    'anchor' => '2026-07-01',
                     'length' => 1,
                     'unit' => 'MONTH',
                 ],
