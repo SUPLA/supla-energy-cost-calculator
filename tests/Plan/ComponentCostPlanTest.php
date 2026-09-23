@@ -75,7 +75,6 @@ final class ComponentCostPlanTest extends TestCase
         $json = json_encode($this->plan(), JSON_THROW_ON_ERROR);
         $plan = (new CostPlanDefinitionParser())->parse($json);
 
-        self::assertSame(2, $plan->version);
         self::assertCount(2, $plan->periods);
         self::assertSame(CostComponentKind::ENERGY_PURCHASE, $plan->periods[0]->components[0]->kind);
         self::assertSame('NET', $plan->priceBasis);
@@ -89,6 +88,16 @@ final class ComponentCostPlanTest extends TestCase
         $this->expectException(CostPlanDefinitionException::class);
         $this->expectExceptionMessage('billingCycles[0].anchor must be an ISO-8601 date');
         (new CostPlanDefinitionParser())->parse($plan);
+    }
+
+    public function testRejectsLegacyEntryPlan(): void
+    {
+        $this->expectException(CostPlanDefinitionException::class);
+        $this->expectExceptionMessage('Cost plan version must be 2');
+        (new CostPlanDefinitionParser())->parse([
+            'version' => 1,
+            'entries' => [],
+        ]);
     }
 
     public function testRejectsPresetComponentAssignedToWrongKind(): void

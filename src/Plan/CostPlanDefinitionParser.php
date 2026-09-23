@@ -20,64 +20,11 @@ final class CostPlanDefinitionParser
             throw new CostPlanDefinitionException('Cost plan must be a JSON object.');
         }
 
-        if (($data['version'] ?? null) === 2) {
-            return $this->parseComponentPlan($data);
+        if (($data['version'] ?? null) !== 2) {
+            throw new CostPlanDefinitionException('Cost plan version must be 2.');
         }
 
-        foreach (array_keys($data) as $key) {
-            if (!in_array($key, ['version', 'entries'], true)) {
-                throw new CostPlanDefinitionException("Cost plan contains unsupported field '$key'.");
-            }
-        }
-
-        $version = $data['version'] ?? null;
-        if ($version !== 1) {
-            throw new CostPlanDefinitionException('Cost plan version must be 1.');
-        }
-
-        $rawEntries = $data['entries'] ?? null;
-        if (!is_array($rawEntries) || !array_is_list($rawEntries) || $rawEntries === []) {
-            throw new CostPlanDefinitionException('Cost plan entries must be a non-empty array.');
-        }
-
-        $entries = [];
-        foreach ($rawEntries as $index => $rawEntry) {
-            if (!is_array($rawEntry) || array_is_list($rawEntry)) {
-                throw new CostPlanDefinitionException("entries[$index] must be an object.");
-            }
-
-            $validFrom = $this->optionalDate($rawEntry['validFrom'] ?? null, "entries[$index].validFrom");
-            $validTo = $this->optionalDate($rawEntry['validTo'] ?? null, "entries[$index].validTo");
-            if ($validFrom !== null && $validTo !== null && $validFrom >= $validTo) {
-                throw new CostPlanDefinitionException("entries[$index].validFrom must be before validTo.");
-            }
-
-            $presetId = $rawEntry['presetId'] ?? null;
-            if (!is_string($presetId) || trim($presetId) === '') {
-                throw new CostPlanDefinitionException("entries[$index].presetId must be a non-empty string.");
-            }
-
-            $values = $rawEntry['values'] ?? null;
-            if (!is_array($values)) {
-                throw new CostPlanDefinitionException("entries[$index].values must be an object.");
-            }
-            foreach (array_keys($values) as $key) {
-                if (!is_string($key) || trim($key) === '') {
-                    throw new CostPlanDefinitionException("entries[$index].values keys must be non-empty strings.");
-                }
-            }
-
-            $allowedKeys = ['validFrom' => true, 'validTo' => true, 'presetId' => true, 'values' => true];
-            foreach (array_keys($rawEntry) as $key) {
-                if (!isset($allowedKeys[$key])) {
-                    throw new CostPlanDefinitionException("entries[$index] contains unsupported field '$key'.");
-                }
-            }
-
-            $entries[] = new CostPlanEntry($validFrom, $validTo, $presetId, $values);
-        }
-
-        return new CostPlanDefinition($version, $entries);
+        return $this->parseComponentPlan($data);
     }
 
     /** @param array<string, mixed> $data */
@@ -176,7 +123,7 @@ final class CostPlanDefinitionParser
             $periods[] = new CostPlanPeriod($from, $to, $components);
         }
 
-        return new CostPlanDefinition(2, [], $cycles, $currency, $timezone, $basis, $periods);
+        return new CostPlanDefinition($cycles, $currency, $timezone, $basis, $periods);
     }
 
     /** @param array<string, mixed> $data @param list<string> $allowed */
@@ -187,17 +134,6 @@ final class CostPlanDefinitionParser
                 throw new CostPlanDefinitionException("$path contains unsupported field '$key'.");
             }
         }
-    }
-
-    private function optionalDate(mixed $value, string $path): ?\DateTimeImmutable
-    {
-        if ($value === null) {
-            return null;
-        }
-        if (!is_string($value) || trim($value) === '') {
-            throw new CostPlanDefinitionException("$path must be an ISO-8601 date-time string or null.");
-        }
-        return $this->parseDate($value, $path);
     }
 
     private function parseDate(mixed $value, string $path): \DateTimeImmutable

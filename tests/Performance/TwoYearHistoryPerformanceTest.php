@@ -15,6 +15,7 @@ use Supla\EnergyCostCalculator\Model\ReferenceDataId;
 use Supla\EnergyCostCalculator\Model\ReferenceInterval;
 use Supla\EnergyCostCalculator\Model\QuantityType;
 use Supla\EnergyCostCalculator\Model\TimeRange;
+use Supla\EnergyCostCalculator\Plan\CostPlanCompiler;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
 
 #[Group('performance')]
@@ -76,6 +77,73 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             self::MAX_CALCULATION_TIME_SECONDS,
             $elapsedSeconds,
             sprintf('Two-year cost calculation took %.3f seconds.', $elapsedSeconds),
+        );
+    }
+
+    public function testCalculatesPresetComposedHistory(): void
+    {
+        $range = new TimeRange(
+            new \DateTimeImmutable('2025-12-31T23:00:00Z'),
+            new \DateTimeImmutable('2026-12-31T23:00:00Z'),
+        );
+        $deltaSource = new class implements EnergyDeltaSource {
+            public function getDeltas(string $meterId, TimeRange $range): iterable
+            {
+                $from = $range->from;
+                while ($from < $range->to) {
+                    $to = $from->add(new \DateInterval('PT15M'));
+                    yield new EnergyDelta($from, $to, [
+                        QuantityType::ACTIVE_ENERGY_IMPORT->value => '0.25',
+                    ]);
+                    $from = $to;
+                }
+            }
+        };
+        $definition = (new CostPlanCompiler())->compile([
+            'version' => 2,
+            'currency' => 'PLN',
+            'timezone' => 'Europe/Warsaw',
+            'priceBasis' => 'NET',
+            'billingCycles' => [[
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => '2027-01-01T00:00:00+01:00',
+                'anchor' => '2026-01-01',
+                'length' => 1,
+                'unit' => 'MONTH',
+            ]],
+            'periods' => [[
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => '2027-01-01T00:00:00+01:00',
+                'components' => [
+                    [
+                        'kind' => 'ENERGY_PURCHASE',
+                        'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
+                        'componentId' => 'energy-purchase',
+                        'values' => ['energy.rate' => '0.71'],
+                    ],
+                    [
+                        'kind' => 'DISTRIBUTION_VARIABLE',
+                        'presetId' => 'PL.ENERGA_OPERATOR.G12.2026',
+                        'componentId' => 'distribution-variable',
+                        'values' => [],
+                    ],
+                ],
+            ]],
+        ]);
+        $calculator = new CostCalculator($deltaSource, new InMemoryReferenceDataSource());
+
+        $startedAt = hrtime(true);
+        $result = $calculator->calculate('meter', $range, $definition);
+        $elapsedSeconds = (hrtime(true) - $startedAt) / 1_000_000_000;
+
+        self::assertSame(35_040, $result->processedDeltaCount);
+        self::assertSame('8760', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
+        self::assertArrayHasKey('energy-purchase', $result->usageBasedByComponent);
+        self::assertArrayHasKey('distribution-variable', $result->usageBasedByComponent);
+        self::assertLessThan(
+            self::MAX_CALCULATION_TIME_SECONDS,
+            $elapsedSeconds,
+            sprintf('Preset-composed calculation took %.3f seconds.', $elapsedSeconds),
         );
     }
 
