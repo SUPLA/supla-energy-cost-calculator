@@ -4,7 +4,7 @@ These files are UI-oriented starting points for building a calculator `BillingDe
 
 ## Scope
 
-The preset describes the selected Polish distribution tariff group (OSD) and provides editable 2026 net defaults for the variable distribution rate. It also contains a minimal `energy-purchase` component so the first UI can produce a complete calculator definition. Energy sale prices are always user inputs. Fixed network fees, subscription fees, quality/OZE/cogeneration/capacity charges, phase-dependent fees and tax are intentionally outside this first preset set.
+The preset describes the selected Polish distribution tariff group (OSD) and provides editable 2026 net defaults for the variable distribution rate. It also contains a minimal `energy-purchase` component so the first UI can produce a complete calculator definition. Energy sale prices remain user-specific inputs for persisted plans, while `simulationDefaults` provides documented seller-tariff suggestions for transient zero-input simulations. Fixed network fees, subscription fees, quality/OZE/cogeneration/capacity charges, phase-dependent fees and tax are intentionally outside this first preset set.
 
 The `energy-purchase` component in G12/G13 examples mirrors the distribution zones as a UI convenience. Supply and distribution are independent in the calculator. If the user's seller uses a different price structure, the frontend should replace the energy component instead of changing the distribution selector. G14dynamic illustrates this explicitly: PDGSZ controls only the distribution component, while the example energy component is a separate constant user rate.
 
@@ -21,6 +21,8 @@ All bundled distribution defaults are **net PLN/kWh** and can be overwritten by 
 Do not persist a copied preset template as the authoritative user plan. Compatible corrections to an existing preset ID are intentionally picked up the next time the plan is compiled. A real tariff change is published under a new preset ID and should become a new cost-plan entry.
 
 Values already present in the preset template are inherited when omitted from `values`. Frontends should therefore avoid blindly persisting every initial form value: persist required user-specific values and fields the user actually overrides. This is what lets a corrected package default flow into existing plans.
+
+For a transient comparison, a frontend may start from `simulationDefaults.values` and then apply optional simulation-only user changes. Do not persist these suggestions as if the user explicitly selected them. `simulationDefaults` also records the assumed supplier, price basis, assumptions and source documents. The bundled energy-price suggestions are net prices including the 5 PLN/MWh excise and excluding VAT. The suggested billing anchor equals the preset `validFrom`; it exists only to make a simulation deterministic when the user's real invoice anchor is unknown.
 
 `TariffPresetCompiler` owns input validation and JSON Pointer application. `apply-preset.js` remains only a dependency-free illustration of the pointer mechanics. `compiled-examples/` contains four synthetic, fully filled BillingDefinition results for G11, G12, G13 and G14dynamic. The energy prices in those compiled files are examples only.
 

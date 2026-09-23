@@ -207,6 +207,8 @@ $definition = (new CostPlanCompiler())->compile($plan);
 
 The cost-plan JSON stores stable preset IDs and user values/overrides, not a copied executable definition. Compiling later uses the current document for the same preset ID, so package-owned corrections automatically apply to existing plans. Omit preset-default values from `values` unless the user explicitly overrides them; this preserves inheritance of corrected defaults. Adjacent plan entries with the same billing-cycle configuration are merged on the billing-cycle timeline, so a price-only change does not create an artificial invoice boundary. See `schema/cost-plan.schema.json` and `docs/cost-plans.md`.
 
+For zero-input tariff comparisons, bundled presets also expose optional `simulationDefaults`. These are suggested values for transient simulations only; they do not become normal preset defaults and `TariffPresetCompiler` does not apply them automatically. The bundled 2026 presets use the standard seller naturally associated with each OSD, net energy prices including excise and excluding VAT, plus a deterministic billing-cycle anchor at the preset validity start. A host may merge `simulationDefaults.values` into a transient cost-plan entry before compiling a simulation. Sources and assumptions are included in the preset document.
+
 These presets intentionally cover only the first UI scope: energy purchase input, variable distribution component, tariff-zone schedule and billing cycle. Fixed/phase-dependent/statutory charges are not baked into the presets. See `examples/tariff-presets/README.md`.
 
 ## SUPLA integration

@@ -72,6 +72,9 @@
         "GROSS"
       ]
     },
+    "simulationDefaults": {
+      "$ref": "#/$defs/simulationDefaults"
+    },
     "inputs": {
       "type": "array",
       "minItems": 1,
@@ -161,6 +164,98 @@
         "help": {
           "type": "string",
           "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "title",
+        "url",
+        "retrievedAt"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "retrievedAt": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "additionalProperties": false
+    },
+    "simulationDefaults": {
+      "type": "object",
+      "required": [
+        "basis",
+        "supplier",
+        "energyPriceBasis",
+        "values",
+        "sources"
+      ],
+      "properties": {
+        "basis": {
+          "const": "STANDARD_SUPPLIER_TARIFF"
+        },
+        "supplier": {
+          "type": "object",
+          "required": [
+            "id",
+            "label"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "energyPriceBasis": {
+          "enum": [
+            "NET_WITH_EXCISE",
+            "NET_WITHOUT_EXCISE",
+            "GROSS"
+          ]
+        },
+        "values": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "type": "string",
+            "minLength": 1
+          },
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number"
+            ]
+          }
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/source"
+          }
         }
       },
       "additionalProperties": false

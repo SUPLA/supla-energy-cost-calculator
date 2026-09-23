@@ -12,6 +12,29 @@
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
   "priceBasis": "NET",
+  "simulationDefaults": {
+    "basis": "STANDARD_SUPPLIER_TARIFF",
+    "supplier": {
+      "id": "ENERGA_OBROT",
+      "label": "ENERGA-OBRÓT"
+    },
+    "energyPriceBasis": "NET_WITH_EXCISE",
+    "values": {
+      "billingCycle.anchor": "2026-01-01T00:00:00+01:00",
+      "energy.rate": "0.5018"
+    },
+    "assumptions": [
+      "billingCycle.anchor jest ustawiony na początek ważności presetu wyłącznie jako deterministyczne założenie do symulacji bez danych z faktury użytkownika.",
+      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
+    ],
+    "sources": [
+      {
+        "title": "Taryfa ENERGA-OBRÓT dla odbiorców z grup taryfowych G na 2026 r.",
+        "url": "https://www.energa.pl/dam/jcr%3A1f730159-7aab-4815-8a17-e0f6f0a6a223/Taryfa%20ENERGA-OBR%C3%93T%20S.A.%20dla%20energii%20elektrycznej%20obowi%C4%85zuj%C4%85ca%20od%201.01.pdf",
+        "retrievedAt": "2026-09-23"
+      }
+    ]
+  },
   "inputs": [
     {
       "id": "billingCycle.anchor",

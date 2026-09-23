@@ -12,6 +12,30 @@
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
   "priceBasis": "NET",
+  "simulationDefaults": {
+    "basis": "STANDARD_SUPPLIER_TARIFF",
+    "supplier": {
+      "id": "EON_POLSKA",
+      "label": "E.ON Polska"
+    },
+    "energyPriceBasis": "NET_WITH_EXCISE",
+    "values": {
+      "billingCycle.anchor": "2026-01-01T00:00:00+01:00",
+      "energy.DAY": "0.5394",
+      "energy.NIGHT": "0.4295"
+    },
+    "assumptions": [
+      "billingCycle.anchor jest ustawiony na początek ważności presetu wyłącznie jako deterministyczne założenie do symulacji bez danych z faktury użytkownika.",
+      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
+    ],
+    "sources": [
+      {
+        "title": "Taryfa E.ON Polska dla grup taryfowych G obowiązująca od 1 stycznia 2026 r.",
+        "url": "https://eon.pl/-/media/eon/dokumenty/dla-domu/taryfa-energii-elektrycznej-eon-polska-sa-dla-grup-taryfowych-g--obowizuje-od-dnia-01_01_2026.ashx",
+        "retrievedAt": "2026-09-23"
+      }
+    ]
+  },
   "inputs": [
     {
       "id": "billingCycle.anchor",
