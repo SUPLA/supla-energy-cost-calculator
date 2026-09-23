@@ -1,17 +1,17 @@
 ---
 kind: secret
 name: rocket_url
-data: j5lwLudVn5dvTbvimI0akSKWvmEshn5/DXs85oHjAFPz47Wo6wcUExrI34jh09q+zGVXdw==
+data: 94NqJOFYW/aTpiMBqTYtneg+gndYV7lzlln1gddzNCNRj1lUCBekLd9uu1VQ40PnIg1jIQ==
 
 ---
 kind: secret
 name: rocket_user
-data: H8zcywiTRXuhdyhWwbxPt72rSL8L/RLfntVRRDYU9HH+idBdocrbDfjYESzn
+data: Jr0kh5fcITYxUhBTcl8IyMKRgFyLLW7ETZXTYDz7GMOFTq51W+w+dLgjjALW
 
 ---
 kind: secret
 name: rocket_token
-data: vqcfI76p/0S34u6I3jXDX9b6Prgp0LLHhkG/O0TleQ8E33WVFbMaQXKaDtHcjP/9EWycO++JGe0wFAcGvUzHIDilRAWzL68=
+data: pLYmJU/8SzADQ6kEuvOe2k+Jb0z+CZButPa/wsulcwJrBHcGc9Zq+HagMiHzRh5oQ4/zRchlHDZcVV++pJroHvqECHrnaD4=
 
 ---
 kind: pipeline
