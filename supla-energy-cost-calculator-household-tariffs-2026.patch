@@ -1,0 +1,3507 @@
+diff --git a/docs/polish-tariff-coverage.md b/docs/polish-tariff-coverage.md
+new file mode 100644
+index 0000000..434f36a
+--- /dev/null
++++ b/docs/polish-tariff-coverage.md
+@@ -0,0 +1,27 @@
++# Polish household tariff coverage
++
++The bundled catalogue focuses on current household groups that can be represented faithfully by the existing selector/rate/quantity DSL. A starter is provided when there is a sensible incumbent-supplier + OSD default combination.
++
++## Bundled simple paths for 2026
++
++| OSD | Starter tariff groups |
++| --- | --- |
++| TAURON Dystrybucja | G11, G12, G12w, G13, G14dynamic |
++| PGE Dystrybucja | G11, G12, G12w, G12n |
++| ENEA Operator | G11, G12, G12w, G12sezON, G13active |
++| Energa-Operator | G11, G12, G12w, G12r |
++| Stoen Operator | G11, G12, G12w |
++
++G12w is operator-specific: the inexpensive weekend/holiday zone is common, but weekday hours differ. PGE additionally changes its two-hour off-peak window seasonally. Each OSD therefore has its own G12w preset rather than a shared schedule.
++
++ENEA G12sezON reuses `PL.ENEA.G11.2026` for the starter's energy-purchase component. In ENEA's standard 2026 tariff both G12sezON energy zones have the same `0.5030 PLN/kWh` net price as G11, while distribution remains genuinely time-dependent.
++
++## Intentionally not bundled as simple defaults
++
++- **G12as** (multiple OSDs): the discounted quantity depends on consumption in the analogous period of the previous year. The current DSL intentionally has no history-dependent quantity baseline.
++- **PGE G12e**: the 2026 tariff has an area-dependent variant whose time zones are published separately by the operator. A single nationwide preset would be misleading; model this only after the applicable area/schedule becomes explicit configuration.
++- **TAURON G13s**: the distribution schedule is representable (season + workday/free-day + three zones), but there is no bundled incumbent-supply mapping in this catalogue yet. It can be added later as an advanced distribution-only preset without changing the DSL.
++- **Stoen G12eko**: introduced for use from October 2026 and not included in the simple starter set yet. Add it together with a deliberate supply/default-product decision rather than guessing one.
++- **Energa G11f** and offer-specific smart/dynamic products: keep these as named offers when their actual price source and contract semantics are known instead of treating the group name alone as a complete price definition.
++
++This coverage list is deliberately narrower than the set of all group names published by Polish OSDs. Missing groups should be added when their calculation semantics and a useful default composition are unambiguous; they should not be approximated with a superficially similar schedule.
+diff --git a/resources/cost-plan-starters/index.json b/resources/cost-plan-starters/index.json
+index 7a07370..7f6cd87 100644
+--- a/resources/cost-plan-starters/index.json
++++ b/resources/cost-plan-starters/index.json
+@@ -93,6 +93,29 @@
+         }
+       ]
+     },
++    {
++      "id": "PL.STARTER.TAURON_DYSTRYBUCJA.G12w",
++      "label": "TAURON Dystrybucja - G12w",
++      "operator": {
++        "id": "TAURON_DYSTRYBUCJA",
++        "label": "TAURON Dystrybucja"
++      },
++      "tariffGroup": "G12w",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "presetId": "PL.TAURON_SPRZEDAZ.G12w.2026",
++          "componentId": "energy-purchase",
++          "values": {}
++        },
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "presetId": "PL.TAURON_DYSTRYBUCJA.G12w.2026",
++          "componentId": "distribution-variable",
++          "values": {}
++        }
++      ]
++    },
+     {
+       "id": "PL.STARTER.PGE_DYSTRYBUCJA.G11",
+       "label": "PGE Dystrybucja - G11",
+@@ -139,6 +162,52 @@
+         }
+       ]
+     },
++    {
++      "id": "PL.STARTER.PGE_DYSTRYBUCJA.G12w",
++      "label": "PGE Dystrybucja - G12w",
++      "operator": {
++        "id": "PGE_DYSTRYBUCJA",
++        "label": "PGE Dystrybucja"
++      },
++      "tariffGroup": "G12w",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "presetId": "PL.PGE_OBROT.G12w.2026",
++          "componentId": "energy-purchase",
++          "values": {}
++        },
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "presetId": "PL.PGE_DYSTRYBUCJA.G12w.2026",
++          "componentId": "distribution-variable",
++          "values": {}
++        }
++      ]
++    },
++    {
++      "id": "PL.STARTER.PGE_DYSTRYBUCJA.G12n",
++      "label": "PGE Dystrybucja - G12n",
++      "operator": {
++        "id": "PGE_DYSTRYBUCJA",
++        "label": "PGE Dystrybucja"
++      },
++      "tariffGroup": "G12n",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "presetId": "PL.PGE_OBROT.G12n.2026",
++          "componentId": "energy-purchase",
++          "values": {}
++        },
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "presetId": "PL.PGE_DYSTRYBUCJA.G12n.2026",
++          "componentId": "distribution-variable",
++          "values": {}
++        }
++      ]
++    },
+     {
+       "id": "PL.STARTER.ENEA_OPERATOR.G11",
+       "label": "ENEA Operator - G11",
+@@ -208,6 +277,52 @@
+         }
+       ]
+     },
++    {
++      "id": "PL.STARTER.ENEA_OPERATOR.G12w",
++      "label": "ENEA Operator - G12w",
++      "operator": {
++        "id": "ENEA_OPERATOR",
++        "label": "ENEA Operator"
++      },
++      "tariffGroup": "G12w",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "presetId": "PL.ENEA.G12w.2026",
++          "componentId": "energy-purchase",
++          "values": {}
++        },
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "presetId": "PL.ENEA_OPERATOR.G12w.2026",
++          "componentId": "distribution-variable",
++          "values": {}
++        }
++      ]
++    },
++    {
++      "id": "PL.STARTER.ENEA_OPERATOR.G12sezON",
++      "label": "ENEA Operator - G12sezON",
++      "operator": {
++        "id": "ENEA_OPERATOR",
++        "label": "ENEA Operator"
++      },
++      "tariffGroup": "G12sezON",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "presetId": "PL.ENEA.G11.2026",
++          "componentId": "energy-purchase",
++          "values": {}
++        },
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "presetId": "PL.ENEA_OPERATOR.G12sezON.2026",
++          "componentId": "distribution-variable",
++          "values": {}
++        }
++      ]
++    },
+     {
+       "id": "PL.STARTER.ENERGA_OPERATOR.G11",
+       "label": "Energa-Operator - G11",
+@@ -254,6 +369,52 @@
+         }
+       ]
+     },
++    {
++      "id": "PL.STARTER.ENERGA_OPERATOR.G12w",
++      "label": "Energa-Operator - G12w",
++      "operator": {
++        "id": "ENERGA_OPERATOR",
++        "label": "Energa-Operator"
++      },
++      "tariffGroup": "G12w",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "presetId": "PL.ENERGA_OBROT.G12w.2026",
++          "componentId": "energy-purchase",
++          "values": {}
++        },
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "presetId": "PL.ENERGA_OPERATOR.G12w.2026",
++          "componentId": "distribution-variable",
++          "values": {}
++        }
++      ]
++    },
++    {
++      "id": "PL.STARTER.ENERGA_OPERATOR.G12r",
++      "label": "Energa-Operator - G12r",
++      "operator": {
++        "id": "ENERGA_OPERATOR",
++        "label": "Energa-Operator"
++      },
++      "tariffGroup": "G12r",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "presetId": "PL.ENERGA_OBROT.G12r.2026",
++          "componentId": "energy-purchase",
++          "values": {}
++        },
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "presetId": "PL.ENERGA_OPERATOR.G12r.2026",
++          "componentId": "distribution-variable",
++          "values": {}
++        }
++      ]
++    },
+     {
+       "id": "PL.STARTER.STOEN_OPERATOR.G11",
+       "label": "Stoen Operator - G11",
+@@ -299,6 +460,29 @@
+           "values": {}
+         }
+       ]
++    },
++    {
++      "id": "PL.STARTER.STOEN_OPERATOR.G12w",
++      "label": "Stoen Operator - G12w",
++      "operator": {
++        "id": "STOEN_OPERATOR",
++        "label": "Stoen Operator"
++      },
++      "tariffGroup": "G12w",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "presetId": "PL.EON_POLSKA.G12w.2026",
++          "componentId": "energy-purchase",
++          "values": {}
++        },
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "presetId": "PL.STOEN_OPERATOR.G12w.2026",
++          "componentId": "distribution-variable",
++          "values": {}
++        }
++      ]
+     }
+   ]
+ }
+diff --git a/resources/tariff-presets/PL/2026/distribution/ENEA_OPERATOR/G12sezON.json b/resources/tariff-presets/PL/2026/distribution/ENEA_OPERATOR/G12sezON.json
+new file mode 100644
+index 0000000..0c98781
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/distribution/ENEA_OPERATOR/G12sezON.json
+@@ -0,0 +1,200 @@
++{
++  "version": 1,
++  "id": "PL.ENEA_OPERATOR.G12sezON.2026",
++  "label": "ENEA Operator - G12sezON",
++  "presetType": "TARIFF",
++  "components": [
++    {
++      "kind": "DISTRIBUTION_VARIABLE",
++      "componentId": "distribution-variable",
++      "label": "Dystrybucja zmienna"
++    }
++  ],
++  "provider": {
++    "id": "ENEA_OPERATOR",
++    "label": "ENEA Operator"
++  },
++  "operator": {
++    "id": "ENEA_OPERATOR",
++    "label": "ENEA Operator"
++  },
++  "tariffGroup": "G12sezON",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "inputs": [
++    {
++      "id": "distribution.OTHER",
++      "label": "Dystrybucja - Pozostałe godziny doby",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/OTHER"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "distribution.RECOMMENDED_CONSUMPTION",
++      "label": "Dystrybucja - Zalecany pobór",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/RECOMMENDED_CONSUMPTION"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "distribution-variable",
++            "category": "NETWORK",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "RECOMMENDED_CONSUMPTION",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "04:00",
++                      "to": "06:00"
++                    },
++                    {
++                      "from": "09:00",
++                      "to": "17:00"
++                    }
++                  ],
++                  "season": "SUMMER"
++                },
++                {
++                  "zone": "OTHER",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "09:00"
++                    },
++                    {
++                      "from": "17:00",
++                      "to": "04:00"
++                    }
++                  ],
++                  "season": "SUMMER"
++                },
++                {
++                  "zone": "RECOMMENDED_CONSUMPTION",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    },
++                    {
++                      "from": "11:00",
++                      "to": "13:00"
++                    }
++                  ],
++                  "season": "WINTER"
++                },
++                {
++                  "zone": "OTHER",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "11:00"
++                    },
++                    {
++                      "from": "13:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "season": "WINTER"
++                }
++              ],
++              "seasons": [
++                {
++                  "id": "SUMMER",
++                  "from": "--04-01",
++                  "to": "--10-01"
++                },
++                {
++                  "id": "WINTER",
++                  "from": "--10-01",
++                  "to": "--04-01"
++                }
++              ]
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "OTHER": "0.2779",
++                "RECOMMENDED_CONSUMPTION": "0.0913"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa ENEA Operator na 2026 r.",
++    "url": "https://www.operator.enea.pl/sites/operator/files/dokumenty/Enea%20Operator_wyci%C4%85g%20z%20taryfy_01.01.2026-31.12.2026.pdf",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/distribution/ENEA_OPERATOR/G12w.json b/resources/tariff-presets/PL/2026/distribution/ENEA_OPERATOR/G12w.json
+new file mode 100644
+index 0000000..742418c
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/distribution/ENEA_OPERATOR/G12w.json
+@@ -0,0 +1,158 @@
++{
++  "version": 1,
++  "id": "PL.ENEA_OPERATOR.G12w.2026",
++  "label": "ENEA Operator - G12w",
++  "presetType": "TARIFF",
++  "components": [
++    {
++      "kind": "DISTRIBUTION_VARIABLE",
++      "componentId": "distribution-variable",
++      "label": "Dystrybucja zmienna"
++    }
++  ],
++  "provider": {
++    "id": "ENEA_OPERATOR",
++    "label": "ENEA Operator"
++  },
++  "operator": {
++    "id": "ENEA_OPERATOR",
++    "label": "ENEA Operator"
++  },
++  "tariffGroup": "G12w",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "inputs": [
++    {
++      "id": "distribution.DAY",
++      "label": "Dystrybucja - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "distribution.NIGHT",
++      "label": "Dystrybucja - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "distribution-variable",
++            "category": "NETWORK",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "21:00",
++                      "to": "06:00"
++                    }
++                  ],
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "21:00"
++                    }
++                  ],
++                  "priority": 500
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.2702",
++                "NIGHT": "0.0813"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa ENEA Operator na 2026 r.",
++    "url": "https://www.operator.enea.pl/sites/operator/files/dokumenty/Enea%20Operator_wyci%C4%85g%20z%20taryfy_01.01.2026-31.12.2026.pdf",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/distribution/ENERGA_OPERATOR/G12r.json b/resources/tariff-presets/PL/2026/distribution/ENERGA_OPERATOR/G12r.json
+new file mode 100644
+index 0000000..8dbc40c
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/distribution/ENERGA_OPERATOR/G12r.json
+@@ -0,0 +1,140 @@
++{
++  "version": 1,
++  "id": "PL.ENERGA_OPERATOR.G12r.2026",
++  "label": "Energa-Operator - G12r",
++  "presetType": "TARIFF",
++  "components": [
++    {
++      "kind": "DISTRIBUTION_VARIABLE",
++      "componentId": "distribution-variable",
++      "label": "Dystrybucja zmienna"
++    }
++  ],
++  "provider": {
++    "id": "ENERGA_OPERATOR",
++    "label": "Energa-Operator"
++  },
++  "operator": {
++    "id": "ENERGA_OPERATOR",
++    "label": "Energa-Operator"
++  },
++  "tariffGroup": "G12r",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "inputs": [
++    {
++      "id": "distribution.DAY",
++      "label": "Dystrybucja - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "distribution.NIGHT",
++      "label": "Dystrybucja - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "distribution-variable",
++            "category": "NETWORK",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "07:00"
++                    },
++                    {
++                      "from": "13:00",
++                      "to": "16:00"
++                    }
++                  ]
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "07:00",
++                      "to": "13:00"
++                    },
++                    {
++                      "from": "16:00",
++                      "to": "22:00"
++                    }
++                  ]
++                }
++              ]
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.3640",
++                "NIGHT": "0.0882"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa Energa-Operator na 2026 r.",
++    "url": "https://cdn-netpr.pl/file/mediakit/2933024/8/20251217_taryfa_2026.pdf",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/distribution/ENERGA_OPERATOR/G12w.json b/resources/tariff-presets/PL/2026/distribution/ENERGA_OPERATOR/G12w.json
+new file mode 100644
+index 0000000..27e2267
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/distribution/ENERGA_OPERATOR/G12w.json
+@@ -0,0 +1,166 @@
++{
++  "version": 1,
++  "id": "PL.ENERGA_OPERATOR.G12w.2026",
++  "label": "Energa-Operator - G12w",
++  "presetType": "TARIFF",
++  "components": [
++    {
++      "kind": "DISTRIBUTION_VARIABLE",
++      "componentId": "distribution-variable",
++      "label": "Dystrybucja zmienna"
++    }
++  ],
++  "provider": {
++    "id": "ENERGA_OPERATOR",
++    "label": "Energa-Operator"
++  },
++  "operator": {
++    "id": "ENERGA_OPERATOR",
++    "label": "Energa-Operator"
++  },
++  "tariffGroup": "G12w",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "inputs": [
++    {
++      "id": "distribution.DAY",
++      "label": "Dystrybucja - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "distribution.NIGHT",
++      "label": "Dystrybucja - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "distribution-variable",
++            "category": "NETWORK",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    },
++                    {
++                      "from": "13:00",
++                      "to": "15:00"
++                    }
++                  ],
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "13:00"
++                    },
++                    {
++                      "from": "15:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "priority": 500
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.4017",
++                "NIGHT": "0.0851"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa Energa-Operator na 2026 r.",
++    "url": "https://cdn-netpr.pl/file/mediakit/2933024/8/20251217_taryfa_2026.pdf",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/distribution/PGE_DYSTRYBUCJA/G12n.json b/resources/tariff-presets/PL/2026/distribution/PGE_DYSTRYBUCJA/G12n.json
+new file mode 100644
+index 0000000..501d360
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/distribution/PGE_DYSTRYBUCJA/G12n.json
+@@ -0,0 +1,163 @@
++{
++  "version": 1,
++  "id": "PL.PGE_DYSTRYBUCJA.G12n.2026",
++  "label": "PGE Dystrybucja - G12n",
++  "presetType": "TARIFF",
++  "components": [
++    {
++      "kind": "DISTRIBUTION_VARIABLE",
++      "componentId": "distribution-variable",
++      "label": "Dystrybucja zmienna"
++    }
++  ],
++  "provider": {
++    "id": "PGE_DYSTRYBUCJA",
++    "label": "PGE Dystrybucja"
++  },
++  "operator": {
++    "id": "PGE_DYSTRYBUCJA",
++    "label": "PGE Dystrybucja"
++  },
++  "tariffGroup": "G12n",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "inputs": [
++    {
++      "id": "distribution.DAY",
++      "label": "Dystrybucja - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "distribution.NIGHT",
++      "label": "Dystrybucja - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "distribution-variable",
++            "category": "NETWORK",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "01:00",
++                      "to": "05:00"
++                    }
++                  ],
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "05:00",
++                      "to": "24:00"
++                    },
++                    {
++                      "from": "00:00",
++                      "to": "01:00"
++                    }
++                  ],
++                  "priority": 500
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.3470",
++                "NIGHT": "0.0347"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa PGE Dystrybucja na 2026 r.",
++    "url": "https://pgedystrybucja.pl/content/download/cd45f59eac0f9136b8fa66d3c0180f85/file/wyciag-z-taryfy-dla-uslug-dystrybucji-energii-elektrycznej-obowiazujacej-od-dnia-01.01.2026r.pdf?contentId=1257&inLanguage=pol-PL&version=4",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/distribution/PGE_DYSTRYBUCJA/G12w.json b/resources/tariff-presets/PL/2026/distribution/PGE_DYSTRYBUCJA/G12w.json
+new file mode 100644
+index 0000000..e6accf6
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/distribution/PGE_DYSTRYBUCJA/G12w.json
+@@ -0,0 +1,224 @@
++{
++  "version": 1,
++  "id": "PL.PGE_DYSTRYBUCJA.G12w.2026",
++  "label": "PGE Dystrybucja - G12w",
++  "presetType": "TARIFF",
++  "components": [
++    {
++      "kind": "DISTRIBUTION_VARIABLE",
++      "componentId": "distribution-variable",
++      "label": "Dystrybucja zmienna"
++    }
++  ],
++  "provider": {
++    "id": "PGE_DYSTRYBUCJA",
++    "label": "PGE Dystrybucja"
++  },
++  "operator": {
++    "id": "PGE_DYSTRYBUCJA",
++    "label": "PGE Dystrybucja"
++  },
++  "tariffGroup": "G12w",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "inputs": [
++    {
++      "id": "distribution.DAY",
++      "label": "Dystrybucja - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "distribution.NIGHT",
++      "label": "Dystrybucja - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "distribution-variable",
++            "category": "NETWORK",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    },
++                    {
++                      "from": "15:00",
++                      "to": "17:00"
++                    }
++                  ],
++                  "season": "SUMMER",
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "15:00"
++                    },
++                    {
++                      "from": "17:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "season": "SUMMER",
++                  "priority": 500
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    },
++                    {
++                      "from": "13:00",
++                      "to": "15:00"
++                    }
++                  ],
++                  "season": "WINTER",
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "13:00"
++                    },
++                    {
++                      "from": "15:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "season": "WINTER",
++                  "priority": 500
++                }
++              ],
++              "seasons": [
++                {
++                  "id": "SUMMER",
++                  "from": "--04-01",
++                  "to": "--10-01"
++                },
++                {
++                  "id": "WINTER",
++                  "from": "--10-01",
++                  "to": "--04-01"
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.4276",
++                "NIGHT": "0.0845"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa PGE Dystrybucja na 2026 r.",
++    "url": "https://pgedystrybucja.pl/content/download/cd45f59eac0f9136b8fa66d3c0180f85/file/wyciag-z-taryfy-dla-uslug-dystrybucji-energii-elektrycznej-obowiazujacej-od-dnia-01.01.2026r.pdf?contentId=1257&inLanguage=pol-PL&version=4",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/distribution/STOEN_OPERATOR/G12w.json b/resources/tariff-presets/PL/2026/distribution/STOEN_OPERATOR/G12w.json
+new file mode 100644
+index 0000000..d3ee01e
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/distribution/STOEN_OPERATOR/G12w.json
+@@ -0,0 +1,158 @@
++{
++  "version": 1,
++  "id": "PL.STOEN_OPERATOR.G12w.2026",
++  "label": "Stoen Operator - G12w",
++  "presetType": "TARIFF",
++  "components": [
++    {
++      "kind": "DISTRIBUTION_VARIABLE",
++      "componentId": "distribution-variable",
++      "label": "Dystrybucja zmienna"
++    }
++  ],
++  "provider": {
++    "id": "STOEN_OPERATOR",
++    "label": "Stoen Operator"
++  },
++  "operator": {
++    "id": "STOEN_OPERATOR",
++    "label": "Stoen Operator"
++  },
++  "tariffGroup": "G12w",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "inputs": [
++    {
++      "id": "distribution.DAY",
++      "label": "Dystrybucja - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "distribution.NIGHT",
++      "label": "Dystrybucja - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "distribution-variable",
++            "category": "NETWORK",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    }
++                  ],
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "priority": 500
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.2570",
++                "NIGHT": "0.1079"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa Stoen Operator na 2026 r.",
++    "url": "https://e-bok.stoen.pl/binsource?docId=8321&index=0&language=PL&paramName=BINARYOBJ_FILE",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/distribution/TAURON_DYSTRYBUCJA/G12w.json b/resources/tariff-presets/PL/2026/distribution/TAURON_DYSTRYBUCJA/G12w.json
+new file mode 100644
+index 0000000..f72415d
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/distribution/TAURON_DYSTRYBUCJA/G12w.json
+@@ -0,0 +1,166 @@
++{
++  "version": 1,
++  "id": "PL.TAURON_DYSTRYBUCJA.G12w.2026",
++  "label": "TAURON Dystrybucja - G12w",
++  "presetType": "TARIFF",
++  "components": [
++    {
++      "kind": "DISTRIBUTION_VARIABLE",
++      "componentId": "distribution-variable",
++      "label": "Dystrybucja zmienna"
++    }
++  ],
++  "provider": {
++    "id": "TAURON_DYSTRYBUCJA",
++    "label": "TAURON Dystrybucja"
++  },
++  "operator": {
++    "id": "TAURON_DYSTRYBUCJA",
++    "label": "TAURON Dystrybucja"
++  },
++  "tariffGroup": "G12w",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "inputs": [
++    {
++      "id": "distribution.DAY",
++      "label": "Dystrybucja - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "distribution.NIGHT",
++      "label": "Dystrybucja - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "distribution-variable",
++            "category": "NETWORK",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    },
++                    {
++                      "from": "13:00",
++                      "to": "15:00"
++                    }
++                  ],
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "13:00"
++                    },
++                    {
++                      "from": "15:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "priority": 500
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.3298",
++                "NIGHT": "0.0512"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa TAURON Dystrybucja na 2026 r.",
++    "url": "https://www.tauron-dystrybucja.pl/-/media/offer-documents/dystrybucja/aktualna-taryfa/taryfa-tauron-dystrybucja-2026_ocr.ashx",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/supply/ENEA/G12w.json b/resources/tariff-presets/PL/2026/supply/ENEA/G12w.json
+new file mode 100644
+index 0000000..c411206
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/supply/ENEA/G12w.json
+@@ -0,0 +1,172 @@
++{
++  "version": 1,
++  "id": "PL.ENEA.G12w.2026",
++  "label": "ENEA - G12w",
++  "presetType": "OFFER",
++  "components": [
++    {
++      "kind": "ENERGY_PURCHASE",
++      "componentId": "energy-purchase",
++      "label": "Energia czynna"
++    }
++  ],
++  "provider": {
++    "id": "ENEA",
++    "label": "ENEA"
++  },
++  "tariffGroup": "G12w",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "energyPurchase": {
++    "supplier": {
++      "id": "ENEA",
++      "label": "ENEA"
++    },
++    "energyPriceBasis": "NET_WITH_EXCISE",
++    "assumptions": [
++      "billingCycle.anchor w szablonie jest wyłącznie deterministycznym założeniem do samodzielnej kompilacji presetu; CostPlan konfiguruje billingCycles niezależnie.",
++      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
++    ],
++    "sources": [
++      {
++        "title": "Taryfa ENEA dla energii elektrycznej dla odbiorców z grup taryfowych G na 2026 r.",
++        "url": "https://www.enea.pl/media/6820/taryfa-dla-energii-elektrycznej-dla-odbiorcow-z-grup-taryfowych-gpdf.pdf",
++        "retrievedAt": "2026-09-24"
++      }
++    ]
++  },
++  "inputs": [
++    {
++      "id": "energy.DAY",
++      "label": "Cena energii - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "energy.NIGHT",
++      "label": "Cena energii - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "energy-purchase",
++            "category": "ENERGY",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "21:00",
++                      "to": "06:00"
++                    }
++                  ],
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "21:00"
++                    }
++                  ],
++                  "priority": 500
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.6568",
++                "NIGHT": "0.3515"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa ENEA dla energii elektrycznej dla odbiorców z grup taryfowych G na 2026 r.",
++    "url": "https://www.enea.pl/media/6820/taryfa-dla-energii-elektrycznej-dla-odbiorcow-z-grup-taryfowych-gpdf.pdf",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/supply/ENERGA_OBROT/G12r.json b/resources/tariff-presets/PL/2026/supply/ENERGA_OBROT/G12r.json
+new file mode 100644
+index 0000000..4a634f0
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/supply/ENERGA_OBROT/G12r.json
+@@ -0,0 +1,154 @@
++{
++  "version": 1,
++  "id": "PL.ENERGA_OBROT.G12r.2026",
++  "label": "ENERGA-OBRÓT - G12r",
++  "presetType": "OFFER",
++  "components": [
++    {
++      "kind": "ENERGY_PURCHASE",
++      "componentId": "energy-purchase",
++      "label": "Energia czynna"
++    }
++  ],
++  "provider": {
++    "id": "ENERGA_OBROT",
++    "label": "ENERGA-OBRÓT"
++  },
++  "tariffGroup": "G12r",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "energyPurchase": {
++    "supplier": {
++      "id": "ENERGA_OBROT",
++      "label": "ENERGA-OBRÓT"
++    },
++    "energyPriceBasis": "NET_WITH_EXCISE",
++    "assumptions": [
++      "billingCycle.anchor w szablonie jest wyłącznie deterministycznym założeniem do samodzielnej kompilacji presetu; CostPlan konfiguruje billingCycles niezależnie.",
++      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
++    ],
++    "sources": [
++      {
++        "title": "Taryfa ENERGA-OBRÓT dla odbiorców z grup taryfowych G na 2026 r.",
++        "url": "https://www.energa.pl/dam/jcr%3A1f730159-7aab-4815-8a17-e0f6f0a6a223/Taryfa%20ENERGA-OBR%C3%93T%20S.A.%20dla%20energii%20elektrycznej%20obowi%C4%85zuj%C4%85ca%20od%201.01.pdf",
++        "retrievedAt": "2026-09-24"
++      }
++    ]
++  },
++  "inputs": [
++    {
++      "id": "energy.DAY",
++      "label": "Cena energii - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "energy.NIGHT",
++      "label": "Cena energii - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "energy-purchase",
++            "category": "ENERGY",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "07:00"
++                    },
++                    {
++                      "from": "13:00",
++                      "to": "16:00"
++                    }
++                  ]
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "07:00",
++                      "to": "13:00"
++                    },
++                    {
++                      "from": "16:00",
++                      "to": "22:00"
++                    }
++                  ]
++                }
++              ]
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.6717",
++                "NIGHT": "0.3067"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa ENERGA-OBRÓT dla odbiorców z grup taryfowych G na 2026 r.",
++    "url": "https://www.energa.pl/dam/jcr%3A1f730159-7aab-4815-8a17-e0f6f0a6a223/Taryfa%20ENERGA-OBR%C3%93T%20S.A.%20dla%20energii%20elektrycznej%20obowi%C4%85zuj%C4%85ca%20od%201.01.pdf",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/supply/ENERGA_OBROT/G12w.json b/resources/tariff-presets/PL/2026/supply/ENERGA_OBROT/G12w.json
+new file mode 100644
+index 0000000..1451aa0
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/supply/ENERGA_OBROT/G12w.json
+@@ -0,0 +1,180 @@
++{
++  "version": 1,
++  "id": "PL.ENERGA_OBROT.G12w.2026",
++  "label": "ENERGA-OBRÓT - G12w",
++  "presetType": "OFFER",
++  "components": [
++    {
++      "kind": "ENERGY_PURCHASE",
++      "componentId": "energy-purchase",
++      "label": "Energia czynna"
++    }
++  ],
++  "provider": {
++    "id": "ENERGA_OBROT",
++    "label": "ENERGA-OBRÓT"
++  },
++  "tariffGroup": "G12w",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "energyPurchase": {
++    "supplier": {
++      "id": "ENERGA_OBROT",
++      "label": "ENERGA-OBRÓT"
++    },
++    "energyPriceBasis": "NET_WITH_EXCISE",
++    "assumptions": [
++      "billingCycle.anchor w szablonie jest wyłącznie deterministycznym założeniem do samodzielnej kompilacji presetu; CostPlan konfiguruje billingCycles niezależnie.",
++      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
++    ],
++    "sources": [
++      {
++        "title": "Taryfa ENERGA-OBRÓT dla odbiorców z grup taryfowych G na 2026 r.",
++        "url": "https://www.energa.pl/dam/jcr%3A1f730159-7aab-4815-8a17-e0f6f0a6a223/Taryfa%20ENERGA-OBR%C3%93T%20S.A.%20dla%20energii%20elektrycznej%20obowi%C4%85zuj%C4%85ca%20od%201.01.pdf",
++        "retrievedAt": "2026-09-24"
++      }
++    ]
++  },
++  "inputs": [
++    {
++      "id": "energy.DAY",
++      "label": "Cena energii - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "energy.NIGHT",
++      "label": "Cena energii - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "energy-purchase",
++            "category": "ENERGY",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    },
++                    {
++                      "from": "13:00",
++                      "to": "15:00"
++                    }
++                  ],
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "13:00"
++                    },
++                    {
++                      "from": "15:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "priority": 500
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.6107",
++                "NIGHT": "0.3990"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa ENERGA-OBRÓT dla odbiorców z grup taryfowych G na 2026 r.",
++    "url": "https://www.energa.pl/dam/jcr%3A1f730159-7aab-4815-8a17-e0f6f0a6a223/Taryfa%20ENERGA-OBR%C3%93T%20S.A.%20dla%20energii%20elektrycznej%20obowi%C4%85zuj%C4%85ca%20od%201.01.pdf",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/supply/EON_POLSKA/G12w.json b/resources/tariff-presets/PL/2026/supply/EON_POLSKA/G12w.json
+new file mode 100644
+index 0000000..7fecce4
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/supply/EON_POLSKA/G12w.json
+@@ -0,0 +1,172 @@
++{
++  "version": 1,
++  "id": "PL.EON_POLSKA.G12w.2026",
++  "label": "E.ON Polska - G12w",
++  "presetType": "OFFER",
++  "components": [
++    {
++      "kind": "ENERGY_PURCHASE",
++      "componentId": "energy-purchase",
++      "label": "Energia czynna"
++    }
++  ],
++  "provider": {
++    "id": "EON_POLSKA",
++    "label": "E.ON Polska"
++  },
++  "tariffGroup": "G12w",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "energyPurchase": {
++    "supplier": {
++      "id": "EON_POLSKA",
++      "label": "E.ON Polska"
++    },
++    "energyPriceBasis": "NET_WITH_EXCISE",
++    "assumptions": [
++      "billingCycle.anchor w szablonie jest wyłącznie deterministycznym założeniem do samodzielnej kompilacji presetu; CostPlan konfiguruje billingCycles niezależnie.",
++      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
++    ],
++    "sources": [
++      {
++        "title": "Taryfa E.ON Polska dla grup taryfowych G obowiązująca od 1 stycznia 2026 r.",
++        "url": "https://eon.pl/-/media/eon/dokumenty/dla-domu/taryfa-energii-elektrycznej-eon-polska-sa-dla-grup-taryfowych-g--obowizuje-od-dnia-01_01_2026.ashx",
++        "retrievedAt": "2026-09-24"
++      }
++    ]
++  },
++  "inputs": [
++    {
++      "id": "energy.DAY",
++      "label": "Cena energii - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "energy.NIGHT",
++      "label": "Cena energii - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "energy-purchase",
++            "category": "ENERGY",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    }
++                  ],
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "priority": 500
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.5294",
++                "NIGHT": "0.4445"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa E.ON Polska dla grup taryfowych G obowiązująca od 1 stycznia 2026 r.",
++    "url": "https://eon.pl/-/media/eon/dokumenty/dla-domu/taryfa-energii-elektrycznej-eon-polska-sa-dla-grup-taryfowych-g--obowizuje-od-dnia-01_01_2026.ashx",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/supply/PGE_OBROT/G12n.json b/resources/tariff-presets/PL/2026/supply/PGE_OBROT/G12n.json
+new file mode 100644
+index 0000000..e92e1f6
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/supply/PGE_OBROT/G12n.json
+@@ -0,0 +1,177 @@
++{
++  "version": 1,
++  "id": "PL.PGE_OBROT.G12n.2026",
++  "label": "PGE Obrót - G12n",
++  "presetType": "OFFER",
++  "components": [
++    {
++      "kind": "ENERGY_PURCHASE",
++      "componentId": "energy-purchase",
++      "label": "Energia czynna"
++    }
++  ],
++  "provider": {
++    "id": "PGE_OBROT",
++    "label": "PGE Obrót"
++  },
++  "tariffGroup": "G12n",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "energyPurchase": {
++    "supplier": {
++      "id": "PGE_OBROT",
++      "label": "PGE Obrót"
++    },
++    "energyPriceBasis": "NET_WITH_EXCISE",
++    "assumptions": [
++      "billingCycle.anchor w szablonie jest wyłącznie deterministycznym założeniem do samodzielnej kompilacji presetu; CostPlan konfiguruje billingCycles niezależnie.",
++      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
++    ],
++    "sources": [
++      {
++        "title": "Taryfa PGE Obrót dla odbiorców z grup taryfowych G na 2026 r.",
++        "url": "https://www.gkpge.pl/content/download/e81cbcdedf76bd67800e1c39c65dc827/file/a5_taryfa_g_12_2026_web.pdf?contentId=196597&inLanguage=pol-PL&version=1",
++        "retrievedAt": "2026-09-24"
++      }
++    ]
++  },
++  "inputs": [
++    {
++      "id": "energy.DAY",
++      "label": "Cena energii - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "energy.NIGHT",
++      "label": "Cena energii - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "energy-purchase",
++            "category": "ENERGY",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "01:00",
++                      "to": "05:00"
++                    }
++                  ],
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI",
++                    "SAT"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "05:00",
++                      "to": "24:00"
++                    },
++                    {
++                      "from": "00:00",
++                      "to": "01:00"
++                    }
++                  ],
++                  "priority": 500
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.5561",
++                "NIGHT": "0.3962"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa PGE Obrót dla odbiorców z grup taryfowych G na 2026 r.",
++    "url": "https://www.gkpge.pl/content/download/e81cbcdedf76bd67800e1c39c65dc827/file/a5_taryfa_g_12_2026_web.pdf?contentId=196597&inLanguage=pol-PL&version=1",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/supply/PGE_OBROT/G12w.json b/resources/tariff-presets/PL/2026/supply/PGE_OBROT/G12w.json
+new file mode 100644
+index 0000000..7cef629
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/supply/PGE_OBROT/G12w.json
+@@ -0,0 +1,238 @@
++{
++  "version": 1,
++  "id": "PL.PGE_OBROT.G12w.2026",
++  "label": "PGE Obrót - G12w",
++  "presetType": "OFFER",
++  "components": [
++    {
++      "kind": "ENERGY_PURCHASE",
++      "componentId": "energy-purchase",
++      "label": "Energia czynna"
++    }
++  ],
++  "provider": {
++    "id": "PGE_OBROT",
++    "label": "PGE Obrót"
++  },
++  "tariffGroup": "G12w",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "energyPurchase": {
++    "supplier": {
++      "id": "PGE_OBROT",
++      "label": "PGE Obrót"
++    },
++    "energyPriceBasis": "NET_WITH_EXCISE",
++    "assumptions": [
++      "billingCycle.anchor w szablonie jest wyłącznie deterministycznym założeniem do samodzielnej kompilacji presetu; CostPlan konfiguruje billingCycles niezależnie.",
++      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
++    ],
++    "sources": [
++      {
++        "title": "Taryfa PGE Obrót dla odbiorców z grup taryfowych G na 2026 r.",
++        "url": "https://www.gkpge.pl/content/download/e81cbcdedf76bd67800e1c39c65dc827/file/a5_taryfa_g_12_2026_web.pdf?contentId=196597&inLanguage=pol-PL&version=1",
++        "retrievedAt": "2026-09-24"
++      }
++    ]
++  },
++  "inputs": [
++    {
++      "id": "energy.DAY",
++      "label": "Cena energii - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "energy.NIGHT",
++      "label": "Cena energii - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "energy-purchase",
++            "category": "ENERGY",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    },
++                    {
++                      "from": "15:00",
++                      "to": "17:00"
++                    }
++                  ],
++                  "season": "SUMMER",
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "15:00"
++                    },
++                    {
++                      "from": "17:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "season": "SUMMER",
++                  "priority": 500
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    },
++                    {
++                      "from": "13:00",
++                      "to": "15:00"
++                    }
++                  ],
++                  "season": "WINTER",
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "13:00"
++                    },
++                    {
++                      "from": "15:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "season": "WINTER",
++                  "priority": 500
++                }
++              ],
++              "seasons": [
++                {
++                  "id": "SUMMER",
++                  "from": "--04-01",
++                  "to": "--10-01"
++                },
++                {
++                  "id": "WINTER",
++                  "from": "--10-01",
++                  "to": "--04-01"
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.5871",
++                "NIGHT": "0.4285"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa PGE Obrót dla odbiorców z grup taryfowych G na 2026 r.",
++    "url": "https://www.gkpge.pl/content/download/e81cbcdedf76bd67800e1c39c65dc827/file/a5_taryfa_g_12_2026_web.pdf?contentId=196597&inLanguage=pol-PL&version=1",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/PL/2026/supply/TAURON_SPRZEDAZ/G12w.json b/resources/tariff-presets/PL/2026/supply/TAURON_SPRZEDAZ/G12w.json
+new file mode 100644
+index 0000000..80d171f
+--- /dev/null
++++ b/resources/tariff-presets/PL/2026/supply/TAURON_SPRZEDAZ/G12w.json
+@@ -0,0 +1,180 @@
++{
++  "version": 1,
++  "id": "PL.TAURON_SPRZEDAZ.G12w.2026",
++  "label": "TAURON Sprzedaż - G12w",
++  "presetType": "OFFER",
++  "components": [
++    {
++      "kind": "ENERGY_PURCHASE",
++      "componentId": "energy-purchase",
++      "label": "Energia czynna"
++    }
++  ],
++  "provider": {
++    "id": "TAURON_SPRZEDAZ",
++    "label": "TAURON Sprzedaż"
++  },
++  "tariffGroup": "G12w",
++  "validFrom": "2026-01-01T00:00:00+01:00",
++  "validTo": "2027-01-01T00:00:00+01:00",
++  "currency": "PLN",
++  "timezone": "Europe/Warsaw",
++  "priceBasis": "NET",
++  "energyPurchase": {
++    "supplier": {
++      "id": "TAURON_SPRZEDAZ",
++      "label": "TAURON Sprzedaż"
++    },
++    "energyPriceBasis": "NET_WITH_EXCISE",
++    "assumptions": [
++      "billingCycle.anchor w szablonie jest wyłącznie deterministycznym założeniem do samodzielnej kompilacji presetu; CostPlan konfiguruje billingCycles niezależnie.",
++      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
++    ],
++    "sources": [
++      {
++        "title": "Taryfa TAURON Sprzedaż dla odbiorców z grup taryfowych G na 2026 r.",
++        "url": "https://bip.ure.gov.pl/download/3/20340/TauronSprzedaz.pdf",
++        "retrievedAt": "2026-09-24"
++      }
++    ]
++  },
++  "inputs": [
++    {
++      "id": "energy.DAY",
++      "label": "Cena energii - Szczyt/Dzień",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/DAY"
++      ],
++      "unit": "PLN/kWh"
++    },
++    {
++      "id": "energy.NIGHT",
++      "label": "Cena energii - Pozaszczyt/Noc",
++      "type": "DECIMAL",
++      "required": true,
++      "targets": [
++        "/periods/0/components/0/rate/rates/NIGHT"
++      ],
++      "unit": "PLN/kWh"
++    }
++  ],
++  "billingDefinitionTemplate": {
++    "version": 1,
++    "currency": "PLN",
++    "timezone": "Europe/Warsaw",
++    "billingCycle": {
++      "anchor": "2026-01-01",
++      "length": 1,
++      "unit": "MONTH"
++    },
++    "periods": [
++      {
++        "validFrom": "2026-01-01T00:00:00+01:00",
++        "validTo": "2027-01-01T00:00:00+01:00",
++        "components": [
++          {
++            "id": "energy-purchase",
++            "category": "ENERGY",
++            "quantity": {
++              "type": "ACTIVE_ENERGY_IMPORT",
++              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
++              "periodInMinutes": 60
++            },
++            "selector": {
++              "type": "WEEKLY_SCHEDULE",
++              "timezone": "Europe/Warsaw",
++              "rules": [
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "HOLIDAY"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 100
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "SAT",
++                    "SUN"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "00:00",
++                      "to": "24:00"
++                    }
++                  ],
++                  "priority": 200
++                },
++                {
++                  "zone": "NIGHT",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "22:00",
++                      "to": "06:00"
++                    },
++                    {
++                      "from": "13:00",
++                      "to": "15:00"
++                    }
++                  ],
++                  "priority": 500
++                },
++                {
++                  "zone": "DAY",
++                  "days": [
++                    "MON",
++                    "TUE",
++                    "WED",
++                    "THU",
++                    "FRI"
++                  ],
++                  "time_ranges": [
++                    {
++                      "from": "06:00",
++                      "to": "13:00"
++                    },
++                    {
++                      "from": "15:00",
++                      "to": "22:00"
++                    }
++                  ],
++                  "priority": 500
++                }
++              ],
++              "calendar": "PL_PUBLIC_HOLIDAYS"
++            },
++            "rate": {
++              "type": "ZONED",
++              "rates": {
++                "DAY": "0.6270",
++                "NIGHT": "0.4180"
++              },
++              "unit": "PLN/kWh"
++            }
++          }
++        ]
++      }
++    ]
++  },
++  "warnings": [],
++  "source": {
++    "title": "Taryfa TAURON Sprzedaż dla odbiorców z grup taryfowych G na 2026 r.",
++    "url": "https://bip.ure.gov.pl/download/3/20340/TauronSprzedaz.pdf",
++    "retrievedAt": "2026-09-24"
++  }
++}
+diff --git a/resources/tariff-presets/index.json b/resources/tariff-presets/index.json
+index a34a108..6e766d0 100644
+--- a/resources/tariff-presets/index.json
++++ b/resources/tariff-presets/index.json
+@@ -90,6 +90,28 @@
+       "tariffGroup": "G14dynamic",
+       "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G14dynamic.json"
+     },
++    {
++      "id": "PL.TAURON_DYSTRYBUCJA.G12w.2026",
++      "label": "TAURON Dystrybucja - G12w",
++      "presetType": "TARIFF",
++      "components": [
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "componentId": "distribution-variable",
++          "label": "Dystrybucja zmienna"
++        }
++      ],
++      "provider": {
++        "id": "TAURON_DYSTRYBUCJA",
++        "label": "TAURON Dystrybucja"
++      },
++      "operator": {
++        "id": "TAURON_DYSTRYBUCJA",
++        "label": "TAURON Dystrybucja"
++      },
++      "tariffGroup": "G12w",
++      "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G12w.json"
++    },
+     {
+       "id": "PL.PGE_DYSTRYBUCJA.G11.2026",
+       "label": "PGE Dystrybucja - G11",
+@@ -134,6 +156,50 @@
+       "tariffGroup": "G12",
+       "path": "PL/2026/distribution/PGE_DYSTRYBUCJA/G12.json"
+     },
++    {
++      "id": "PL.PGE_DYSTRYBUCJA.G12w.2026",
++      "label": "PGE Dystrybucja - G12w",
++      "presetType": "TARIFF",
++      "components": [
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "componentId": "distribution-variable",
++          "label": "Dystrybucja zmienna"
++        }
++      ],
++      "provider": {
++        "id": "PGE_DYSTRYBUCJA",
++        "label": "PGE Dystrybucja"
++      },
++      "operator": {
++        "id": "PGE_DYSTRYBUCJA",
++        "label": "PGE Dystrybucja"
++      },
++      "tariffGroup": "G12w",
++      "path": "PL/2026/distribution/PGE_DYSTRYBUCJA/G12w.json"
++    },
++    {
++      "id": "PL.PGE_DYSTRYBUCJA.G12n.2026",
++      "label": "PGE Dystrybucja - G12n",
++      "presetType": "TARIFF",
++      "components": [
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "componentId": "distribution-variable",
++          "label": "Dystrybucja zmienna"
++        }
++      ],
++      "provider": {
++        "id": "PGE_DYSTRYBUCJA",
++        "label": "PGE Dystrybucja"
++      },
++      "operator": {
++        "id": "PGE_DYSTRYBUCJA",
++        "label": "PGE Dystrybucja"
++      },
++      "tariffGroup": "G12n",
++      "path": "PL/2026/distribution/PGE_DYSTRYBUCJA/G12n.json"
++    },
+     {
+       "id": "PL.ENEA_OPERATOR.G11.2026",
+       "label": "ENEA Operator - G11",
+@@ -200,6 +266,50 @@
+       "tariffGroup": "G13active",
+       "path": "PL/2026/distribution/ENEA_OPERATOR/G13active.json"
+     },
++    {
++      "id": "PL.ENEA_OPERATOR.G12w.2026",
++      "label": "ENEA Operator - G12w",
++      "presetType": "TARIFF",
++      "components": [
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "componentId": "distribution-variable",
++          "label": "Dystrybucja zmienna"
++        }
++      ],
++      "provider": {
++        "id": "ENEA_OPERATOR",
++        "label": "ENEA Operator"
++      },
++      "operator": {
++        "id": "ENEA_OPERATOR",
++        "label": "ENEA Operator"
++      },
++      "tariffGroup": "G12w",
++      "path": "PL/2026/distribution/ENEA_OPERATOR/G12w.json"
++    },
++    {
++      "id": "PL.ENEA_OPERATOR.G12sezON.2026",
++      "label": "ENEA Operator - G12sezON",
++      "presetType": "TARIFF",
++      "components": [
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "componentId": "distribution-variable",
++          "label": "Dystrybucja zmienna"
++        }
++      ],
++      "provider": {
++        "id": "ENEA_OPERATOR",
++        "label": "ENEA Operator"
++      },
++      "operator": {
++        "id": "ENEA_OPERATOR",
++        "label": "ENEA Operator"
++      },
++      "tariffGroup": "G12sezON",
++      "path": "PL/2026/distribution/ENEA_OPERATOR/G12sezON.json"
++    },
+     {
+       "id": "PL.ENERGA_OPERATOR.G11.2026",
+       "label": "Energa-Operator - G11",
+@@ -244,6 +354,50 @@
+       "tariffGroup": "G12",
+       "path": "PL/2026/distribution/ENERGA_OPERATOR/G12.json"
+     },
++    {
++      "id": "PL.ENERGA_OPERATOR.G12w.2026",
++      "label": "Energa-Operator - G12w",
++      "presetType": "TARIFF",
++      "components": [
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "componentId": "distribution-variable",
++          "label": "Dystrybucja zmienna"
++        }
++      ],
++      "provider": {
++        "id": "ENERGA_OPERATOR",
++        "label": "Energa-Operator"
++      },
++      "operator": {
++        "id": "ENERGA_OPERATOR",
++        "label": "Energa-Operator"
++      },
++      "tariffGroup": "G12w",
++      "path": "PL/2026/distribution/ENERGA_OPERATOR/G12w.json"
++    },
++    {
++      "id": "PL.ENERGA_OPERATOR.G12r.2026",
++      "label": "Energa-Operator - G12r",
++      "presetType": "TARIFF",
++      "components": [
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "componentId": "distribution-variable",
++          "label": "Dystrybucja zmienna"
++        }
++      ],
++      "provider": {
++        "id": "ENERGA_OPERATOR",
++        "label": "Energa-Operator"
++      },
++      "operator": {
++        "id": "ENERGA_OPERATOR",
++        "label": "Energa-Operator"
++      },
++      "tariffGroup": "G12r",
++      "path": "PL/2026/distribution/ENERGA_OPERATOR/G12r.json"
++    },
+     {
+       "id": "PL.STOEN_OPERATOR.G11.2026",
+       "label": "Stoen Operator - G11",
+@@ -288,6 +442,28 @@
+       "tariffGroup": "G12",
+       "path": "PL/2026/distribution/STOEN_OPERATOR/G12.json"
+     },
++    {
++      "id": "PL.STOEN_OPERATOR.G12w.2026",
++      "label": "Stoen Operator - G12w",
++      "presetType": "TARIFF",
++      "components": [
++        {
++          "kind": "DISTRIBUTION_VARIABLE",
++          "componentId": "distribution-variable",
++          "label": "Dystrybucja zmienna"
++        }
++      ],
++      "provider": {
++        "id": "STOEN_OPERATOR",
++        "label": "Stoen Operator"
++      },
++      "operator": {
++        "id": "STOEN_OPERATOR",
++        "label": "Stoen Operator"
++      },
++      "tariffGroup": "G12w",
++      "path": "PL/2026/distribution/STOEN_OPERATOR/G12w.json"
++    },
+     {
+       "id": "PL.TAURON_SPRZEDAZ.G11.2026",
+       "label": "TAURON Sprzedaż - G11",
+@@ -342,6 +518,24 @@
+       "tariffGroup": "G13",
+       "path": "PL/2026/supply/TAURON_SPRZEDAZ/G13.json"
+     },
++    {
++      "id": "PL.TAURON_SPRZEDAZ.G12w.2026",
++      "label": "TAURON Sprzedaż - G12w",
++      "presetType": "OFFER",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "componentId": "energy-purchase",
++          "label": "Energia czynna"
++        }
++      ],
++      "provider": {
++        "id": "TAURON_SPRZEDAZ",
++        "label": "TAURON Sprzedaż"
++      },
++      "tariffGroup": "G12w",
++      "path": "PL/2026/supply/TAURON_SPRZEDAZ/G12w.json"
++    },
+     {
+       "id": "PL.PGE_OBROT.G11.2026",
+       "label": "PGE Obrót - G11",
+@@ -400,6 +594,42 @@
+       },
+       "path": "PL/dynamic/PGE_OBROT/dynamiczna-energia-g1x-konsument-2026.json"
+     },
++    {
++      "id": "PL.PGE_OBROT.G12w.2026",
++      "label": "PGE Obrót - G12w",
++      "presetType": "OFFER",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "componentId": "energy-purchase",
++          "label": "Energia czynna"
++        }
++      ],
++      "provider": {
++        "id": "PGE_OBROT",
++        "label": "PGE Obrót"
++      },
++      "tariffGroup": "G12w",
++      "path": "PL/2026/supply/PGE_OBROT/G12w.json"
++    },
++    {
++      "id": "PL.PGE_OBROT.G12n.2026",
++      "label": "PGE Obrót - G12n",
++      "presetType": "OFFER",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "componentId": "energy-purchase",
++          "label": "Energia czynna"
++        }
++      ],
++      "provider": {
++        "id": "PGE_OBROT",
++        "label": "PGE Obrót"
++      },
++      "tariffGroup": "G12n",
++      "path": "PL/2026/supply/PGE_OBROT/G12n.json"
++    },
+     {
+       "id": "PL.ENEA.G11.2026",
+       "label": "ENEA - G11",
+@@ -508,6 +738,24 @@
+       "tariffGroup": "G12",
+       "path": "PL/2026/supply/EON_POLSKA/G12.json"
+     },
++    {
++      "id": "PL.EON_POLSKA.G12w.2026",
++      "label": "E.ON Polska - G12w",
++      "presetType": "OFFER",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "componentId": "energy-purchase",
++          "label": "Energia czynna"
++        }
++      ],
++      "provider": {
++        "id": "EON_POLSKA",
++        "label": "E.ON Polska"
++      },
++      "tariffGroup": "G12w",
++      "path": "PL/2026/supply/EON_POLSKA/G12w.json"
++    },
+     {
+       "id": "PL.ENERGA_OBROT.OFERTA_DYNAMICZNA_II.2025_11",
+       "label": "ENERGA-OBRÓT - Oferta dynamiczna II",
+@@ -530,6 +778,42 @@
+       },
+       "path": "PL/dynamic/ENERGA_OBROT/oferta-dynamiczna-ii-2025-11.json"
+     },
++    {
++      "id": "PL.ENERGA_OBROT.G12w.2026",
++      "label": "ENERGA-OBRÓT - G12w",
++      "presetType": "OFFER",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "componentId": "energy-purchase",
++          "label": "Energia czynna"
++        }
++      ],
++      "provider": {
++        "id": "ENERGA_OBROT",
++        "label": "ENERGA-OBRÓT"
++      },
++      "tariffGroup": "G12w",
++      "path": "PL/2026/supply/ENERGA_OBROT/G12w.json"
++    },
++    {
++      "id": "PL.ENERGA_OBROT.G12r.2026",
++      "label": "ENERGA-OBRÓT - G12r",
++      "presetType": "OFFER",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "componentId": "energy-purchase",
++          "label": "Energia czynna"
++        }
++      ],
++      "provider": {
++        "id": "ENERGA_OBROT",
++        "label": "ENERGA-OBRÓT"
++      },
++      "tariffGroup": "G12r",
++      "path": "PL/2026/supply/ENERGA_OBROT/G12r.json"
++    },
+     {
+       "id": "PL.ENEA.CENY_DYNAMICZNE.DI12011227_G",
+       "label": "ENEA - Ceny Dynamiczne",
+@@ -551,6 +835,24 @@
+         "label": "ENEA"
+       },
+       "path": "PL/dynamic/ENEA/ceny-dynamiczne-DI12011227_G.json"
++    },
++    {
++      "id": "PL.ENEA.G12w.2026",
++      "label": "ENEA - G12w",
++      "presetType": "OFFER",
++      "components": [
++        {
++          "kind": "ENERGY_PURCHASE",
++          "componentId": "energy-purchase",
++          "label": "Energia czynna"
++        }
++      ],
++      "provider": {
++        "id": "ENEA",
++        "label": "ENEA"
++      },
++      "tariffGroup": "G12w",
++      "path": "PL/2026/supply/ENEA/G12w.json"
+     }
+   ]
+ }
+diff --git a/tests/Plan/CostPlanStarterCatalogTest.php b/tests/Plan/CostPlanStarterCatalogTest.php
+index f7c2244..45365fa 100644
+--- a/tests/Plan/CostPlanStarterCatalogTest.php
++++ b/tests/Plan/CostPlanStarterCatalogTest.php
+@@ -21,7 +21,7 @@ final class CostPlanStarterCatalogTest extends TestCase
+     {
+         $starters = (new CostPlanStarterCatalog())->starters();
+ 
+-        self::assertCount(13, $starters);
++        self::assertCount(21, $starters);
+         self::assertSame('PL.STARTER.TAURON_DYSTRYBUCJA.G11', $starters[0]['id']);
+         self::assertSame('G11', $starters[0]['tariffGroup']);
+         self::assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $starters[0]['revision']);
+diff --git a/tests/Preset/AdditionalHouseholdTariffPresetTest.php b/tests/Preset/AdditionalHouseholdTariffPresetTest.php
+new file mode 100644
+index 0000000..7e4c065
+--- /dev/null
++++ b/tests/Preset/AdditionalHouseholdTariffPresetTest.php
+@@ -0,0 +1,105 @@
++<?php
++
++declare(strict_types=1);
++
++namespace Supla\EnergyCostCalculator\Tests\Preset;
++
++use PHPUnit\Framework\TestCase;
++use Supla\EnergyCostCalculator\Preset\TariffPresetCatalog;
++use Supla\EnergyCostCalculator\Preset\TariffPresetCompiler;
++
++final class AdditionalHouseholdTariffPresetTest extends TestCase
++{
++    public function testCatalogContainsWeekendAndAdditionalHouseholdGroups(): void
++    {
++        $byId = array_column((new TariffPresetCatalog())->presets(), null, 'id');
++        foreach ([
++            'PL.TAURON_DYSTRYBUCJA.G12w.2026',
++            'PL.TAURON_SPRZEDAZ.G12w.2026',
++            'PL.PGE_DYSTRYBUCJA.G12w.2026',
++            'PL.PGE_OBROT.G12w.2026',
++            'PL.PGE_DYSTRYBUCJA.G12n.2026',
++            'PL.PGE_OBROT.G12n.2026',
++            'PL.ENEA_OPERATOR.G12w.2026',
++            'PL.ENEA.G12w.2026',
++            'PL.ENEA_OPERATOR.G12sezON.2026',
++            'PL.ENERGA_OPERATOR.G12w.2026',
++            'PL.ENERGA_OBROT.G12w.2026',
++            'PL.ENERGA_OPERATOR.G12r.2026',
++            'PL.ENERGA_OBROT.G12r.2026',
++            'PL.STOEN_OPERATOR.G12w.2026',
++            'PL.EON_POLSKA.G12w.2026',
++        ] as $id) {
++            self::assertArrayHasKey($id, $byId);
++        }
++    }
++
++    public function testTauronG12wUsesWeekendAndHolidayOffPeakZone(): void
++    {
++        $component = $this->component('PL.TAURON_DYSTRYBUCJA.G12w.2026', 'distribution-variable');
++
++        self::assertSame(['DAY' => '0.3298', 'NIGHT' => '0.0512'], $component['rate']['rates']);
++        self::assertSame('PL_PUBLIC_HOLIDAYS', $component['selector']['calendar']);
++        self::assertSame(['HOLIDAY'], $component['selector']['rules'][0]['days']);
++        self::assertSame(['SAT', 'SUN'], $component['selector']['rules'][1]['days']);
++        self::assertSame('NIGHT', $component['selector']['rules'][0]['zone']);
++        self::assertSame('NIGHT', $component['selector']['rules'][1]['zone']);
++    }
++
++    public function testPgeG12wKeepsSeasonalTwoHourValley(): void
++    {
++        $component = $this->component('PL.PGE_DYSTRYBUCJA.G12w.2026', 'distribution-variable');
++
++        self::assertSame(['DAY' => '0.4276', 'NIGHT' => '0.0845'], $component['rate']['rates']);
++        self::assertSame('SUMMER', $component['selector']['rules'][2]['season']);
++        self::assertSame('15:00', $component['selector']['rules'][2]['time_ranges'][1]['from']);
++        self::assertSame('WINTER', $component['selector']['rules'][4]['season']);
++        self::assertSame('13:00', $component['selector']['rules'][4]['time_ranges'][1]['from']);
++    }
++
++    public function testPgeG12nMakesSundayAndHolidaysOffPeakAllDay(): void
++    {
++        $component = $this->component('PL.PGE_DYSTRYBUCJA.G12n.2026', 'distribution-variable');
++
++        self::assertSame(['DAY' => '0.3470', 'NIGHT' => '0.0347'], $component['rate']['rates']);
++        self::assertSame(['HOLIDAY'], $component['selector']['rules'][0]['days']);
++        self::assertSame(['SUN'], $component['selector']['rules'][1]['days']);
++        self::assertSame('01:00', $component['selector']['rules'][2]['time_ranges'][0]['from']);
++        self::assertSame('05:00', $component['selector']['rules'][2]['time_ranges'][0]['to']);
++    }
++
++    public function testEnergaG12rAndEneaG12sezOnUseFixedSeasonSchedules(): void
++    {
++        $energa = $this->component('PL.ENERGA_OPERATOR.G12r.2026', 'distribution-variable');
++        self::assertSame(['DAY' => '0.3640', 'NIGHT' => '0.0882'], $energa['rate']['rates']);
++        self::assertSame('13:00', $energa['selector']['rules'][0]['time_ranges'][1]['from']);
++        self::assertSame('16:00', $energa['selector']['rules'][0]['time_ranges'][1]['to']);
++
++        $enea = $this->component('PL.ENEA_OPERATOR.G12sezON.2026', 'distribution-variable');
++        self::assertSame(['OTHER' => '0.2779', 'RECOMMENDED_CONSUMPTION' => '0.0913'], $enea['rate']['rates']);
++        self::assertSame('04:00', $enea['selector']['rules'][0]['time_ranges'][0]['from']);
++        self::assertSame('22:00', $enea['selector']['rules'][2]['time_ranges'][0]['from']);
++    }
++
++    public function testNewSupplyDefaultsIncludeExciseWhereTariffSourceExcludesIt(): void
++    {
++        $cases = [
++            'PL.TAURON_SPRZEDAZ.G12w.2026' => ['DAY' => '0.6270', 'NIGHT' => '0.4180'],
++            'PL.PGE_OBROT.G12w.2026' => ['DAY' => '0.5871', 'NIGHT' => '0.4285'],
++            'PL.PGE_OBROT.G12n.2026' => ['DAY' => '0.5561', 'NIGHT' => '0.3962'],
++            'PL.ENEA.G12w.2026' => ['DAY' => '0.6568', 'NIGHT' => '0.3515'],
++            'PL.ENERGA_OBROT.G12w.2026' => ['DAY' => '0.6107', 'NIGHT' => '0.3990'],
++            'PL.ENERGA_OBROT.G12r.2026' => ['DAY' => '0.6717', 'NIGHT' => '0.3067'],
++            'PL.EON_POLSKA.G12w.2026' => ['DAY' => '0.5294', 'NIGHT' => '0.4445'],
++        ];
++        foreach ($cases as $id => $rates) {
++            self::assertSame($rates, $this->component($id, 'energy-purchase')['rate']['rates'], $id);
++        }
++    }
++
++    /** @return array<string, mixed> */
++    private function component(string $presetId, string $componentId): array
++    {
++        return (new TariffPresetCompiler())->compileComponentToArray($presetId, $componentId, [])['periods'][0]['components'][0];
++    }
++}
+diff --git a/tests/Preset/TariffPresetCatalogTest.php b/tests/Preset/TariffPresetCatalogTest.php
+index ef3bafc..7557ca4 100644
+--- a/tests/Preset/TariffPresetCatalogTest.php
++++ b/tests/Preset/TariffPresetCatalogTest.php
+@@ -29,7 +29,7 @@ final class TariffPresetCatalogTest extends TestCase
+     {
+         $presets = (new TariffPresetCatalog())->presets();
+ 
+-        self::assertCount(29, $presets);
++        self::assertCount(44, $presets);
+         self::assertSame('PL.TAURON_DYSTRYBUCJA.G11.2026', $presets[0]['id']);
+         self::assertSame('TAURON Dystrybucja - G11', $presets[0]['label']);
+         self::assertSame('TARIFF', $presets[0]['presetType']);

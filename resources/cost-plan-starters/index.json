@@ -94,6 +94,29 @@
       ]
     },
     {
+      "id": "PL.STARTER.TAURON_DYSTRYBUCJA.G12w",
+      "label": "TAURON Dystrybucja - G12w",
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G12w",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "presetId": "PL.TAURON_SPRZEDAZ.G12w.2026",
+          "componentId": "energy-purchase",
+          "values": {}
+        },
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G12w.2026",
+          "componentId": "distribution-variable",
+          "values": {}
+        }
+      ]
+    },
+    {
       "id": "PL.STARTER.PGE_DYSTRYBUCJA.G11",
       "label": "PGE Dystrybucja - G11",
       "operator": {
@@ -134,6 +157,52 @@
         {
           "kind": "DISTRIBUTION_VARIABLE",
           "presetId": "PL.PGE_DYSTRYBUCJA.G12.2026",
+          "componentId": "distribution-variable",
+          "values": {}
+        }
+      ]
+    },
+    {
+      "id": "PL.STARTER.PGE_DYSTRYBUCJA.G12w",
+      "label": "PGE Dystrybucja - G12w",
+      "operator": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "tariffGroup": "G12w",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "presetId": "PL.PGE_OBROT.G12w.2026",
+          "componentId": "energy-purchase",
+          "values": {}
+        },
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12w.2026",
+          "componentId": "distribution-variable",
+          "values": {}
+        }
+      ]
+    },
+    {
+      "id": "PL.STARTER.PGE_DYSTRYBUCJA.G12n",
+      "label": "PGE Dystrybucja - G12n",
+      "operator": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "tariffGroup": "G12n",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "presetId": "PL.PGE_OBROT.G12n.2026",
+          "componentId": "energy-purchase",
+          "values": {}
+        },
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12n.2026",
           "componentId": "distribution-variable",
           "values": {}
         }
@@ -209,6 +278,52 @@
       ]
     },
     {
+      "id": "PL.STARTER.ENEA_OPERATOR.G12w",
+      "label": "ENEA Operator - G12w",
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G12w",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "presetId": "PL.ENEA.G12w.2026",
+          "componentId": "energy-purchase",
+          "values": {}
+        },
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "presetId": "PL.ENEA_OPERATOR.G12w.2026",
+          "componentId": "distribution-variable",
+          "values": {}
+        }
+      ]
+    },
+    {
+      "id": "PL.STARTER.ENEA_OPERATOR.G12sezON",
+      "label": "ENEA Operator - G12sezON",
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G12sezON",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "presetId": "PL.ENEA.G11.2026",
+          "componentId": "energy-purchase",
+          "values": {}
+        },
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "presetId": "PL.ENEA_OPERATOR.G12sezON.2026",
+          "componentId": "distribution-variable",
+          "values": {}
+        }
+      ]
+    },
+    {
       "id": "PL.STARTER.ENERGA_OPERATOR.G11",
       "label": "Energa-Operator - G11",
       "operator": {
@@ -255,6 +370,52 @@
       ]
     },
     {
+      "id": "PL.STARTER.ENERGA_OPERATOR.G12w",
+      "label": "Energa-Operator - G12w",
+      "operator": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "tariffGroup": "G12w",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "presetId": "PL.ENERGA_OBROT.G12w.2026",
+          "componentId": "energy-purchase",
+          "values": {}
+        },
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "presetId": "PL.ENERGA_OPERATOR.G12w.2026",
+          "componentId": "distribution-variable",
+          "values": {}
+        }
+      ]
+    },
+    {
+      "id": "PL.STARTER.ENERGA_OPERATOR.G12r",
+      "label": "Energa-Operator - G12r",
+      "operator": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "tariffGroup": "G12r",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "presetId": "PL.ENERGA_OBROT.G12r.2026",
+          "componentId": "energy-purchase",
+          "values": {}
+        },
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "presetId": "PL.ENERGA_OPERATOR.G12r.2026",
+          "componentId": "distribution-variable",
+          "values": {}
+        }
+      ]
+    },
+    {
       "id": "PL.STARTER.STOEN_OPERATOR.G11",
       "label": "Stoen Operator - G11",
       "operator": {
@@ -295,6 +456,29 @@
         {
           "kind": "DISTRIBUTION_VARIABLE",
           "presetId": "PL.STOEN_OPERATOR.G12.2026",
+          "componentId": "distribution-variable",
+          "values": {}
+        }
+      ]
+    },
+    {
+      "id": "PL.STARTER.STOEN_OPERATOR.G12w",
+      "label": "Stoen Operator - G12w",
+      "operator": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "tariffGroup": "G12w",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "presetId": "PL.EON_POLSKA.G12w.2026",
+          "componentId": "energy-purchase",
+          "values": {}
+        },
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "presetId": "PL.STOEN_OPERATOR.G12w.2026",
           "componentId": "distribution-variable",
           "values": {}
         }

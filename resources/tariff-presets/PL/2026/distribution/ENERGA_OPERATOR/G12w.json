@@ -1,0 +1,166 @@
+{
+  "version": 1,
+  "id": "PL.ENERGA_OPERATOR.G12w.2026",
+  "label": "Energa-Operator - G12w",
+  "presetType": "TARIFF",
+  "components": [
+    {
+      "kind": "DISTRIBUTION_VARIABLE",
+      "componentId": "distribution-variable",
+      "label": "Dystrybucja zmienna"
+    }
+  ],
+  "provider": {
+    "id": "ENERGA_OPERATOR",
+    "label": "Energa-Operator"
+  },
+  "operator": {
+    "id": "ENERGA_OPERATOR",
+    "label": "Energa-Operator"
+  },
+  "tariffGroup": "G12w",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "distribution.DAY",
+      "label": "Dystrybucja - Szczyt/Dzień",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "distribution.NIGHT",
+      "label": "Dystrybucja - Pozaszczyt/Noc",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh"
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "distribution-variable",
+            "category": "NETWORK",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "HOLIDAY"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "24:00"
+                    }
+                  ],
+                  "priority": 100
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "24:00"
+                    }
+                  ],
+                  "priority": 200
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "15:00"
+                    }
+                  ],
+                  "priority": 500
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "13:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "22:00"
+                    }
+                  ],
+                  "priority": 500
+                }
+              ],
+              "calendar": "PL_PUBLIC_HOLIDAYS"
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": "0.4017",
+                "NIGHT": "0.0851"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "source": {
+    "title": "Taryfa Energa-Operator na 2026 r.",
+    "url": "https://cdn-netpr.pl/file/mediakit/2933024/8/20251217_taryfa_2026.pdf",
+    "retrievedAt": "2026-09-24"
+  }
+}

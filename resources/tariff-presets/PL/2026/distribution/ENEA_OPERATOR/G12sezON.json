@@ -1,0 +1,200 @@
+{
+  "version": 1,
+  "id": "PL.ENEA_OPERATOR.G12sezON.2026",
+  "label": "ENEA Operator - G12sezON",
+  "presetType": "TARIFF",
+  "components": [
+    {
+      "kind": "DISTRIBUTION_VARIABLE",
+      "componentId": "distribution-variable",
+      "label": "Dystrybucja zmienna"
+    }
+  ],
+  "provider": {
+    "id": "ENEA_OPERATOR",
+    "label": "ENEA Operator"
+  },
+  "operator": {
+    "id": "ENEA_OPERATOR",
+    "label": "ENEA Operator"
+  },
+  "tariffGroup": "G12sezON",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "distribution.OTHER",
+      "label": "Dystrybucja - Pozostałe godziny doby",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/OTHER"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "distribution.RECOMMENDED_CONSUMPTION",
+      "label": "Dystrybucja - Zalecany pobór",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/RECOMMENDED_CONSUMPTION"
+      ],
+      "unit": "PLN/kWh"
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "distribution-variable",
+            "category": "NETWORK",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "04:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "09:00",
+                      "to": "17:00"
+                    }
+                  ],
+                  "season": "SUMMER"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "09:00"
+                    },
+                    {
+                      "from": "17:00",
+                      "to": "04:00"
+                    }
+                  ],
+                  "season": "SUMMER"
+                },
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "11:00",
+                      "to": "13:00"
+                    }
+                  ],
+                  "season": "WINTER"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "11:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "22:00"
+                    }
+                  ],
+                  "season": "WINTER"
+                }
+              ],
+              "seasons": [
+                {
+                  "id": "SUMMER",
+                  "from": "--04-01",
+                  "to": "--10-01"
+                },
+                {
+                  "id": "WINTER",
+                  "from": "--10-01",
+                  "to": "--04-01"
+                }
+              ]
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "OTHER": "0.2779",
+                "RECOMMENDED_CONSUMPTION": "0.0913"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "source": {
+    "title": "Taryfa ENEA Operator na 2026 r.",
+    "url": "https://www.operator.enea.pl/sites/operator/files/dokumenty/Enea%20Operator_wyci%C4%85g%20z%20taryfy_01.01.2026-31.12.2026.pdf",
+    "retrievedAt": "2026-09-24"
+  }
+}

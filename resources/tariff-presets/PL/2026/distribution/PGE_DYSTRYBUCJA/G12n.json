@@ -1,0 +1,163 @@
+{
+  "version": 1,
+  "id": "PL.PGE_DYSTRYBUCJA.G12n.2026",
+  "label": "PGE Dystrybucja - G12n",
+  "presetType": "TARIFF",
+  "components": [
+    {
+      "kind": "DISTRIBUTION_VARIABLE",
+      "componentId": "distribution-variable",
+      "label": "Dystrybucja zmienna"
+    }
+  ],
+  "provider": {
+    "id": "PGE_DYSTRYBUCJA",
+    "label": "PGE Dystrybucja"
+  },
+  "operator": {
+    "id": "PGE_DYSTRYBUCJA",
+    "label": "PGE Dystrybucja"
+  },
+  "tariffGroup": "G12n",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "distribution.DAY",
+      "label": "Dystrybucja - Szczyt/Dzień",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "distribution.NIGHT",
+      "label": "Dystrybucja - Pozaszczyt/Noc",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh"
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "distribution-variable",
+            "category": "NETWORK",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "HOLIDAY"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "24:00"
+                    }
+                  ],
+                  "priority": 100
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "24:00"
+                    }
+                  ],
+                  "priority": 200
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "01:00",
+                      "to": "05:00"
+                    }
+                  ],
+                  "priority": 500
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "05:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "01:00"
+                    }
+                  ],
+                  "priority": 500
+                }
+              ],
+              "calendar": "PL_PUBLIC_HOLIDAYS"
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": "0.3470",
+                "NIGHT": "0.0347"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "source": {
+    "title": "Taryfa PGE Dystrybucja na 2026 r.",
+    "url": "https://pgedystrybucja.pl/content/download/cd45f59eac0f9136b8fa66d3c0180f85/file/wyciag-z-taryfy-dla-uslug-dystrybucji-energii-elektrycznej-obowiazujacej-od-dnia-01.01.2026r.pdf?contentId=1257&inLanguage=pol-PL&version=4",
+    "retrievedAt": "2026-09-24"
+  }
+}

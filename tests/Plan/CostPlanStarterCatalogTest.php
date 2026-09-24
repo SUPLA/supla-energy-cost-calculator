@@ -21,7 +21,7 @@ final class CostPlanStarterCatalogTest extends TestCase
     {
         $starters = (new CostPlanStarterCatalog())->starters();
 
-        self::assertCount(13, $starters);
+        self::assertCount(21, $starters);
         self::assertSame('PL.STARTER.TAURON_DYSTRYBUCJA.G11', $starters[0]['id']);
         self::assertSame('G11', $starters[0]['tariffGroup']);
         self::assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $starters[0]['revision']);

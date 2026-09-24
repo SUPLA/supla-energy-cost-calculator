@@ -1,0 +1,238 @@
+{
+  "version": 1,
+  "id": "PL.PGE_OBROT.G12w.2026",
+  "label": "PGE Obrót - G12w",
+  "presetType": "OFFER",
+  "components": [
+    {
+      "kind": "ENERGY_PURCHASE",
+      "componentId": "energy-purchase",
+      "label": "Energia czynna"
+    }
+  ],
+  "provider": {
+    "id": "PGE_OBROT",
+    "label": "PGE Obrót"
+  },
+  "tariffGroup": "G12w",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "energyPurchase": {
+    "supplier": {
+      "id": "PGE_OBROT",
+      "label": "PGE Obrót"
+    },
+    "energyPriceBasis": "NET_WITH_EXCISE",
+    "assumptions": [
+      "billingCycle.anchor w szablonie jest wyłącznie deterministycznym założeniem do samodzielnej kompilacji presetu; CostPlan konfiguruje billingCycles niezależnie.",
+      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
+    ],
+    "sources": [
+      {
+        "title": "Taryfa PGE Obrót dla odbiorców z grup taryfowych G na 2026 r.",
+        "url": "https://www.gkpge.pl/content/download/e81cbcdedf76bd67800e1c39c65dc827/file/a5_taryfa_g_12_2026_web.pdf?contentId=196597&inLanguage=pol-PL&version=1",
+        "retrievedAt": "2026-09-24"
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "id": "energy.DAY",
+      "label": "Cena energii - Szczyt/Dzień",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "energy.NIGHT",
+      "label": "Cena energii - Pozaszczyt/Noc",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh"
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "HOLIDAY"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "24:00"
+                    }
+                  ],
+                  "priority": 100
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "24:00"
+                    }
+                  ],
+                  "priority": 200
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "17:00"
+                    }
+                  ],
+                  "season": "SUMMER",
+                  "priority": 500
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "15:00"
+                    },
+                    {
+                      "from": "17:00",
+                      "to": "22:00"
+                    }
+                  ],
+                  "season": "SUMMER",
+                  "priority": 500
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "15:00"
+                    }
+                  ],
+                  "season": "WINTER",
+                  "priority": 500
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "13:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "22:00"
+                    }
+                  ],
+                  "season": "WINTER",
+                  "priority": 500
+                }
+              ],
+              "seasons": [
+                {
+                  "id": "SUMMER",
+                  "from": "--04-01",
+                  "to": "--10-01"
+                },
+                {
+                  "id": "WINTER",
+                  "from": "--10-01",
+                  "to": "--04-01"
+                }
+              ],
+              "calendar": "PL_PUBLIC_HOLIDAYS"
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": "0.5871",
+                "NIGHT": "0.4285"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "source": {
+    "title": "Taryfa PGE Obrót dla odbiorców z grup taryfowych G na 2026 r.",
+    "url": "https://www.gkpge.pl/content/download/e81cbcdedf76bd67800e1c39c65dc827/file/a5_taryfa_g_12_2026_web.pdf?contentId=196597&inLanguage=pol-PL&version=1",
+    "retrievedAt": "2026-09-24"
+  }
+}
