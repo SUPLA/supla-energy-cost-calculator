@@ -6,88 +6,64 @@ namespace Supla\EnergyCostCalculator\Tests\Preset;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Supla\EnergyCostCalculator\Exception\TariffPresetCompilationException;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCatalog;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCompiler;
 
-final class TariffPresetSimulationDefaultsTest extends TestCase
+final class TariffPresetDefaultsTest extends TestCase
 {
-    public function testEveryBundledPresetCanBeCompiledUsingSimulationDefaultsWithoutAdditionalInput(): void
+    public function testEveryBundledPresetCanBeCompiledWithoutInput(): void
     {
         $catalog = new TariffPresetCatalog();
         $compiler = new TariffPresetCompiler($catalog);
 
         foreach ($catalog->presets() as $metadata) {
             $preset = $catalog->get($metadata['id']);
-            $simulation = $preset->document['simulationDefaults'] ?? null;
-
-            self::assertIsArray($simulation, $preset->id);
-            self::assertSame('STANDARD_SUPPLIER_TARIFF', $simulation['basis'] ?? null, $preset->id);
-            self::assertSame('NET_WITH_EXCISE', $simulation['energyPriceBasis'] ?? null, $preset->id);
-            self::assertIsArray($simulation['supplier'] ?? null, $preset->id);
-            self::assertNotSame('', $simulation['supplier']['id'] ?? '', $preset->id);
-            self::assertNotSame('', $simulation['supplier']['label'] ?? '', $preset->id);
-            self::assertIsArray($simulation['values'] ?? null, $preset->id);
-            self::assertNotEmpty($simulation['sources'] ?? [], $preset->id);
-            self::assertSame(substr($preset->document['validFrom'], 0, 10), $simulation['values']['billingCycle.anchor'] ?? null, $preset->id);
-
-            $inputs = [];
-            foreach ($preset->document['inputs'] as $input) {
-                $inputs[$input['id']] = $input;
-            }
-
-            foreach ($simulation['values'] as $inputId => $_value) {
-                self::assertArrayHasKey($inputId, $inputs, "$preset->id simulation default must reference a declared input");
-                $target = $inputs[$inputId]['targets'][0];
-                self::assertNull(
-                    $this->readPointer($preset->document['billingDefinitionTemplate'], $target),
-                    "$preset->id simulation default '$inputId' must not duplicate an inherited preset default",
-                );
-            }
-
             foreach ($preset->document['inputs'] as $input) {
                 if (($input['required'] ?? false) !== true) {
                     continue;
                 }
                 $templateValue = $this->readPointer($preset->document['billingDefinitionTemplate'], $input['targets'][0]);
-                $simulationValueExists = array_key_exists($input['id'], $simulation['values']);
-                self::assertTrue(
-                    ($templateValue !== null && $templateValue !== '') || $simulationValueExists,
-                    "$preset->id required input '{$input['id']}' is unresolved even for simulation",
+                self::assertNotTrue(
+                    $templateValue === null || $templateValue === '',
+                    "$preset->id required input '{$input['id']}' is unresolved",
                 );
             }
 
-            $definition = $compiler->compile($preset, $simulation['values']);
+            $definition = $compiler->compile($preset, []);
             self::assertSame($preset->document['currency'], $definition->currency, $preset->id);
             self::assertSame($preset->document['timezone'], $definition->timezone, $preset->id);
         }
     }
 
     #[DataProvider('energyPriceDefaults')]
-    public function testBundledEnergyPriceSuggestions(string $presetId, string $supplierId, array $expectedValues): void
+    public function testBundledEnergyPurchaseDefaults(string $presetId, string $supplierId, array $expectedValues): void
     {
         $preset = (new TariffPresetCatalog())->get($presetId);
-        $simulation = $preset->document['simulationDefaults'];
+        $energyPurchase = $preset->document['energyPurchase'];
 
-        self::assertSame($supplierId, $simulation['supplier']['id']);
+        self::assertSame($supplierId, $energyPurchase['supplier']['id']);
         foreach ($expectedValues as $inputId => $expectedValue) {
-            self::assertSame($expectedValue, $simulation['values'][$inputId] ?? null, "$presetId $inputId");
+            foreach ($preset->document['inputs'] as $input) {
+                if ($input['id'] === $inputId) {
+                    self::assertSame($expectedValue, $this->readPointer($preset->document['billingDefinitionTemplate'], $input['targets'][0]), "$presetId $inputId");
+                    continue 2;
+                }
+            }
+            self::fail("$presetId missing input $inputId");
         }
     }
 
-    public function testSimulationDefaultsDoNotBecomeNormalPresetDefaults(): void
+    public function testDefaultsMayBeOverriddenByInputs(): void
     {
         $catalog = new TariffPresetCatalog();
         $preset = $catalog->get('PL.TAURON_DYSTRYBUCJA.G11.2026');
 
-        self::assertNull($this->readPointer(
+        self::assertSame('0.5020', $this->readPointer(
             $preset->document['billingDefinitionTemplate'],
             '/periods/0/components/0/rate/value',
         ));
-        self::assertSame('0.5020', $preset->document['simulationDefaults']['values']['energy.rate']);
-
-        $this->expectException(TariffPresetCompilationException::class);
-        (new TariffPresetCompiler($catalog))->compile($preset, []);
+        $compiled = (new TariffPresetCompiler($catalog))->compileToArray($preset, ['energy.rate' => '0.6000']);
+        self::assertSame('0.6000', $compiled['periods'][0]['components'][0]['rate']['value']);
     }
 
     public static function energyPriceDefaults(): iterable

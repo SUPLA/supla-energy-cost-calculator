@@ -48,7 +48,7 @@ final class TariffPresetCompilerTest extends TestCase
         ]);
     }
 
-    public function testCompilesOneComponentWithoutRequiringOtherInputsOrBillingAnchor(): void
+    public function testCompilesOneComponentWithoutRequiringOtherInputOverrides(): void
     {
         $compiled = (new TariffPresetCompiler())->compileComponentToArray(
             'PL.ENEA_OPERATOR.G12.2026',
@@ -63,17 +63,15 @@ final class TariffPresetCompilerTest extends TestCase
         self::assertCount(1, $compiled['periods'][0]['components']);
         self::assertSame('ENERGY', $compiled['periods'][0]['components'][0]['category']);
         self::assertSame('12:00', $compiled['periods'][0]['components'][0]['selector']['rules'][0]['time_ranges'][1]['from']);
-        self::assertNull($compiled['billingCycle']['anchor']);
+        self::assertSame('2026-01-01', $compiled['billingCycle']['anchor']);
     }
 
     public function testRejectsUnresolvedRequiredInput(): void
     {
         $this->expectException(TariffPresetCompilationException::class);
-        $this->expectExceptionMessage("Required input 'billingCycle.anchor'");
+        $this->expectExceptionMessage("Required input 'rate'");
 
-        (new TariffPresetCompiler())->compile('PL.TAURON_DYSTRYBUCJA.G11.2026', [
-            'energy.rate' => '0.71',
-        ]);
+        (new TariffPresetCompiler())->compile($this->customPreset('/periods/0/components/0/rate/rates/A~1B'), []);
     }
 
     public function testRejectsIntegerBelowPresetMinimum(): void

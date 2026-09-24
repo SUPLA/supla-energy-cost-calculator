@@ -46,7 +46,7 @@ final class TariffPresetCatalogTest extends TestCase
         self::assertArrayHasKey('billingDefinitionTemplate', $preset->document);
     }
 
-    public function testEveryBundledPresetHasCompilableSimulationDefaults(): void
+    public function testEveryBundledPresetHasCompilableDefaults(): void
     {
         $catalog = new TariffPresetCatalog();
         $compiler = new TariffPresetCompiler($catalog);
@@ -54,24 +54,11 @@ final class TariffPresetCatalogTest extends TestCase
         foreach ($catalog->presets() as $metadata) {
             $preset = $catalog->get($metadata['id']);
             $document = $preset->document;
-            $defaults = $document['simulationDefaults'] ?? null;
-            self::assertIsArray($defaults, $preset->id);
-            self::assertSame('STANDARD_SUPPLIER_TARIFF', $defaults['basis'] ?? null, $preset->id);
-            self::assertNotEmpty($defaults['supplier']['id'] ?? null, $preset->id);
-            self::assertNotEmpty($defaults['supplier']['label'] ?? null, $preset->id);
-            self::assertIsArray($defaults['values'] ?? null, $preset->id);
+            self::assertArrayNotHasKey('simulationDefaults', $document, $preset->id);
+            self::assertSame('2026-01-01', $document['billingDefinitionTemplate']['billingCycle']['anchor'], $preset->id);
 
-            $values = $defaults['values'];
-            self::assertSame(
-                (new \DateTimeImmutable($document['validFrom']))->format('Y-m-d'),
-                $values['billingCycle.anchor'] ?? null,
-                $preset->id,
-            );
-            $inputIds = array_column($document['inputs'], 'id');
-            self::assertSame([], array_diff(array_keys($values), $inputIds), $preset->id);
-
-            $compiled = $compiler->compileToArray($preset, $values);
-            self::assertSame($values['billingCycle.anchor'], $compiled['billingCycle']['anchor'], $preset->id);
+            $compiled = $compiler->compileToArray($preset, []);
+            self::assertSame('2026-01-01', $compiled['billingCycle']['anchor'], $preset->id);
             self::assertSame($document['billingDefinitionTemplate'], $preset->document['billingDefinitionTemplate'], $preset->id);
         }
     }

@@ -15,7 +15,7 @@
     "timezone",
     "priceBasis",
     "inputs",
-    "simulationDefaults",
+    "energyPurchase",
     "billingDefinitionTemplate",
     "source"
   ],
@@ -73,8 +73,8 @@
         "GROSS"
       ]
     },
-    "simulationDefaults": {
-      "$ref": "#/$defs/simulationDefaults"
+    "energyPurchase": {
+      "$ref": "#/$defs/energyPurchase"
     },
     "inputs": {
       "type": "array",
@@ -85,33 +85,6 @@
     },
     "billingDefinitionTemplate": {
       "type": "object"
-    },
-    "simulationDefaults": {
-      "type": "object",
-      "required": ["basis", "supplier", "values"],
-      "properties": {
-        "basis": {
-          "const": "STANDARD_SUPPLIER_TARIFF"
-        },
-        "supplier": {
-          "$ref": "#/$defs/supplier"
-        },
-        "values": {
-          "type": "object",
-          "required": ["billingCycle.anchor"],
-          "minProperties": 2,
-          "propertyNames": {
-            "pattern": "^(billingCycle\\.(anchor|length)|energy\\.[A-Za-z0-9_]+)$"
-          },
-          "additionalProperties": {
-            "oneOf": [
-              { "type": "string", "minLength": 1 },
-              { "type": "integer" }
-            ]
-          }
-        }
-      },
-      "additionalProperties": false
     },
     "warnings": {
       "type": "array",
@@ -229,19 +202,14 @@
       },
       "additionalProperties": false
     },
-    "simulationDefaults": {
+    "energyPurchase": {
       "type": "object",
       "required": [
-        "basis",
         "supplier",
         "energyPriceBasis",
-        "values",
         "sources"
       ],
       "properties": {
-        "basis": {
-          "const": "STANDARD_SUPPLIER_TARIFF"
-        },
         "supplier": {
           "type": "object",
           "required": [
@@ -266,20 +234,6 @@
             "NET_WITHOUT_EXCISE",
             "GROSS"
           ]
-        },
-        "values": {
-          "type": "object",
-          "minProperties": 1,
-          "propertyNames": {
-            "type": "string",
-            "minLength": 1
-          },
-          "additionalProperties": {
-            "type": [
-              "string",
-              "number"
-            ]
-          }
         },
         "assumptions": {
           "type": "array",

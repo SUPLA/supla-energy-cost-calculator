@@ -12,17 +12,12 @@
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
   "priceBasis": "NET",
-  "simulationDefaults": {
-    "basis": "STANDARD_SUPPLIER_TARIFF",
+  "energyPurchase": {
     "supplier": {
       "id": "PGE_OBROT",
       "label": "PGE Obrót"
     },
     "energyPriceBasis": "NET_WITH_EXCISE",
-    "values": {
-      "billingCycle.anchor": "2026-01-01",
-      "energy.rate": "0.5032"
-    },
     "assumptions": [
       "billingCycle.anchor jest ustawiony na początek ważności presetu wyłącznie jako deterministyczne założenie do symulacji bez danych z faktury użytkownika.",
       "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
@@ -84,7 +79,7 @@
     "currency": "PLN",
     "timezone": "Europe/Warsaw",
     "billingCycle": {
-      "anchor": null,
+      "anchor": "2026-01-01",
       "length": 1,
       "unit": "MONTH"
     },
@@ -104,7 +99,7 @@
             },
             "rate": {
               "type": "CONSTANT",
-              "value": null,
+              "value": "0.5032",
               "unit": "PLN/kWh"
             }
           },

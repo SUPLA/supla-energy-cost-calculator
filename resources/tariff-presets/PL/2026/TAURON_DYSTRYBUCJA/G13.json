@@ -12,19 +12,12 @@
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
   "priceBasis": "NET",
-  "simulationDefaults": {
-    "basis": "STANDARD_SUPPLIER_TARIFF",
+  "energyPurchase": {
     "supplier": {
       "id": "TAURON_SPRZEDAZ",
       "label": "TAURON Sprzedaż"
     },
     "energyPriceBasis": "NET_WITH_EXCISE",
-    "values": {
-      "billingCycle.anchor": "2026-01-01",
-      "energy.MORNING_PEAK": "0.4718",
-      "energy.AFTERNOON_PEAK": "0.7830",
-      "energy.OFF_PEAK": "0.4260"
-    },
     "assumptions": [
       "billingCycle.anchor jest ustawiony na początek ważności presetu wyłącznie jako deterministyczne założenie do symulacji bez danych z faktury użytkownika.",
       "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
@@ -128,7 +121,7 @@
     "currency": "PLN",
     "timezone": "Europe/Warsaw",
     "billingCycle": {
-      "anchor": null,
+      "anchor": "2026-01-01",
       "length": 1,
       "unit": "MONTH"
     },
@@ -316,9 +309,9 @@
             "rate": {
               "type": "ZONED",
               "rates": {
-                "MORNING_PEAK": null,
-                "AFTERNOON_PEAK": null,
-                "OFF_PEAK": null
+                "MORNING_PEAK": "0.4718",
+                "AFTERNOON_PEAK": "0.7830",
+                "OFF_PEAK": "0.4260"
               },
               "unit": "PLN/kWh"
             }
