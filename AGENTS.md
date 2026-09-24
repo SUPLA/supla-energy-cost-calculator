@@ -36,6 +36,8 @@ Never reintroduce a global "static tariff vs dynamic tariff" distinction. Differ
 - `ReferenceDataSource` supplies time-series values such as Fixing1, Fixing2, RCE and PDGSZ.
 - `HolidayCalendarProvider` supplies local-date holiday information.
 
+When a `REFERENCE` rate declares `sourceUnit`, the returned `ReferenceInterval.unit` must match it exactly. Treat `sourceUnit` as a runtime contract assertion; do not silently convert units in the resolver because the rate's `multiplier` already owns any intended conversion.
+
 The core calculator must not query a database directly.
 
 ## SUPLA integration assumptions
@@ -251,6 +253,8 @@ Supported strategies are:
 - `IMPORT_MINUS_EXPORT_CAP_ZERO` = `max(sum(import) - sum(export), 0)`.
 
 Without `strategy`, quantities keep the existing per-delta behavior. Temporal netting currently applies to `ACTIVE_ENERGY_IMPORT` and requires both `ACTIVE_ENERGY_IMPORT` and `ACTIVE_ENERGY_EXPORT` in every source delta.
+
+Device-reported vector-balanced counters such as SUPLA `fae_balanced`/`rae_balanced` are not calculator quantity types. Adapters expose canonical active import/export facts; tariff-specific balancing belongs to `quantity.strategy` and its explicit time window.
 
 Netting windows are aligned using `BillingDefinition.timezone`. Raw meter deltas remain canonical source facts. A netting charge may be emitted only when the full window is covered contiguously. A requested range that cuts a netting window, a gap in meter deltas, a billing-definition or billing-cycle boundary inside a window, a selector change inside a window, or a rate change inside a window must fail explicitly.
 

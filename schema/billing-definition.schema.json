@@ -107,8 +107,6 @@
               "enum": [
                 "ACTIVE_ENERGY_IMPORT",
                 "ACTIVE_ENERGY_EXPORT",
-                "ACTIVE_ENERGY_BALANCED_IMPORT",
-                "ACTIVE_ENERGY_BALANCED_EXPORT",
                 "REACTIVE_ENERGY_IMPORT",
                 "REACTIVE_ENERGY_EXPORT"
               ]
@@ -189,8 +187,6 @@
               "enum": [
                 "ACTIVE_ENERGY_IMPORT",
                 "ACTIVE_ENERGY_EXPORT",
-                "ACTIVE_ENERGY_BALANCED_IMPORT",
-                "ACTIVE_ENERGY_BALANCED_EXPORT",
                 "REACTIVE_ENERGY_IMPORT",
                 "REACTIVE_ENERGY_EXPORT"
               ]
@@ -480,7 +476,8 @@
               "type": "string"
             },
             "sourceUnit": {
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "multiplier": {
               "type": [

@@ -43,7 +43,7 @@ This is an initial package skeleton. Before production billing use, consider add
 - demand / contracted-power quantity strategies,
 - explicit handling of gaps in delta logs,
 - configurable behavior for definition boundaries that cut through meter intervals,
-- richer validation of units and component compatibility,
+- richer component compatibility and unit-conversion semantics,
 - result/cost caching outside the library if large fleet-wide reports need it.
 
 ## Holiday calendars

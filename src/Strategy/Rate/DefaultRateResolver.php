@@ -46,7 +46,18 @@ final class DefaultRateResolver implements RateResolver
         DecimalMath $math,
     ): string {
         $source = (string)$definition->config['source'];
-        $value = $references->series($source)->valueAt($delta->from)->value;
+        $interval = $references->series($source)->valueAt($delta->from);
+        $sourceUnit = $definition->config['sourceUnit'] ?? null;
+        if ($sourceUnit !== null && $interval->unit !== $sourceUnit) {
+            $actualUnit = $interval->unit ?? '<missing>';
+            throw new CalculationException(sprintf(
+                "Reference source '%s' unit mismatch: expected '%s', got '%s'.",
+                $source,
+                $sourceUnit,
+                $actualUnit,
+            ));
+        }
+        $value = $interval->value;
         $multiplier = (string)($definition->config['multiplier'] ?? '1');
         $add = (string)($definition->config['add'] ?? '0');
         return $math->add($math->multiply($value, $multiplier), $add);

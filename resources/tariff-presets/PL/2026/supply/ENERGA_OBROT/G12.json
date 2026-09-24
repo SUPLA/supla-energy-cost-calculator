@@ -78,7 +78,9 @@
             "id": "energy-purchase",
             "category": "ENERGY",
             "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT"
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
             },
             "selector": {
               "type": "WEEKLY_SCHEDULE",

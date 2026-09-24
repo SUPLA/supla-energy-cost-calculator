@@ -29,7 +29,7 @@ final class TariffPresetCatalogTest extends TestCase
     {
         $presets = (new TariffPresetCatalog())->presets();
 
-        self::assertCount(28, $presets);
+        self::assertCount(29, $presets);
         self::assertSame('PL.TAURON_DYSTRYBUCJA.G11.2026', $presets[0]['id']);
         self::assertSame('TAURON Dystrybucja - G11', $presets[0]['label']);
         self::assertSame('TARIFF', $presets[0]['presetType']);

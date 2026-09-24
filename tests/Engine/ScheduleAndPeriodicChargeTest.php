@@ -165,7 +165,7 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
 
     public function testBillingPeriodFixedCostIsChargedOncePerBillingCycle(): void
     {
-        $definition = $this->definition([[ 
+        $definition = $this->definition([[
             'id' => 'billing-fee',
             'category' => 'SERVICE',
             'quantity' => ['type' => 'PERIOD', 'period' => 'BILLING_PERIOD', 'prorate' => false],
@@ -198,8 +198,6 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
         return new EnergyDelta(new \DateTimeImmutable($from), new \DateTimeImmutable($to), [
             QuantityType::ACTIVE_ENERGY_IMPORT->value => '1',
             QuantityType::ACTIVE_ENERGY_EXPORT->value => '0',
-            QuantityType::ACTIVE_ENERGY_BALANCED_IMPORT->value => '1',
-            QuantityType::ACTIVE_ENERGY_BALANCED_EXPORT->value => '0',
         ]);
     }
 

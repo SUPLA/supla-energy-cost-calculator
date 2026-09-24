@@ -282,6 +282,9 @@ final class BillingDefinitionParser
             }
         } elseif ($type === 'REFERENCE') {
             $this->requiredString($data, 'source', $path);
+            if (array_key_exists('sourceUnit', $data)) {
+                $this->requiredString($data, 'sourceUnit', $path);
+            }
             foreach (['multiplier', 'add'] as $field) {
                 if (isset($data[$field]) && !is_numeric((string)$data[$field])) {
                     throw new DefinitionException("$path.$field must be numeric.");

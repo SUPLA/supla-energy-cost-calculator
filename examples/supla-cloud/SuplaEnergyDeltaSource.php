@@ -26,8 +26,7 @@ final class SuplaEnergyDeltaSource implements EnergyDeltaSource
         // supla_em_delta_log.date is the END of the 15-minute slot.
         $rows = $this->connection->executeQuery(
             'SELECT date, phase1_fae, phase2_fae, phase3_fae,
-                    phase1_rae, phase2_rae, phase3_rae,
-                    fae_balanced, rae_balanced
+                    phase1_rae, phase2_rae, phase3_rae
                FROM supla_em_delta_log
               WHERE channel_id = :channelId
                 AND date > :from
@@ -51,12 +50,6 @@ final class SuplaEnergyDeltaSource implements EnergyDeltaSource
                 QuantityType::ACTIVE_ENERGY_IMPORT->value => $this->toKwh($forward),
                 QuantityType::ACTIVE_ENERGY_EXPORT->value => $this->toKwh($reverse),
             ];
-            if ($row['fae_balanced'] !== null) {
-                $quantities[QuantityType::ACTIVE_ENERGY_BALANCED_IMPORT->value] = $this->toKwh((int)$row['fae_balanced']);
-            }
-            if ($row['rae_balanced'] !== null) {
-                $quantities[QuantityType::ACTIVE_ENERGY_BALANCED_EXPORT->value] = $this->toKwh((int)$row['rae_balanced']);
-            }
 
             yield new EnergyDelta($from, $to, $quantities);
         }

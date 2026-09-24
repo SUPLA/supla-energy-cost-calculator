@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "id": "PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1",
-  "label": "Własna cena dynamiczna - interwałowa",
+  "id": "PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE_HOURLY.V1",
+  "label": "Własna cena dynamiczna - godzinowa",
   "presetType": "GENERIC",
   "components": [
     {
@@ -23,16 +23,12 @@
       "required": true,
       "options": [
         {
-          "value": "PL.TGE.FIXING1",
-          "label": "RDN Fixing I"
+          "value": "PL.TGE.FIXING1_HOURLY",
+          "label": "RDN Fixing I - hourly"
         },
         {
-          "value": "PL.TGE.FIXING2",
-          "label": "RDN Fixing II"
-        },
-        {
-          "value": "PL.PSE.RCE",
-          "label": "RCE"
+          "value": "PL.TGE.FIXING2_HOURLY",
+          "label": "RDN Fixing II - hourly"
         }
       ],
       "targets": [
@@ -77,14 +73,16 @@
             "id": "energy-purchase",
             "category": "ENERGY",
             "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT"
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
             },
             "selector": {
               "type": "ALWAYS"
             },
             "rate": {
               "type": "REFERENCE",
-              "source": "PL.TGE.FIXING1",
+              "source": "PL.TGE.FIXING1_HOURLY",
               "sourceUnit": "PLN/MWh",
               "multiplier": "0.001",
               "add": "0",
@@ -96,7 +94,7 @@
     ]
   },
   "warnings": [
-    "Preset generyczny: formuła ceny to reference × multiplier + add. Nie narzuca godzinnego nettingu; używa naturalnej rozdzielczości wybranego źródła."
+    "Preset generyczny: formuła ceny to reference × multiplier + add; energia pobrana jest godzinowo bilansowana z energią oddaną i ograniczana do zera."
   ],
   "source": {
     "title": "Konfiguracja użytkownika",

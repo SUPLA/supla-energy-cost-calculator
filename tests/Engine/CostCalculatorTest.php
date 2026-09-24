@@ -183,6 +183,7 @@ final class CostCalculatorTest extends TestCase
             'rate' => [
                 'type' => 'REFERENCE',
                 'source' => 'PL.TGE.FIXING1',
+                'sourceUnit' => 'PLN/MWh',
                 'multiplier' => '0.001',
                 'add' => '0.05',
                 'unit' => 'PLN/kWh',
@@ -198,6 +199,62 @@ final class CostCalculatorTest extends TestCase
 
         self::assertSame('1', $result->usageBasedTotal);
         self::assertSame('1', $result->total);
+    }
+
+    public function testReferenceRateRejectsMismatchedSourceUnit(): void
+    {
+        $deltas = [$this->delta('2026-01-01T10:00:00Z', '2026-01-01T10:15:00Z', '1')];
+        $references = new InMemoryReferenceDataSource([
+            'PL.TGE.FIXING1' => [new ReferenceInterval(
+                new \DateTimeImmutable('2026-01-01T10:00:00Z'),
+                new \DateTimeImmutable('2026-01-01T11:00:00Z'),
+                '0.45',
+                'PLN/kWh',
+            )],
+        ]);
+        $definition = $this->singleComponentDefinition([
+            'id' => 'energy',
+            'category' => 'ENERGY',
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'rate' => [
+                'type' => 'REFERENCE',
+                'source' => 'PL.TGE.FIXING1',
+                'sourceUnit' => 'PLN/MWh',
+                'multiplier' => '0.001',
+                'unit' => 'PLN/kWh',
+            ],
+        ]);
+
+        $this->expectException(\Supla\EnergyCostCalculator\Exception\CalculationException::class);
+        $this->expectExceptionMessage("Reference source 'PL.TGE.FIXING1' unit mismatch: expected 'PLN/MWh', got 'PLN/kWh'.");
+
+        (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), $references))->calculate(
+            'meter',
+            new TimeRange(new \DateTimeImmutable('2026-01-01T10:00:00Z'), new \DateTimeImmutable('2026-01-01T10:15:00Z')),
+            $definition,
+        );
+    }
+
+    public function testReferenceRateRejectsMissingSourceUnitWhenDefinitionRequiresIt(): void
+    {
+        $deltas = [$this->delta('2026-01-01T10:00:00Z', '2026-01-01T10:15:00Z', '1')];
+        $references = new InMemoryReferenceDataSource([
+            'PL.TGE.FIXING1' => [new ReferenceInterval(
+                new \DateTimeImmutable('2026-01-01T10:00:00Z'),
+                new \DateTimeImmutable('2026-01-01T11:00:00Z'),
+                '450',
+            )],
+        ]);
+        $definition = $this->singleComponentDefinition([
+            'id' => 'energy', 'category' => 'ENERGY', 'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'rate' => ['type' => 'REFERENCE', 'source' => 'PL.TGE.FIXING1', 'sourceUnit' => 'PLN/MWh'],
+        ]);
+
+        $this->expectException(\Supla\EnergyCostCalculator\Exception\CalculationException::class);
+        $this->expectExceptionMessage("got '<missing>'");
+        (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), $references))->calculate(
+            'meter', new TimeRange(new \DateTimeImmutable('2026-01-01T10:00:00Z'), new \DateTimeImmutable('2026-01-01T10:15:00Z')), $definition,
+        );
     }
 
     public function testPdgszSelectsG14DynamicZone(): void
@@ -484,8 +541,6 @@ final class CostCalculatorTest extends TestCase
         return new EnergyDelta(new \DateTimeImmutable($from), new \DateTimeImmutable($to), [
             QuantityType::ACTIVE_ENERGY_IMPORT->value => $import,
             QuantityType::ACTIVE_ENERGY_EXPORT->value => $export,
-            QuantityType::ACTIVE_ENERGY_BALANCED_IMPORT->value => $import,
-            QuantityType::ACTIVE_ENERGY_BALANCED_EXPORT->value => $export,
         ]);
     }
 

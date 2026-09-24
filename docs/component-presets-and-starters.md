@@ -35,22 +35,27 @@ Catalogue metadata declares concrete `components` (`kind`, `componentId`, `label
 
 ## Generic energy presets
 
-The package ships two generic `ENERGY_PURCHASE` presets:
+The package ships three generic `ENERGY_PURCHASE` presets:
 
-- `PL.GENERIC.ENERGY_PURCHASE.CONSTANT.V1` - editable constant PLN/kWh price;
-- `PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1` - `REFERENCE` rate with selectable Polish reference source plus editable multiplier and additive term.
+- `PL.GENERIC.ENERGY_PURCHASE.CONSTANT.V1` - editable constant PLN/kWh price with 60-minute import/export netting;
+- `PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1` - interval-reference rate for Fixing I, Fixing II or RCE without an imposed hourly netting window;
+- `PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE_HOURLY.V1` - hourly Fixing I/Fixing II reference with 60-minute import/export netting.
 
 Generic presets use the same `inputs`, defaults and overrides as real tariff presets. They are not a second configuration language.
 
 `CHOICE` inputs replace a scalar target exactly like the existing input types, but the submitted value must match one of the declared option values.
 
+Temporal netting is part of the component preset's executable `quantity`, not starter metadata. Standard Polish household supply/distribution presets use `IMPORT_MINUS_EXPORT_CAP_ZERO` with a 60-minute window. A starter merely selects those presets, so the same netting semantics apply whether a preset is reached through a starter or chosen manually.
+
+SUPLA's device-reported `fae_balanced`/`rae_balanced` counters describe vector phase-to-phase balancing and remain measurement/UI data. They are deliberately not separate calculator `QuantityType` values. Cost definitions operate on canonical active import/export quantities and apply temporal netting explicitly when the tariff requires it.
+
 ## Bundled dynamic offers
 
 Named dynamic offers are bundled only when the current calculator can express the published formula without approximation.
 
-`PL.ENERGA_OBROT.OFERTA_DYNAMICZNA_II.2025_11` models ENERGA-OBRÓT's Oferta dynamiczna II as hourly RDN Fixing I converted from PLN/MWh to PLN/kWh plus `0.0878 PLN/kWh` net. It also exposes the monthly supplier fee as a separate, overridable `SUPPLIER_FIXED` component. Source: https://www.energa.pl/dam/jcr%3A2971d640-ec36-434b-ab84-e310a8b1ea07/Regulamin%20naszej%20oferty%20Oferta%20dynamiczna%20II%20dla%20domu%20obowi%C4%85zuj%C4%85cy%20od%201%20listopada%202025%20roku.pdf
+`PL.ENERGA_OBROT.OFERTA_DYNAMICZNA_II.2025_11` models ENERGA-OBRÓT's Oferta dynamiczna II as hourly RDN Fixing I converted from PLN/MWh to PLN/kWh plus `0.0878 PLN/kWh` net, with 60-minute import/export netting. It also exposes the monthly supplier fee as a separate, overridable `SUPPLIER_FIXED` component. Source: https://www.energa.pl/dam/jcr%3A2971d640-ec36-434b-ab84-e310a8b1ea07/Regulamin%20naszej%20oferty%20Oferta%20dynamiczna%20II%20dla%20domu%20obowi%C4%85zuj%C4%85cy%20od%201%20listopada%202025%20roku.pdf
 
-`PL.ENEA.CENY_DYNAMICZNE.DI12011227_G` models ENEA's `DI12011227_G` Ceny Dynamiczne cennik as hourly RDN Fixing I plus `0.0050 PLN/kWh` excise and `0.0820 PLN/kWh` cost/margin component, therefore `add = 0.0870 PLN/kWh` net. Its monthly supplier fee is also a separate overridable component. Source: https://www.enea.pl/media/9061/cennik-oferty-ceny-dynamicznedi12011227god-01072026-do-30092026pdf.pdf
+`PL.ENEA.CENY_DYNAMICZNE.DI12011227_G` models ENEA's `DI12011227_G` Ceny Dynamiczne cennik as hourly RDN Fixing I plus `0.0050 PLN/kWh` excise and `0.0820 PLN/kWh` cost/margin component, therefore `add = 0.0870 PLN/kWh` net, with 60-minute import/export netting. Its monthly supplier fee is also a separate overridable component. Source: https://www.enea.pl/media/9061/cennik-oferty-ceny-dynamicznedi12011227god-01072026-do-30092026pdf.pdf
 
 For these offers, top-level preset validity records the availability window of that offer edition. Their internal price rule is intentionally open-ended because the actual contract start/end belongs to the user's CostPlan period.
 

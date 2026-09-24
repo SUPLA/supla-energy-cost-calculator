@@ -19,12 +19,15 @@ final class DynamicOfferPresetTest extends TestCase
             [],
         );
 
-        $rate = $compiled['periods'][0]['components'][0]['rate'];
+        $component = $compiled['periods'][0]['components'][0];
+        $rate = $component['rate'];
         self::assertSame('REFERENCE', $rate['type']);
         self::assertSame('PL.TGE.FIXING1_HOURLY', $rate['source']);
         self::assertSame('PLN/MWh', $rate['sourceUnit']);
         self::assertSame('0.001', $rate['multiplier']);
         self::assertSame('0.0878', $rate['add']);
+        self::assertSame('IMPORT_MINUS_EXPORT_CAP_ZERO', $component['quantity']['strategy']);
+        self::assertSame(60, $component['quantity']['periodInMinutes']);
 
         $overridden = $compiler->compileComponentToArray(
             'PL.ENERGA_OBROT.OFERTA_DYNAMICZNA_II.2025_11',
@@ -63,11 +66,14 @@ final class DynamicOfferPresetTest extends TestCase
             [],
         );
 
-        $rate = $compiled['periods'][0]['components'][0]['rate'];
+        $component = $compiled['periods'][0]['components'][0];
+        $rate = $component['rate'];
         self::assertSame('REFERENCE', $rate['type']);
         self::assertSame('PL.TGE.FIXING1_HOURLY', $rate['source']);
         self::assertSame('0.001', $rate['multiplier']);
         self::assertSame('0.0870', $rate['add']);
+        self::assertSame('IMPORT_MINUS_EXPORT_CAP_ZERO', $component['quantity']['strategy']);
+        self::assertSame(60, $component['quantity']['periodInMinutes']);
     }
 
     public function testDynamicOfferMetadataAdvertisesBothComponents(): void
