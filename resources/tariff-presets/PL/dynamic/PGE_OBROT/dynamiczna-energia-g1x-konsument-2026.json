@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "id": "PL.PGE_OBROT.DYNAMICZNA_ENERGIA.G1X.KONSUMENT.2026",
+  "label": "PGE Obrót - Dynamiczna energia z PGE (konsument)",
+  "presetType": "OFFER",
+  "components": [
+    {
+      "kind": "ENERGY_PURCHASE",
+      "componentId": "energy-purchase",
+      "label": "Energia czynna"
+    },
+    {
+      "kind": "SUPPLIER_FIXED",
+      "componentId": "supplier-fixed",
+      "label": "Opłata handlowa"
+    }
+  ],
+  "provider": {
+    "id": "PGE_OBROT",
+    "label": "PGE Obrót"
+  },
+  "validFrom": "2026-03-01T00:00:00+01:00",
+  "validTo": "2026-07-01T00:00:00+02:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "energy.add",
+      "label": "Stały składnik ceny energii",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/add"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Domyślna wartość 0,0905 PLN/kWh obejmuje składnik K 0,0855 PLN/kWh i akcyzę 0,0050 PLN/kWh dla 2026 r."
+    },
+    {
+      "id": "supplier.fixed",
+      "label": "Miesięczna opłata handlowa",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/value"
+      ],
+      "unit": "PLN/month"
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": null,
+        "validTo": null,
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "REFERENCE",
+              "source": "PL.TGE.FIXING1",
+              "sourceUnit": "PLN/MWh",
+              "sourceMin": "0",
+              "sourceMax": "4000",
+              "multiplier": "0.001",
+              "add": "0.0905",
+              "unit": "PLN/kWh"
+            }
+          },
+          {
+            "id": "supplier-fixed",
+            "category": "SERVICE",
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "22.00",
+              "unit": "PLN/month"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "Cena energii: RDN Fixing I po ograniczeniu ceny źródłowej do zakresu 0..4000 PLN/MWh, przeliczony na PLN/kWh + składnik K 0,0855 PLN/kWh + akcyza 0,0050 PLN/kWh, czyli add = 0,0905 PLN/kWh netto.",
+    "Domyślna opłata handlowa dla konsumenta niebędącego prosumentem wynosi 22,00 PLN netto/mies. (27,06 PLN brutto przy VAT 23%).",
+    "Oferta uwzględnia godzinową lub 15-minutową rozdzielczość ceny i zużycia zależnie od publikacji TGE; preset korzysta z naturalnej rozdzielczości PL.TGE.FIXING1 i nie narzuca temporalnego nettingu.",
+    "Ta edycja oferty była oferowana od 01.03.2026 do 30.06.2026. Ustaw okres CostPlan zgodnie z własną umową. Preset nie obejmuje dystrybucji.",
+    "Wariant prosumencki nie jest bundlowany: godzinowe bilansowanie prosumenta połączone z cenami zmieniającymi się co 15 minut wymaga jawnej reguły alokacji zbilansowanego wolumenu na krótsze interwały cenowe.",
+    "Dla roku 2027 dokumentacja PGE przechodzi na Fixing II; należy opublikować nowy preset zamiast rozszerzać semantykę tego ID."
+  ],
+  "source": {
+    "title": "PGE Obrót - Dynamiczna energia z PGE, Załącznik nr 2, ceny energii dla G1x, Ed. 1.2026",
+    "url": "https://www.gkpge.pl/content/download/6f23e27ebdb19716dc20233047913cc5/file/zal-nr-2-ceny-energii-elektrycznej-dla-g1x.pdf?contentId=143446&inLanguage=pol-PL&version=26",
+    "retrievedAt": "2026-09-24"
+  }
+}

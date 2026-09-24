@@ -503,6 +503,18 @@
               "type": "string",
               "minLength": 1
             },
+            "sourceMin": {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
+            "sourceMax": {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
             "multiplier": {
               "type": [
                 "string",

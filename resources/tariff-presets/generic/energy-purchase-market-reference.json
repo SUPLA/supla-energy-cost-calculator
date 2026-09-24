@@ -1,7 +1,7 @@
 {
   "version": 1,
   "id": "PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1",
-  "label": "Własna cena dynamiczna - interwałowa",
+  "label": "Własna cena dynamiczna",
   "presetType": "GENERIC",
   "components": [
     {
@@ -27,8 +27,16 @@
           "label": "RDN Fixing I"
         },
         {
+          "value": "PL.TGE.FIXING1_HOURLY",
+          "label": "RDN Fixing I - hourly"
+        },
+        {
           "value": "PL.TGE.FIXING2",
           "label": "RDN Fixing II"
+        },
+        {
+          "value": "PL.TGE.FIXING2_HOURLY",
+          "label": "RDN Fixing II - hourly"
         },
         {
           "value": "PL.PSE.RCE",
@@ -84,7 +92,7 @@
             },
             "rate": {
               "type": "REFERENCE",
-              "source": "PL.TGE.FIXING1",
+              "source": "PL.TGE.FIXING1_HOURLY",
               "sourceUnit": "PLN/MWh",
               "multiplier": "0.001",
               "add": "0",
@@ -96,7 +104,7 @@
     ]
   },
   "warnings": [
-    "Preset generyczny: formuła ceny to reference × multiplier + add. Nie narzuca godzinnego nettingu; używa naturalnej rozdzielczości wybranego źródła."
+    "Preset generyczny: formuła ceny to reference × multiplier + add. Wybór źródła nie narzuca temporal nettingu; cena jest naliczana na naturalnych interwałach danych pomiarowych."
   ],
   "source": {
     "title": "Konfiguracja użytkownika",

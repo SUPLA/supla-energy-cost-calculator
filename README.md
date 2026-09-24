@@ -117,6 +117,8 @@ Temporal netting is declared directly on the quantity:
 
 Supported strategies are `IMPORT_MINUS_EXPORT` and `IMPORT_MINUS_EXPORT_CAP_ZERO`. Without `strategy`, `ACTIVE_ENERGY_IMPORT` keeps the existing forward/import behavior. A netting window must be complete and its selector result and rate must remain constant for the whole window. Therefore a 60-minute netting component can use an hourly Fixing series, but it is invalid with a rate or zone changing every 15 minutes.
 
+A `REFERENCE` rate may declare `sourceUnit` as a runtime assertion and optional `sourceMin`/`sourceMax` bounds. The bounds clamp the raw source value before `multiplier` and `add`; they do not cap a billing-period weighted-average/effective price.
+
 Example: dynamic energy (`Fixing1`) plus dynamic network zones (`PDGSZ`) plus a monthly fee:
 
 ```json

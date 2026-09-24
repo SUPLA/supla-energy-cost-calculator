@@ -16,7 +16,7 @@
     },
     {
       "id": "PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1",
-      "label": "Własna cena dynamiczna - interwałowa",
+      "label": "Własna cena dynamiczna",
       "presetType": "GENERIC",
       "components": [
         {
@@ -26,19 +26,6 @@
         }
       ],
       "path": "generic/energy-purchase-market-reference.json"
-    },
-    {
-      "id": "PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE_HOURLY.V1",
-      "label": "Własna cena dynamiczna - godzinowa",
-      "presetType": "GENERIC",
-      "components": [
-        {
-          "kind": "ENERGY_PURCHASE",
-          "componentId": "energy-purchase",
-          "label": "Energia czynna"
-        }
-      ],
-      "path": "generic/energy-purchase-market-reference-hourly.json"
     }
   ]
 }

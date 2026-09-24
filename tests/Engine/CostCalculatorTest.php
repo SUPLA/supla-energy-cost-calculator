@@ -257,6 +257,72 @@ final class CostCalculatorTest extends TestCase
         );
     }
 
+    public function testReferenceRateClampsSourceBeforeMultiplierAndAdd(): void
+    {
+        $deltas = [
+            $this->delta('2026-01-01T10:00:00Z', '2026-01-01T10:15:00Z', '1'),
+            $this->delta('2026-01-01T10:15:00Z', '2026-01-01T10:30:00Z', '1'),
+        ];
+        $references = new InMemoryReferenceDataSource([
+            'PL.TGE.FIXING1' => [
+                new ReferenceInterval(
+                    new \DateTimeImmutable('2026-01-01T10:00:00Z'),
+                    new \DateTimeImmutable('2026-01-01T10:15:00Z'),
+                    '-50',
+                    'PLN/MWh',
+                ),
+                new ReferenceInterval(
+                    new \DateTimeImmutable('2026-01-01T10:15:00Z'),
+                    new \DateTimeImmutable('2026-01-01T10:30:00Z'),
+                    '5000',
+                    'PLN/MWh',
+                ),
+            ],
+        ]);
+        $definition = $this->singleComponentDefinition([
+            'id' => 'energy',
+            'category' => 'ENERGY',
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'rate' => [
+                'type' => 'REFERENCE',
+                'source' => 'PL.TGE.FIXING1',
+                'sourceUnit' => 'PLN/MWh',
+                'sourceMin' => '0',
+                'sourceMax' => '4000',
+                'multiplier' => '0.001',
+                'add' => '0.09',
+                'unit' => 'PLN/kWh',
+            ],
+        ]);
+
+        $result = (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), $references))->calculate(
+            'meter',
+            new TimeRange(new \DateTimeImmutable('2026-01-01T10:00:00Z'), new \DateTimeImmutable('2026-01-01T10:30:00Z')),
+            $definition,
+        );
+
+        self::assertSame('4.18', $result->usageBasedTotal);
+    }
+
+    public function testReferenceRateRejectsInvertedSourceClamp(): void
+    {
+        $definition = $this->singleComponentDefinition([
+            'id' => 'energy',
+            'category' => 'ENERGY',
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'rate' => [
+                'type' => 'REFERENCE',
+                'source' => 'PL.TGE.FIXING1',
+                'sourceMin' => '4000',
+                'sourceMax' => '0',
+            ],
+        ]);
+
+        $this->expectException(\Supla\EnergyCostCalculator\Exception\DefinitionException::class);
+        $this->expectExceptionMessage('sourceMin must be less than or equal to sourceMax');
+        (new \Supla\EnergyCostCalculator\Definition\BillingDefinitionParser())->parse($definition);
+    }
+
     public function testPdgszSelectsG14DynamicZone(): void
     {
         $deltas = [$this->delta('2026-01-01T18:00:00Z', '2026-01-01T18:15:00Z', '1.25')];

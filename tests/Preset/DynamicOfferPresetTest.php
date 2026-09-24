@@ -76,6 +76,32 @@ final class DynamicOfferPresetTest extends TestCase
         self::assertSame(60, $component['quantity']['periodInMinutes']);
     }
 
+    public function testPgeDynamicConsumerOfferUsesPublishedClampAndNaturalReferenceResolution(): void
+    {
+        $compiler = new TariffPresetCompiler();
+        $energy = $compiler->compileComponentToArray(
+            'PL.PGE_OBROT.DYNAMICZNA_ENERGIA.G1X.KONSUMENT.2026',
+            'energy-purchase',
+            [],
+        );
+        $component = $energy['periods'][0]['components'][0];
+
+        self::assertSame('PL.TGE.FIXING1', $component['rate']['source']);
+        self::assertSame('PLN/MWh', $component['rate']['sourceUnit']);
+        self::assertSame('0', $component['rate']['sourceMin']);
+        self::assertSame('4000', $component['rate']['sourceMax']);
+        self::assertSame('0.001', $component['rate']['multiplier']);
+        self::assertSame('0.0905', $component['rate']['add']);
+        self::assertArrayNotHasKey('strategy', $component['quantity']);
+
+        $fee = $compiler->compileComponentToArray(
+            'PL.PGE_OBROT.DYNAMICZNA_ENERGIA.G1X.KONSUMENT.2026',
+            'supplier-fixed',
+            [],
+        );
+        self::assertSame('22.00', $fee['periods'][0]['components'][0]['rate']['value']);
+    }
+
     public function testDynamicOfferMetadataAdvertisesBothComponents(): void
     {
         $catalog = new TariffPresetCatalog();

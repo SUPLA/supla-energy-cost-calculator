@@ -35,6 +35,8 @@ Dynamicity belongs to a component, not to the entire tariff. A single billing pe
 - distribution zone from `PL.PSE.PDGSZ`,
 - a static monthly service fee.
 
+`REFERENCE.sourceMin` and `REFERENCE.sourceMax` are source-domain clamps. They are evaluated against the raw reference value before `multiplier` and `add`. This models offers such as PGE's RDN floor/cap without conflating them with caps or floors applied to a billing-period effective price.
+
 ## Current deliberate limitations
 
 This is an initial package skeleton. Before production billing use, consider adding:
@@ -44,7 +46,14 @@ This is an initial package skeleton. Before production billing use, consider add
 - explicit handling of gaps in delta logs,
 - configurable behavior for definition boundaries that cut through meter intervals,
 - richer component compatibility and unit-conversion semantics,
+- a contract-defined allocation strategy for 60-minute net quantities priced by changing 15-minute rates,
+- billing-period effective-rate adjustments (weighted-average min/max/floor/cap),
+- reference-series fallback policies for missing market data,
+- history-dependent quantity baselines such as G12as previous-year thresholds,
+- export-side prosumer settlement/revenue,
 - result/cost caching outside the library if large fleet-wide reports need it.
+
+Do not approximate these cases with superficially similar existing primitives. In particular, a raw-reference clamp is not a billing-period price cap, and per-interval dynamic pricing is not equivalent to redistributing a wider netted quantity without an explicit allocation rule.
 
 ## Holiday calendars
 

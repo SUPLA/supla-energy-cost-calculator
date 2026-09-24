@@ -379,6 +379,28 @@
       "path": "PL/2026/supply/PGE_OBROT/G12.json"
     },
     {
+      "id": "PL.PGE_OBROT.DYNAMICZNA_ENERGIA.G1X.KONSUMENT.2026",
+      "label": "PGE Obrót - Dynamiczna energia z PGE (konsument)",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        },
+        {
+          "kind": "SUPPLIER_FIXED",
+          "componentId": "supplier-fixed",
+          "label": "Opłata handlowa"
+        }
+      ],
+      "provider": {
+        "id": "PGE_OBROT",
+        "label": "PGE Obrót"
+      },
+      "path": "PL/dynamic/PGE_OBROT/dynamiczna-energia-g1x-konsument-2026.json"
+    },
+    {
       "id": "PL.ENEA.G11.2026",
       "label": "ENEA - G11",
       "presetType": "OFFER",

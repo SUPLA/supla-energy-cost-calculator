@@ -58,8 +58,28 @@ final class DefaultRateResolver implements RateResolver
             ));
         }
         $value = $interval->value;
+        $sourceMin = isset($definition->config['sourceMin']) ? (string)$definition->config['sourceMin'] : null;
+        $sourceMax = isset($definition->config['sourceMax']) ? (string)$definition->config['sourceMax'] : null;
+        if ($sourceMin !== null && $sourceMax !== null && $this->compare($math, $sourceMin, $sourceMax) > 0) {
+            throw new CalculationException("REFERENCE sourceMin must be less than or equal to sourceMax.");
+        }
+        if ($sourceMin !== null && $this->compare($math, $value, $sourceMin) < 0) {
+            $value = $sourceMin;
+        }
+        if ($sourceMax !== null && $this->compare($math, $value, $sourceMax) > 0) {
+            $value = $sourceMax;
+        }
         $multiplier = (string)($definition->config['multiplier'] ?? '1');
         $add = (string)($definition->config['add'] ?? '0');
         return $math->add($math->multiply($value, $multiplier), $add);
+    }
+
+    private function compare(DecimalMath $math, string $left, string $right): int
+    {
+        $difference = $math->add($left, $math->multiply($right, '-1'));
+        if ((float)$difference === 0.0) {
+            return 0;
+        }
+        return str_starts_with($difference, '-') ? -1 : 1;
     }
 }

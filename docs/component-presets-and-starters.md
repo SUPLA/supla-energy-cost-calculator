@@ -35,19 +35,31 @@ Catalogue metadata declares concrete `components` (`kind`, `componentId`, `label
 
 ## Generic energy presets
 
-The package ships three generic `ENERGY_PURCHASE` presets:
+The package ships two generic `ENERGY_PURCHASE` presets:
 
 - `PL.GENERIC.ENERGY_PURCHASE.CONSTANT.V1` - editable constant PLN/kWh price with 60-minute import/export netting;
-- `PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1` - interval-reference rate for Fixing I, Fixing II or RCE without an imposed hourly netting window;
-- `PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE_HOURLY.V1` - hourly Fixing I/Fixing II reference with 60-minute import/export netting.
+- `PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1` - one configurable `REFERENCE` rate for Fixing I, hourly Fixing I, Fixing II, hourly Fixing II or RCE, with editable multiplier and additive term.
+
+The generic dynamic preset deliberately does not impose temporal netting. `_HOURLY` references are ordinary selectable sources whose value stays constant across the four 15-minute SUPLA price slots; they do not need a separate preset. Conversely, a 15-minute reference cannot be combined generically with 60-minute netting until the contract-specific allocation of an hourly net quantity back to sub-hour price intervals is modelled. `strategy` and `periodInMinutes` are therefore not exposed as generic user inputs.
 
 Generic presets use the same `inputs`, defaults and overrides as real tariff presets. They are not a second configuration language.
 
 `CHOICE` inputs replace a scalar target exactly like the existing input types, but the submitted value must match one of the declared option values.
 
-Temporal netting is part of the component preset's executable `quantity`, not starter metadata. Standard Polish household supply/distribution presets use `IMPORT_MINUS_EXPORT_CAP_ZERO` with a 60-minute window. A starter merely selects those presets, so the same netting semantics apply whether a preset is reached through a starter or chosen manually.
+Temporal netting is part of the component preset's executable `quantity`, not starter metadata. Standard Polish household supply/distribution presets use `IMPORT_MINUS_EXPORT_CAP_ZERO` with a 60-minute window. This is also a useful default for a non-prosumer: with zero export the monetary result is unchanged, while natural `charges[]` are hourly instead of one charge per raw 15-minute meter delta. A starter merely selects those presets, so the same semantics apply whether a preset is reached through a starter or chosen manually.
 
 SUPLA's device-reported `fae_balanced`/`rae_balanced` counters describe vector phase-to-phase balancing and remain measurement/UI data. They are deliberately not separate calculator `QuantityType` values. Cost definitions operate on canonical active import/export quantities and apply temporal netting explicitly when the tariff requires it.
+
+## Reference source clamps
+
+A `REFERENCE` rate may define optional `sourceMin` and/or `sourceMax`. They clamp the raw reference value in `sourceUnit` before `multiplier` and `add` are applied:
+
+```text
+clampedSource = min(max(reference, sourceMin), sourceMax)
+rate = clampedSource * multiplier + add
+```
+
+This is intentionally different from a cap/floor on a billing-period weighted-average or effective rate. `sourceMin`/`sourceMax` must not be used to approximate such settlement rules.
 
 ## Bundled dynamic offers
 
@@ -57,9 +69,21 @@ Named dynamic offers are bundled only when the current calculator can express th
 
 `PL.ENEA.CENY_DYNAMICZNE.DI12011227_G` models ENEA's `DI12011227_G` Ceny Dynamiczne cennik as hourly RDN Fixing I plus `0.0050 PLN/kWh` excise and `0.0820 PLN/kWh` cost/margin component, therefore `add = 0.0870 PLN/kWh` net, with 60-minute import/export netting. Its monthly supplier fee is also a separate overridable component. Source: https://www.enea.pl/media/9061/cennik-oferty-ceny-dynamicznedi12011227god-01072026-do-30092026pdf.pdf
 
-For these offers, top-level preset validity records the availability window of that offer edition. Their internal price rule is intentionally open-ended because the actual contract start/end belongs to the user's CostPlan period.
+PGE's `Dynamiczna energia z PGE` Ed. 1.2026 is bundled for the consumer/non-prosumer variant. It uses the natural resolution of Fixing I, clamps the raw RDN value to `0..4000 PLN/MWh`, converts it to PLN/kWh, and then adds the published `K = 0.0855 PLN/kWh` plus the 2026 excise `0.0050 PLN/kWh`, therefore `add = 0.0905 PLN/kWh` net. The monthly supplier fee is `22.00 PLN` net. The preset deliberately does not impose temporal netting because the current PGE materials allow hourly or 15-minute price/consumption resolution depending on TGE publication. Source: https://www.gkpge.pl/content/download/6f23e27ebdb19716dc20233047913cc5/file/zal-nr-2-ceny-energii-elektrycznej-dla-g1x.pdf?contentId=143446&inLanguage=pol-PL&version=26
 
-TAURON Dynamiczne/Dynamiczne MAX and the investigated PGE dynamic offer are intentionally not bundled yet. Their published settlement rules include behavior such as billing-period minimum/maximum prices or a floor applied to negative market prices, which cannot be represented faithfully by the current per-reference affine formula `reference * multiplier + add`. Add the required rate/aggregation semantics before adding those named offers rather than approximating them with a misleading preset.
+For named offers, top-level preset validity records the availability window of that offer edition. The actual contract start/end belongs to the user's CostPlan period.
+
+## Deliberately unsupported / deferred settlement rules
+
+The following cases are intentionally not approximated by the current DSL:
+
+- **15-minute price combined with wider prosumer netting when the contract redistributes the net hourly quantity among sub-hour price intervals.** The engine currently requires a stable selector and rate inside a temporal-netting window. This is why the PGE Ed. 1.2026 prosumer variant is not bundled even though its `K` and monthly fee are known. Add an explicit allocation strategy before modelling such an offer.
+- **Billing-period effective-rate floors/caps**, including TAURON Dynamiczne/Dynamiczne MAX rules applied after calculating a consumption-weighted average. `sourceMin`/`sourceMax` clamp each raw reference observation and are not equivalent to a billing-period cap/floor.
+- **Reference-data fallback policies** specified by some dynamic offers (for example using earlier market prices when the current publication is missing). Missing reference data currently fails explicitly instead of guessing a fallback.
+- **History-dependent quantity thresholds**, such as G12as rules in which part of current consumption is priced according to an analogous previous-year consumption baseline.
+- **Full prosumer export settlement/revenue.** The current plan model calculates import-side costs and hourly import/export netting; it does not calculate net-billing revenue for exported energy.
+
+PGE's bundled `.2026` dynamic consumer preset intentionally models the 2026 Fixing I rules only. The published offer states that Fixing II applies from 2027; later contract periods should use a future preset edition rather than silently extending the 2026 source selection.
 
 ## Component identity
 

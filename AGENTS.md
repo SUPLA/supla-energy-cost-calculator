@@ -36,7 +36,7 @@ Never reintroduce a global "static tariff vs dynamic tariff" distinction. Differ
 - `ReferenceDataSource` supplies time-series values such as Fixing1, Fixing2, RCE and PDGSZ.
 - `HolidayCalendarProvider` supplies local-date holiday information.
 
-When a `REFERENCE` rate declares `sourceUnit`, the returned `ReferenceInterval.unit` must match it exactly. Treat `sourceUnit` as a runtime contract assertion; do not silently convert units in the resolver because the rate's `multiplier` already owns any intended conversion.
+When a `REFERENCE` rate declares `sourceUnit`, the returned `ReferenceInterval.unit` must match it exactly. Treat `sourceUnit` as a runtime contract assertion; do not silently convert units in the resolver because the rate's `multiplier` already owns any intended conversion. Optional `sourceMin`/`sourceMax` clamp the raw source value before `multiplier` and `add`; they are not settlement-period effective-rate caps.
 
 The core calculator must not query a database directly.
 
@@ -258,6 +258,6 @@ Device-reported vector-balanced counters such as SUPLA `fae_balanced`/`rae_balan
 
 Netting windows are aligned using `BillingDefinition.timezone`. Raw meter deltas remain canonical source facts. A netting charge may be emitted only when the full window is covered contiguously. A requested range that cuts a netting window, a gap in meter deltas, a billing-definition or billing-cycle boundary inside a window, a selector change inside a window, or a rate change inside a window must fail explicitly.
 
-This means `periodInMinutes: 60` is compatible with an hourly Fixing series such as `PL.TGE.FIXING1_HOURLY` or `PL.TGE.FIXING2_HOURLY`, but not with a 15-minute-changing price/selector on the same component.
+This means `periodInMinutes: 60` is compatible with an hourly Fixing series such as `PL.TGE.FIXING1_HOURLY` or `PL.TGE.FIXING2_HOURLY`, but not with a 15-minute-changing price/selector on the same component. Do not weaken this invariant by averaging rates or smearing a netting-window quantity across sub-intervals. A future offer that explicitly redistributes a wider net quantity among shorter price intervals needs a named allocation strategy.
 
 `charges[]` is the authoritative cost-fact series for charting. Ordinary components produce charge facts at meter-delta resolution; temporally netted components produce one charge fact per netting window. `intervals[]` remains a raw meter-interval diagnostic view and must not contain an allocated share of a wider netting-window charge.

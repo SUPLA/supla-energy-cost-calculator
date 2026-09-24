@@ -285,10 +285,20 @@ final class BillingDefinitionParser
             if (array_key_exists('sourceUnit', $data)) {
                 $this->requiredString($data, 'sourceUnit', $path);
             }
+            foreach (['sourceMin', 'sourceMax'] as $field) {
+                if (array_key_exists($field, $data) && !is_numeric((string)$data[$field])) {
+                    throw new DefinitionException("$path.$field must be numeric.");
+                }
+            }
             foreach (['multiplier', 'add'] as $field) {
                 if (isset($data[$field]) && !is_numeric((string)$data[$field])) {
                     throw new DefinitionException("$path.$field must be numeric.");
                 }
+            }
+            if (array_key_exists('sourceMin', $data) && array_key_exists('sourceMax', $data)
+                && is_numeric((string)$data['sourceMin']) && is_numeric((string)$data['sourceMax'])
+                && (float)$data['sourceMin'] > (float)$data['sourceMax']) {
+                throw new DefinitionException("$path.sourceMin must be less than or equal to sourceMax.");
             }
         }
     }
