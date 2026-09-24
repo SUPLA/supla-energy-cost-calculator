@@ -80,6 +80,63 @@ final class ComponentCostPlanTest extends TestCase
         self::assertSame('NET', $plan->priceBasis);
     }
 
+    public function testCompilesAndCalculatesAPlanWithOpenPeriodBoundaries(): void
+    {
+        $plan = [
+            'version' => 2,
+            'currency' => 'PLN',
+            'timezone' => 'Europe/Warsaw',
+            'priceBasis' => 'NET',
+            'billingCycles' => [[
+                'anchor' => '2026-01-01',
+                'length' => 1,
+                'unit' => 'MONTH',
+            ]],
+            'periods' => [[
+                'components' => [[
+                    'kind' => 'SUPPLIER_FIXED',
+                    'rate' => '12.00',
+                    'per' => 'BILLING_PERIOD',
+                ]],
+            ]],
+        ];
+
+        $compiled = (new CostPlanCompiler())->compileToArray($plan);
+        self::assertNull($compiled['periods'][0]['validFrom']);
+        self::assertNull($compiled['periods'][0]['validTo']);
+
+        $result = (new CostCalculator(
+            new InMemoryEnergyDeltaSource([]),
+            new InMemoryReferenceDataSource(),
+        ))->calculate('meter', new TimeRange(
+            new \DateTimeImmutable('2026-01-01T00:00:00+01:00'),
+            new \DateTimeImmutable('2026-02-01T00:00:00+01:00'),
+        ), $compiled);
+
+        self::assertSame('12', $result->total);
+    }
+
+    public function testAllowsOpenStartAndEndAroundContiguousPeriods(): void
+    {
+        $plan = $this->plan();
+        $plan['periods'][0]['validFrom'] = null;
+        $plan['periods'][1]['validTo'] = null;
+
+        $parsed = (new CostPlanDefinitionParser())->parse($plan);
+        self::assertNull($parsed->periods[0]->validFrom);
+        self::assertNull($parsed->periods[1]->validTo);
+    }
+
+    public function testRejectsGapsBetweenCostPlanPeriods(): void
+    {
+        $plan = $this->plan();
+        $plan['periods'][1]['validFrom'] = '2026-01-16T00:00:00+01:00';
+
+        $this->expectException(CostPlanDefinitionException::class);
+        $this->expectExceptionMessage('contiguous and ordered');
+        (new CostPlanDefinitionParser())->parse($plan);
+    }
+
     public function testRejectsDateTimeBillingCycleAnchor(): void
     {
         $plan = $this->plan();

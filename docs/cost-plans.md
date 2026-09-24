@@ -45,6 +45,8 @@ For non-prorated periodic fees, the calculator charges a given component once pe
 
 `CostPlanDefinition` is the persistent user-intent model. `BillingDefinition` is the executable calculator model.
 
+Cost-plan periods are ordered, contiguous half-open ranges. The first period may omit or set `validFrom` to `null` for an open start, and the last may omit or set `validTo` to `null` for an open end. Every interior boundary is required and must exactly match the preceding period's `validTo`; a single period may leave both boundaries open.
+
 ```text
 CostPlanDefinition
   -> presetId + user values/overrides

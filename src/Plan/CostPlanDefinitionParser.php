@@ -73,7 +73,7 @@ final class CostPlanDefinitionParser
             $this->onlyKeys($rawPeriod, ['validFrom', 'validTo', 'components'], "periods[$i]");
             $from = $this->parseDate($rawPeriod['validFrom'] ?? null, "periods[$i].validFrom");
             $to = $this->parseDate($rawPeriod['validTo'] ?? null, "periods[$i].validTo");
-            if ($from >= $to) {
+            if ($from !== null && $to !== null && $from >= $to) {
                 throw new CostPlanDefinitionException("periods[$i].validFrom must be before validTo.");
             }
             $rawComponents = $rawPeriod['components'] ?? null;
@@ -122,6 +122,7 @@ final class CostPlanDefinitionParser
             }
             $periods[] = new CostPlanPeriod($from, $to, $components);
         }
+        $this->assertContinuousPeriods($periods);
 
         return new CostPlanDefinition($cycles, $currency, $timezone, $basis, $periods);
     }
@@ -136,8 +137,34 @@ final class CostPlanDefinitionParser
         }
     }
 
-    private function parseDate(mixed $value, string $path): \DateTimeImmutable
+    /** @param list<CostPlanPeriod> $periods */
+    private function assertContinuousPeriods(array $periods): void
     {
+        if (count($periods) === 1) {
+            return;
+        }
+
+        foreach ($periods as $i => $period) {
+            if ($i > 0 && $i < count($periods) - 1 && ($period->validFrom === null || $period->validTo === null)) {
+                throw new CostPlanDefinitionException("periods[$i] must define validFrom and validTo.");
+            }
+            if ($i === 0 && $period->validTo === null) {
+                throw new CostPlanDefinitionException('periods[0].validTo is required when multiple periods are defined.');
+            }
+            if ($i === count($periods) - 1 && $period->validFrom === null) {
+                throw new CostPlanDefinitionException("periods[$i].validFrom is required when multiple periods are defined.");
+            }
+            if ($i > 0 && $periods[$i - 1]->validTo != $period->validFrom) {
+                throw new CostPlanDefinitionException('Cost plan periods must be contiguous and ordered.');
+            }
+        }
+    }
+
+    private function parseDate(mixed $value, string $path): ?\DateTimeImmutable
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
         if (!is_string($value) || !preg_match('/(?:Z|[+-]\d{2}:\d{2})$/', $value)) {
             throw new CostPlanDefinitionException("$path must contain an explicit UTC offset or Z suffix.");
         }

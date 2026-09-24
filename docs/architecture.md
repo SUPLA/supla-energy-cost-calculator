@@ -23,6 +23,8 @@ The package never imports Doctrine, Symfony or SUPLA entities.
 10. Calculate periodic charges only when the requested range covers complete billing cycles.
 11. Return usage totals, optional meter-interval diagnostics, and optional natural-resolution `charges[]`.
 
+Persisted cost-plan periods compile into the same billing-definition periods. Their boundaries may be open at either outer edge, so calculation can resolve logs before the first dated tariff change and after the last one.
+
 ## Important modelling choice
 
 Dynamicity belongs to a component, not to the entire tariff. A single billing period can therefore combine:

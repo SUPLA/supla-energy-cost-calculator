@@ -44,21 +44,26 @@ final class CostPlanCompiler
         }
         $periods = [];
         foreach ($plan->periods as $index => $entry) {
-            if (!$entry instanceof CostPlanPeriod || $entry->validFrom >= $entry->validTo || $entry->components === []) {
+            if (!$entry instanceof CostPlanPeriod
+                || ($entry->validFrom !== null && $entry->validTo !== null && $entry->validFrom >= $entry->validTo)
+                || $entry->components === []) {
                 throw new CostPlanDefinitionException("Invalid cost plan period $index.");
             }
             $cycleCoverage = [];
             foreach ($plan->billingCycles as $cycle) {
                 $from = $this->maxDate($entry->validFrom, $this->documentDate($cycle['validFrom'] ?? null, 'billing cycle validFrom'));
                 $to = $this->minDate($entry->validTo, $this->documentDate($cycle['validTo'] ?? null, 'billing cycle validTo'));
-                if ($from !== null && $to !== null && $from < $to) {
-                    $cycleCoverage[] = ['validFrom' => $from->format(DATE_ATOM), 'validTo' => $to->format(DATE_ATOM)];
+                if ($from === null || $to === null || $from < $to) {
+                    $cycleCoverage[] = [
+                        'validFrom' => $from?->format(DATE_ATOM),
+                        'validTo' => $to?->format(DATE_ATOM),
+                    ];
                 }
             }
             $this->assertCoverage($cycleCoverage, $entry->validFrom, $entry->validTo, "billing cycles for period $index");
             $segments = [[
-                'validFrom' => $entry->validFrom->format(DATE_ATOM),
-                'validTo' => $entry->validTo->format(DATE_ATOM),
+                'validFrom' => $entry->validFrom?->format(DATE_ATOM),
+                'validTo' => $entry->validTo?->format(DATE_ATOM),
                 'components' => [],
             ]];
             $kinds = [];
@@ -112,7 +117,7 @@ final class CostPlanCompiler
                             $this->documentDate($source['validTo'] ?? null, 'preset period validTo'),
                         );
                         $to = $this->minDate($to, $this->documentDate($preset->document['validTo'] ?? null, 'preset validTo'));
-                        if ($from === null || $to === null || $from >= $to) {
+                        if ($from !== null && $to !== null && $from >= $to) {
                             continue;
                         }
                         $component = $source['components'][0];
@@ -152,19 +157,24 @@ final class CostPlanCompiler
     }
 
     /** @param list<array<string, mixed>> $segments */
-    private function assertCoverage(array $segments, \DateTimeImmutable $from, \DateTimeImmutable $to, string $context): void
+    private function assertCoverage(array $segments, ?\DateTimeImmutable $from, ?\DateTimeImmutable $to, string $context): void
     {
         usort($segments, fn(array $a, array $b) => $this->boundaryTimestamp($a['validFrom'], PHP_INT_MIN) <=> $this->boundaryTimestamp($b['validFrom'], PHP_INT_MIN));
-        $cursor = $from->getTimestamp();
+        $cursor = $from;
         foreach ($segments as $segment) {
-            if ($this->boundaryTimestamp($segment['validFrom'], PHP_INT_MIN) !== $cursor) {
+            if (!$this->sameBoundary($this->documentDate($segment['validFrom'], 'compiled validFrom'), $cursor)) {
                 throw new CostPlanDefinitionException("Preset does not cover $context continuously.");
             }
-            $cursor = $this->boundaryTimestamp($segment['validTo'], PHP_INT_MIN);
+            $cursor = $this->documentDate($segment['validTo'], 'compiled validTo');
         }
-        if ($cursor !== $to->getTimestamp()) {
+        if (!$this->sameBoundary($cursor, $to)) {
             throw new CostPlanDefinitionException("Preset does not cover $context continuously.");
         }
+    }
+
+    private function sameBoundary(?\DateTimeImmutable $left, ?\DateTimeImmutable $right): bool
+    {
+        return $left === null ? $right === null : $right !== null && $left == $right;
     }
 
     private function boundaryTimestamp(mixed $value, int $nullValue): int

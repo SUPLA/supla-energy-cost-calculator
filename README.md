@@ -185,6 +185,8 @@ $preset->revision; // SHA-256 of the deterministically encoded JSON document.
 
 Cost plans use the component-based version 2 format described in `docs/cost-plans.md` and `schema/cost-plan-v2.schema.json`. Each effective period selects individual `CostComponentKind` values; `billingCycles` are configured separately.
 
+Plan periods are contiguous and ordered. The first may have an open `validFrom`, the last may have an open `validTo`, and a single period may leave both boundaries open.
+
 Use `TariffPresetCompiler` when compiling one preset and `CostPlanCompiler` for persisted user plans:
 
 ```php

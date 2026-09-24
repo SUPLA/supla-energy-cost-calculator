@@ -8,8 +8,8 @@ final readonly class CostPlanPeriod
 {
     /** @param list<CostPlanComponent> $components */
     public function __construct(
-        public \DateTimeImmutable $validFrom,
-        public \DateTimeImmutable $validTo,
+        public ?\DateTimeImmutable $validFrom,
+        public ?\DateTimeImmutable $validTo,
         public array $components,
     ) {
     }
