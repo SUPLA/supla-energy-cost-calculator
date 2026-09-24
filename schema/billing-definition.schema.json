@@ -198,6 +198,30 @@
           "type": "object",
           "required": [
             "type",
+            "strategy",
+            "periodInMinutes"
+          ],
+          "properties": {
+            "type": {
+              "const": "ACTIVE_ENERGY_IMPORT"
+            },
+            "strategy": {
+              "enum": [
+                "IMPORT_MINUS_EXPORT",
+                "IMPORT_MINUS_EXPORT_CAP_ZERO"
+              ]
+            },
+            "periodInMinutes": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
             "period"
           ],
           "properties": {

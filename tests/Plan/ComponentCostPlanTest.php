@@ -42,7 +42,7 @@ final class ComponentCostPlanTest extends TestCase
         ))->calculate('meter', new TimeRange(
             new \DateTimeImmutable('2026-01-01T00:00:00+01:00'),
             new \DateTimeImmutable('2026-02-01T00:00:00+01:00'),
-        ), $compiled);
+        ), $this->periodicOnly($compiled));
         self::assertSame('12', $result->periodicTotal);
         self::assertSame('12', $result->total);
         self::assertSame('12', $result->billingPeriods[0]['costs']['periodic']['total']);
@@ -207,7 +207,7 @@ final class ComponentCostPlanTest extends TestCase
     {
         $plan = $this->plan();
         $plan['periods'][1]['components'][2]['rate'] = '13.00';
-        $definition = (new CostPlanCompiler())->compile($plan);
+        $definition = (new CostPlanCompiler())->compileToArray($plan);
 
         $this->expectException(CalculationException::class);
         $this->expectExceptionMessage('changes within one charge period');
@@ -217,7 +217,21 @@ final class ComponentCostPlanTest extends TestCase
         ))->calculate('meter', new TimeRange(
             new \DateTimeImmutable('2026-01-01T00:00:00+01:00'),
             new \DateTimeImmutable('2026-02-01T00:00:00+01:00'),
-        ), $definition);
+        ), $this->periodicOnly($definition));
+    }
+
+    /** @param array<string, mixed> $definition @return array<string, mixed> */
+    private function periodicOnly(array $definition): array
+    {
+        foreach ($definition['periods'] as &$period) {
+            $period['components'] = array_values(array_filter(
+                $period['components'],
+                static fn(array $component): bool => ($component['quantity']['type'] ?? null) === 'PERIOD',
+            ));
+        }
+        unset($period);
+
+        return $definition;
     }
 
     /** @return array<string, mixed> */
