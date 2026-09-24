@@ -249,6 +249,13 @@
           "minLength": 1
         }
       },
+      "allOf": [
+        {
+          "if": {"properties": {"type": {"const": "CHOICE"}}},
+          "then": {"required": ["options"]},
+          "else": {"not": {"required": ["options"]}}
+        }
+      ],
       "additionalProperties": false
     },
     "source": {

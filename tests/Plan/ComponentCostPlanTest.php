@@ -186,9 +186,7 @@ final class ComponentCostPlanTest extends TestCase
     public function testRejectsPresetComponentAssignedToWrongKind(): void
     {
         $plan = $this->plan();
-        array_shift($plan['periods'][0]['components']);
-        $plan['periods'][0]['components'][0]['componentId'] = 'energy-purchase';
-        $plan['periods'][0]['components'][0]['values'] = ['energy.DAY' => '0.60', 'energy.NIGHT' => '0.40'];
+        $plan['periods'][0]['components'][0]['kind'] = 'DISTRIBUTION_VARIABLE';
 
         $this->expectException(CostPlanDefinitionException::class);
         $this->expectExceptionMessage('does not match DISTRIBUTION_VARIABLE');
@@ -201,7 +199,7 @@ final class ComponentCostPlanTest extends TestCase
         $plan['periods'][0]['components'][] = $plan['periods'][0]['components'][0];
 
         $this->expectException(CostPlanDefinitionException::class);
-        $this->expectExceptionMessage("duplicate componentId 'energy-purchase'");
+        $this->expectExceptionMessage("duplicates componentId 'energy-purchase'");
         (new CostPlanCompiler())->compile($plan);
     }
 

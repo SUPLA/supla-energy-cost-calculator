@@ -92,21 +92,22 @@ final class CostPlanDefinitionParser
                     throw new CostPlanDefinitionException("$path has unknown component kind.");
                 }
                 if (!array_key_exists('presetId', $raw) && $kind->isPeriodic()) {
-                    $this->onlyKeys($raw, ['kind', 'rate', 'per', 'prorate'], $path);
+                    $this->onlyKeys($raw, ['kind', 'componentId', 'rate', 'per', 'prorate'], $path);
+                    $componentId = $raw['componentId'] ?? $kind->componentId();
                     $rate = $raw['rate'] ?? null;
                     $per = $raw['per'] ?? null;
                     $prorate = $raw['prorate'] ?? false;
-                    if (!is_string($rate) || !preg_match('/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/', $rate)
+                    if (!is_string($componentId) || trim($componentId) === ''
+                        || !is_string($rate) || !preg_match('/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/', $rate)
                         || !in_array($per, ['DAY', 'WEEK', 'MONTH', 'YEAR', 'BILLING_PERIOD'], true)
                         || !is_bool($prorate)) {
-                        throw new CostPlanDefinitionException("$path requires decimal rate, valid per and boolean prorate.");
+                        throw new CostPlanDefinitionException("$path requires non-empty componentId when provided, decimal rate, valid per and boolean prorate.");
                     }
-                    $componentId = $kind->componentId();
                     if (isset($componentIds[$componentId])) {
                         throw new CostPlanDefinitionException("$path duplicates componentId '$componentId'.");
                     }
                     $componentIds[$componentId] = true;
-                    $components[] = new CostPlanComponent($kind, rate: $rate, per: $per, prorate: $prorate);
+                    $components[] = new CostPlanComponent($kind, componentId: $componentId, rate: $rate, per: $per, prorate: $prorate);
                 } else {
                     $this->onlyKeys($raw, ['kind', 'presetId', 'componentId', 'values'], $path);
                     $presetId = $raw['presetId'] ?? null;

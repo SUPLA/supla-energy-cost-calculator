@@ -2,7 +2,7 @@
 
 ## Component plans (version 2)
 
-Version 2 assigns a `CostComponentKind` compatibility role to each component of each effective period. The four initial kinds are `ENERGY_PURCHASE`, `DISTRIBUTION_VARIABLE`, `DISTRIBUTION_FIXED`, and `SUPPLIER_FIXED`. Preset-backed components select a concrete `componentId`; fixed periodic kinds may also use the inline `rate`/`per` shorthand. More than one component of the same kind is allowed when `componentId` values differ. `billingCycles` are independent of preset selection. See `schema/cost-plan-v2.schema.json`.
+Version 2 assigns a `CostComponentKind` compatibility role to each component of each effective period. The four initial kinds are `ENERGY_PURCHASE`, `DISTRIBUTION_VARIABLE`, `DISTRIBUTION_FIXED`, and `SUPPLIER_FIXED`. Preset-backed components select a concrete `componentId`; fixed periodic kinds may also use the inline `rate`/`per` shorthand with an optional `componentId`. Omitting it preserves the legacy kind-derived ID. More than one component of the same kind is allowed when `componentId` values differ. `billingCycles` are independent of preset selection. See `schema/cost-plan-v2.schema.json`.
 
 ```json
 {

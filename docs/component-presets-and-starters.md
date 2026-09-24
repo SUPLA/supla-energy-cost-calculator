@@ -44,4 +44,4 @@ TAURON Dynamiczne/Dynamiczne MAX and the investigated PGE dynamic offer are inte
 
 ## Component identity
 
-A `CostComponentKind` is a compatibility role, not a component identity. More than one component of the same kind may exist in one plan period as long as their `componentId` values are distinct. `CostPlanCompiler` validates compatibility by component category and quantity semantics rather than by a hard-coded `kind -> componentId` mapping.
+A `CostComponentKind` is a compatibility role, not a component identity. More than one component of the same kind may exist in one plan period as long as their `componentId` values are distinct. Preset-backed components always declare an ID; inline periodic components may declare one, and otherwise retain their legacy kind-derived ID. `CostPlanCompiler` validates compatibility by component category and quantity semantics rather than by a hard-coded `kind -> componentId` mapping.

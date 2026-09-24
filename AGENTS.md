@@ -80,6 +80,8 @@ Host applications must not resolve package resource paths directly. A preset rev
 
 Cost-plan compilation also belongs to this package. Persisted version 2 cost plans reference stable preset IDs plus user-specific component values/overrides and are compiled with `CostPlanCompiler` into executable `BillingDefinition` objects. Compatible fixes to an existing preset ID intentionally affect existing plans; real tariff changes require a new preset ID. Do not pin a cost plan to a preset revision. Preset revision hashes are for diagnostics/cache invalidation. Adjacent plan periods with identical billing-cycle definitions must not create artificial billing-cycle boundaries.
 
+`CostComponentKind` is a compatibility role, while `componentId` is the unique identity within a cost-plan period. Repeated kinds require distinct component IDs. Inline periodic components may omit `componentId` only to retain their legacy kind-derived ID.
+
 The current bundled calendar is:
 
 ```text

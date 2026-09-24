@@ -6,6 +6,7 @@ namespace Supla\EnergyCostCalculator\Tests\Plan;
 
 use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Exception\CostPlanDefinitionException;
+use Supla\EnergyCostCalculator\Plan\CostPlanCompiler;
 use Supla\EnergyCostCalculator\Plan\CostPlanDefinitionParser;
 
 final class CostPlanComponentMultiplicityTest extends TestCase
@@ -31,6 +32,41 @@ final class CostPlanComponentMultiplicityTest extends TestCase
 
         $this->expectException(CostPlanDefinitionException::class);
         $this->expectExceptionMessage("duplicates componentId 'same-id'");
+        (new CostPlanDefinitionParser())->parse($plan);
+    }
+
+    public function testCompilesInlinePeriodicComponentsOfSameKindWithDistinctIds(): void
+    {
+        $plan = $this->plan([
+            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-subscription', 'rate' => '12.00', 'per' => 'MONTH'],
+            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-support', 'rate' => '3.00', 'per' => 'MONTH'],
+        ]);
+
+        $compiled = (new CostPlanCompiler())->compileToArray($plan);
+
+        self::assertSame(['supplier-subscription', 'supplier-support'], array_column($compiled['periods'][0]['components'], 'id'));
+    }
+
+    public function testKeepsLegacyKindDerivedIdForInlinePeriodicComponent(): void
+    {
+        $plan = $this->plan([
+            ['kind' => 'SUPPLIER_FIXED', 'rate' => '12.00', 'per' => 'MONTH'],
+        ]);
+
+        $compiled = (new CostPlanCompiler())->compileToArray($plan);
+
+        self::assertSame('supplier-fixed', $compiled['periods'][0]['components'][0]['id']);
+    }
+
+    public function testRejectsDuplicateExplicitInlinePeriodicComponentId(): void
+    {
+        $plan = $this->plan([
+            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-fee', 'rate' => '12.00', 'per' => 'MONTH'],
+            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-fee', 'rate' => '3.00', 'per' => 'MONTH'],
+        ]);
+
+        $this->expectException(CostPlanDefinitionException::class);
+        $this->expectExceptionMessage("duplicates componentId 'supplier-fee'");
         (new CostPlanDefinitionParser())->parse($plan);
     }
 

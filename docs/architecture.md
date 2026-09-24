@@ -25,6 +25,8 @@ The package never imports Doctrine, Symfony or SUPLA entities.
 
 Persisted cost-plan periods compile into the same billing-definition periods. Their boundaries may be open at either outer edge, so calculation can resolve logs before the first dated tariff change and after the last one.
 
+Within a cost-plan period, `CostComponentKind` describes compatibility while `componentId` identifies the resulting charge component. A kind may occur more than once when the IDs differ. Inline periodic components may omit `componentId` only for the legacy kind-derived ID.
+
 ## Important modelling choice
 
 Dynamicity belongs to a component, not to the entire tariff. A single billing period can therefore combine:

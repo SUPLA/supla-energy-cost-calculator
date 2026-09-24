@@ -221,7 +221,7 @@ $plan = [
 $definition = (new CostPlanCompiler())->compile($plan);
 ```
 
-The cost-plan JSON stores stable preset IDs and user values/overrides, not a copied executable definition. Compiling later uses the current document for the same preset ID, so package-owned corrections automatically apply to existing plans. Omit preset-default values from `values` unless the user explicitly overrides them; this preserves inheritance of corrected defaults. See `schema/cost-plan-v2.schema.json` and `docs/cost-plans.md`.
+The cost-plan JSON stores stable preset IDs and user values/overrides, not a copied executable definition. Compiling later uses the current document for the same preset ID, so package-owned corrections automatically apply to existing plans. Omit preset-default values from `values` unless the user explicitly overrides them; this preserves inheritance of corrected defaults. `kind` is a compatibility role and `componentId` is the per-period identity, so repeated kinds require distinct IDs; inline periodic components may omit it to retain their legacy kind-derived ID. See `schema/cost-plan-v2.schema.json` and `docs/cost-plans.md`.
 
 Bundled presets are complete defaults: `TariffPresetCompiler` can compile them with no input values. Every declared input targets a default template value and callers may override any of them when creating a plan. Billing-cycle settings belong to the cost plan; a preset's internal cycle exists only so that the preset can also compile independently.
 

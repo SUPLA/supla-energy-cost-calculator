@@ -82,7 +82,7 @@ final class CostPlanCompiler
                         throw new CostPlanDefinitionException("Period $index has an incomplete periodic component.");
                     }
                     $definition = [
-                        'id' => $selected->kind->componentId(),
+                        'id' => $componentIdentity,
                         'category' => $selected->kind->category(),
                         'quantity' => ['type' => 'PERIOD', 'period' => $selected->per, 'prorate' => $selected->prorate],
                         'rate' => ['type' => 'CONSTANT', 'value' => $selected->rate],
