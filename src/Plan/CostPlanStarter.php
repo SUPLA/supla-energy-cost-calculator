@@ -6,12 +6,12 @@ namespace Supla\EnergyCostCalculator\Plan;
 
 final readonly class CostPlanStarter
 {
-    /** @param array<string, mixed> $metadata @param array<string, mixed> $plan */
+    /** @param array<string, mixed> $metadata @param list<array<string, mixed>> $components */
     public function __construct(
         public string $id,
         public string $revision,
         public array $metadata,
-        public array $plan,
+        public array $components,
     ) {
     }
 }

@@ -1,10 +1,24 @@
 # Component presets and cost-plan starters
 
-Cost plans are persisted user intent. A cost-plan starter is only a convenient way to create that intent.
+Cost plans are persisted user intent. A cost-plan starter is only a convenient way to populate one period with a sensible set of components.
 
-A starter contains a regular version 2 cost plan whose component `values` are normally empty. Empty values inherit defaults from the referenced preset. When a user overrides one field, only that field is persisted in `values`; removing the override makes the plan inherit the current preset default again.
+A starter contains only `components[]`. It does not define the CostPlan envelope, billing cycles, or period boundaries. Those belong to the user's plan. For the first and only period, a host should normally omit `validFrom` and `validTo`, which makes the selected configuration apply to the whole meter history. When the user later adds another period, the host owns the boundary between the periods and may populate the new period from another starter.
 
-`CostPlanStarterCatalog` exposes the bundled simple paths such as `TAURON Dystrybucja - G11`. Hosts should copy `CostPlanStarter::plan` into the user's draft and then persist the resulting cost plan. Existing plans must not stay linked to the starter ID: changing which component preset a starter recommends is intended to affect new drafts only.
+Component `values` in starters are normally empty. Empty values inherit defaults from the referenced preset. When a user overrides one field, only that field is persisted in `values`; removing the override makes the plan inherit the current preset default again.
+
+`CostPlanStarterCatalog` exposes the bundled simple paths such as `TAURON Dystrybucja - G11`. Hosts copy `CostPlanStarter::components` into the selected CostPlan period and persist the resulting user-owned plan. Existing plans must not stay linked to the starter ID: changing which component preset a starter recommends is intended to affect new drafts only. Starter IDs are intentionally not year-versioned; the concrete referenced preset IDs remain versioned and are copied into the user's CostPlan.
+
+For example, a first-time setup may create the surrounding plan independently and insert only the starter recipe:
+
+```php
+$starter = (new CostPlanStarterCatalog())->get('PL.STARTER.TAURON_DYSTRYBUCJA.G11');
+
+$plan['periods'] = [[
+    'components' => $starter->components,
+]];
+```
+
+The resulting single period has open boundaries. Billing-cycle defaults or invoice-specific anchors are configured by the host/user independently from the selected starter.
 
 ## Preset roles
 

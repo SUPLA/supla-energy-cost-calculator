@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Supla\EnergyCostCalculator\Plan;
 
+use Supla\EnergyCostCalculator\Exception\CostPlanDefinitionException;
 use Supla\EnergyCostCalculator\Exception\CostPlanStarterNotFoundException;
 use Supla\EnergyCostCalculator\Exception\InvalidCostPlanStarterException;
 
@@ -36,18 +37,36 @@ final class CostPlanStarterCatalog
             return $this->loaded[$id];
         }
         $entry = $this->entries()[$id] ?? throw new CostPlanStarterNotFoundException("Unknown cost plan starter '$id'.");
-        $plan = $entry['plan'] ?? null;
-        if (!is_array($plan) || array_is_list($plan)) {
-            throw new InvalidCostPlanStarterException("Cost plan starter '$id' must contain a plan object.");
+        $components = $entry['components'] ?? null;
+        if (!is_array($components) || !array_is_list($components) || $components === []) {
+            throw new InvalidCostPlanStarterException("Cost plan starter '$id' must contain a non-empty components array.");
         }
-        $this->parser->parse($plan);
+
+        // Reuse the CostPlan parser as the single authority for component grammar. The surrounding
+        // plan is validation scaffolding only; starters do not own billing cycles or period boundaries.
+        try {
+            $this->parser->parse([
+                'version' => 2,
+                'currency' => 'XXX',
+                'timezone' => 'UTC',
+                'priceBasis' => 'NET',
+                'billingCycles' => [['length' => 1, 'unit' => 'MONTH']],
+                'periods' => [['components' => $components]],
+            ]);
+        } catch (CostPlanDefinitionException $e) {
+            throw new InvalidCostPlanStarterException(
+                "Cost plan starter '$id' contains invalid components: {$e->getMessage()}",
+                previous: $e,
+            );
+        }
+
         $metadata = $entry;
-        unset($metadata['plan']);
+        unset($metadata['components']);
         return $this->loaded[$id] = new CostPlanStarter(
             $id,
             hash('sha256', json_encode($entry, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION)),
             $metadata,
-            $plan,
+            $components,
         );
     }
 

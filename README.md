@@ -168,7 +168,7 @@ See `examples/definitions/` and `schema/billing-definition.schema.json`.
 
 `resources/tariff-presets/` contains component presets. Polish OSD tariffs expose distribution components, seller tariffs/offers expose supply components, and generic presets provide user-configurable building blocks. Catalogue metadata includes concrete `components` (`kind`, `componentId`, `label`) so a host can render one compatible selector per cost component without hard-coding component IDs.
 
-`CostPlanStarterCatalog` provides the simple setup path: starters such as `TAURON Dystrybucja - G11` compose the matching default supply and distribution presets into an ordinary version 2 cost plan. The starter is only a scaffold; persisted plans keep component preset IDs and explicit user overrides, not the starter ID.
+`CostPlanStarterCatalog` provides the simple setup path: starters such as `TAURON Dystrybucja - G11` return only the matching default component recipe. They do not define billing cycles or period dates. The host inserts `CostPlanStarter::components` into a user-owned CostPlan period; for a first and only period, omitting `validFrom`/`validTo` makes it apply to the whole meter history. Persisted plans keep component preset IDs and explicit user overrides, not the starter ID.
 
 Use the production-facing catalogue API instead of resolving package paths directly:
 
