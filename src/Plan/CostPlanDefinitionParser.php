@@ -81,17 +81,16 @@ final class CostPlanDefinitionParser
                 throw new CostPlanDefinitionException("periods[$i].components must be a non-empty array.");
             }
             $components = [];
-            $kinds = [];
+            $componentIds = [];
             foreach ($rawComponents as $j => $raw) {
                 $path = "periods[$i].components[$j]";
                 if (!is_array($raw) || array_is_list($raw)) {
                     throw new CostPlanDefinitionException("$path must be an object.");
                 }
                 $kind = is_string($raw['kind'] ?? null) ? CostComponentKind::tryFrom($raw['kind']) : null;
-                if ($kind === null || isset($kinds[$kind->value])) {
-                    throw new CostPlanDefinitionException("$path has unknown or duplicate component kind.");
+                if ($kind === null) {
+                    throw new CostPlanDefinitionException("$path has unknown component kind.");
                 }
-                $kinds[$kind->value] = true;
                 if (!array_key_exists('presetId', $raw) && $kind->isPeriodic()) {
                     $this->onlyKeys($raw, ['kind', 'rate', 'per', 'prorate'], $path);
                     $rate = $raw['rate'] ?? null;
@@ -102,6 +101,11 @@ final class CostPlanDefinitionParser
                         || !is_bool($prorate)) {
                         throw new CostPlanDefinitionException("$path requires decimal rate, valid per and boolean prorate.");
                     }
+                    $componentId = $kind->componentId();
+                    if (isset($componentIds[$componentId])) {
+                        throw new CostPlanDefinitionException("$path duplicates componentId '$componentId'.");
+                    }
+                    $componentIds[$componentId] = true;
                     $components[] = new CostPlanComponent($kind, rate: $rate, per: $per, prorate: $prorate);
                 } else {
                     $this->onlyKeys($raw, ['kind', 'presetId', 'componentId', 'values'], $path);
@@ -112,6 +116,10 @@ final class CostPlanDefinitionParser
                         || trim($componentId) === '' || !is_array($values)) {
                         throw new CostPlanDefinitionException("$path requires presetId, componentId and values.");
                     }
+                    if (isset($componentIds[$componentId])) {
+                        throw new CostPlanDefinitionException("$path duplicates componentId '$componentId'.");
+                    }
+                    $componentIds[$componentId] = true;
                     foreach (array_keys($values) as $key) {
                         if (!is_string($key) || trim($key) === '') {
                             throw new CostPlanDefinitionException("$path.values keys must be non-empty strings.");

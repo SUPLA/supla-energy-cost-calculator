@@ -1,0 +1,200 @@
+{
+  "version": 1,
+  "id": "PL.PGE_DYSTRYBUCJA.G12.2026",
+  "label": "PGE Dystrybucja - G12",
+  "presetType": "TARIFF",
+  "components": [
+    {
+      "kind": "DISTRIBUTION_VARIABLE",
+      "componentId": "distribution-variable",
+      "label": "Dystrybucja zmienna"
+    }
+  ],
+  "provider": {
+    "id": "PGE_DYSTRYBUCJA",
+    "label": "PGE Dystrybucja"
+  },
+  "operator": {
+    "id": "PGE_DYSTRYBUCJA",
+    "label": "PGE Dystrybucja"
+  },
+  "tariffGroup": "G12",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "distribution.DAY",
+      "label": "Dystrybucja - Dzień",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.NIGHT",
+      "label": "Dystrybucja - Noc",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "distribution-variable",
+            "category": "NETWORK",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "17:00"
+                    }
+                  ],
+                  "season": "SUMMER"
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "15:00"
+                    },
+                    {
+                      "from": "17:00",
+                      "to": "22:00"
+                    }
+                  ],
+                  "season": "SUMMER"
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "15:00"
+                    }
+                  ],
+                  "season": "WINTER"
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "13:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "22:00"
+                    }
+                  ],
+                  "season": "WINTER"
+                }
+              ],
+              "seasons": [
+                {
+                  "id": "SUMMER",
+                  "from": "--04-01",
+                  "to": "--10-01"
+                },
+                {
+                  "id": "WINTER",
+                  "from": "--10-01",
+                  "to": "--04-01"
+                }
+              ]
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": "0.4014",
+                "NIGHT": "0.0765"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "source": {
+    "title": "Taryfa PGE Dystrybucja na 2026 r.",
+    "url": "https://pgedystrybucja.pl/content/download/cd45f59eac0f9136b8fa66d3c0180f85/file/wyciag-z-taryfy-dla-uslug-dystrybucji-energii-elektrycznej-obowiazujacej-od-dnia-01.01.2026r.pdf?contentId=1257&inLanguage=pol-PL&version=4",
+    "retrievedAt": "2026-09-22"
+  }
+}

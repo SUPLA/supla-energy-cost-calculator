@@ -43,12 +43,6 @@
                     "additionalProperties": {"type": ["string", "number"]}
                   }
                 },
-                "allOf": [
-                  {"if": {"properties": {"kind": {"const": "ENERGY_PURCHASE"}}}, "then": {"properties": {"componentId": {"const": "energy-purchase"}}}},
-                  {"if": {"properties": {"kind": {"const": "DISTRIBUTION_VARIABLE"}}}, "then": {"properties": {"componentId": {"const": "distribution-variable"}}}},
-                  {"if": {"properties": {"kind": {"const": "DISTRIBUTION_FIXED"}}}, "then": {"properties": {"componentId": {"const": "distribution-fixed"}}}},
-                  {"if": {"properties": {"kind": {"const": "SUPPLIER_FIXED"}}}, "then": {"properties": {"componentId": {"const": "supplier-fixed"}}}}
-                ],
                 "additionalProperties": false
               },
               {

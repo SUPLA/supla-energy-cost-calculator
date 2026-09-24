@@ -7,17 +7,15 @@
     "version",
     "id",
     "label",
-    "operator",
-    "tariffGroup",
+    "presetType",
+    "components",
     "validFrom",
     "validTo",
     "currency",
     "timezone",
     "priceBasis",
     "inputs",
-    "energyPurchase",
-    "billingDefinitionTemplate",
-    "source"
+    "billingDefinitionTemplate"
   ],
   "properties": {
     "version": {
@@ -30,6 +28,48 @@
     "label": {
       "type": "string",
       "minLength": 1
+    },
+    "presetType": {
+      "enum": [
+        "OFFER",
+        "TARIFF",
+        "GENERIC"
+      ]
+    },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "componentId",
+          "label"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "ENERGY_PURCHASE",
+              "DISTRIBUTION_VARIABLE",
+              "DISTRIBUTION_FIXED",
+              "SUPPLIER_FIXED"
+            ]
+          },
+          "componentId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "provider": {
+      "$ref": "#/$defs/supplier"
     },
     "operator": {
       "type": "object",
@@ -120,10 +160,19 @@
   "$defs": {
     "supplier": {
       "type": "object",
-      "required": ["id", "label"],
+      "required": [
+        "id",
+        "label"
+      ],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "label": { "type": "string", "minLength": 1 }
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "additionalProperties": false
     },
@@ -151,7 +200,8 @@
             "INTEGER",
             "DATE",
             "DATETIME",
-            "TIME"
+            "TIME",
+            "CHOICE"
           ]
         },
         "required": {
@@ -171,6 +221,28 @@
         },
         "minimum": {
           "type": "integer"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "value",
+              "label"
+            ],
+            "properties": {
+              "value": {
+                "type": "string",
+                "minLength": 1
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          }
         },
         "help": {
           "type": "string",

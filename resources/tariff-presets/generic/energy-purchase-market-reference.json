@@ -1,0 +1,114 @@
+{
+  "version": 1,
+  "id": "PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1",
+  "label": "Własna cena dynamiczna",
+  "presetType": "GENERIC",
+  "components": [
+    {
+      "kind": "ENERGY_PURCHASE",
+      "componentId": "energy-purchase",
+      "label": "Energia czynna"
+    }
+  ],
+  "validFrom": "2000-01-01T00:00:00+01:00",
+  "validTo": "2100-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "energy.source",
+      "label": "Źródło ceny",
+      "type": "CHOICE",
+      "required": true,
+      "options": [
+        {
+          "value": "PL.TGE.FIXING1",
+          "label": "RDN Fixing I"
+        },
+        {
+          "value": "PL.TGE.FIXING1_HOURLY",
+          "label": "RDN Fixing I - hourly"
+        },
+        {
+          "value": "PL.TGE.FIXING2",
+          "label": "RDN Fixing II"
+        },
+        {
+          "value": "PL.TGE.FIXING2_HOURLY",
+          "label": "RDN Fixing II - hourly"
+        },
+        {
+          "value": "PL.PSE.RCE",
+          "label": "RCE"
+        }
+      ],
+      "targets": [
+        "/periods/0/components/0/rate/source"
+      ]
+    },
+    {
+      "id": "energy.multiplier",
+      "label": "Mnożnik",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/multiplier"
+      ]
+    },
+    {
+      "id": "energy.add",
+      "label": "Narzut",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/add"
+      ],
+      "unit": "PLN/kWh"
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2000-01-01T00:00:00+01:00",
+        "validTo": "2100-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "REFERENCE",
+              "source": "PL.TGE.FIXING1_HOURLY",
+              "sourceUnit": "PLN/MWh",
+              "multiplier": "0.001",
+              "add": "0",
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "Preset generyczny: formuła ceny to reference × multiplier + add."
+  ],
+  "source": {
+    "title": "Konfiguracja użytkownika",
+    "url": "https://www.supla.org/",
+    "retrievedAt": "2026-09-24"
+  }
+}

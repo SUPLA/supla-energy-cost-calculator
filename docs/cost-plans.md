@@ -2,7 +2,7 @@
 
 ## Component plans (version 2)
 
-Version 2 selects a fixed `CostComponentKind` for each line of each effective period. The four initial kinds are `ENERGY_PURCHASE`, `DISTRIBUTION_VARIABLE`, `DISTRIBUTION_FIXED`, and `SUPPLIER_FIXED`. The first two select a component by `componentId` from an existing preset; the fixed kinds specify a decimal rate and a `per` period. `billingCycles` are independent of preset selection. See `schema/cost-plan-v2.schema.json`.
+Version 2 assigns a `CostComponentKind` compatibility role to each component of each effective period. The four initial kinds are `ENERGY_PURCHASE`, `DISTRIBUTION_VARIABLE`, `DISTRIBUTION_FIXED`, and `SUPPLIER_FIXED`. Preset-backed components select a concrete `componentId`; fixed periodic kinds may also use the inline `rate`/`per` shorthand. More than one component of the same kind is allowed when `componentId` values differ. `billingCycles` are independent of preset selection. See `schema/cost-plan-v2.schema.json`.
 
 ```json
 {
@@ -23,7 +23,7 @@ Version 2 selects a fixed `CostComponentKind` for each line of each effective pe
     "components": [
       {
         "kind": "ENERGY_PURCHASE",
-        "presetId": "PL.TAURON_DYSTRYBUCJA.G11.2026",
+        "presetId": "PL.TAURON_SPRZEDAZ.G11.2026",
         "componentId": "energy-purchase",
         "values": {"energy.rate": "0.71"}
       },
@@ -39,7 +39,7 @@ Version 2 selects a fixed `CostComponentKind` for each line of each effective pe
 }
 ```
 
-Preset input targets are applied only to the selected component. The compiler verifies the component category and quantity, compatible currency/timezone/price basis, full billing-cycle coverage, and unique kinds per plan period. Preset `validFrom` and `validTo` values are informative; the cost-plan period controls when its selected tariff applies. The compiler preserves any internal template rule changes while extending its outer rules to the configured plan period. Bundled presets compile from their template defaults; a cost plan's `values` override those defaults explicitly. Selecting a sale offer from a supplier requires actual supplier preset data; the current bundled energy components are tariff-zone examples grouped by distribution operator.
+Preset input targets are applied only to the selected component. The compiler verifies component category and quantity compatibility, compatible currency/timezone/price basis, full billing-cycle coverage, and unique `componentId` values per plan period. Preset `validFrom` and `validTo` values are informative; the cost-plan period controls when a selected tariff or offer applies. The compiler preserves internal template rule changes while extending its outer rules to the configured plan period. Bundled presets compile from their template defaults; a cost plan's `values` override those defaults explicitly. Distribution tariffs and supply offers are separate presets. `CostPlanStarterCatalog` composes the usual OSD + incumbent-supplier combinations for the simple setup path, while advanced UIs can replace each component independently.
 
 For non-prorated periodic fees, the calculator charges a given component once per charge bucket even when several plan periods intersect that bucket. If its rate changes within the same bucket, calculation rejects the ambiguous fee; split the billing cycle or use explicit proration.
 
@@ -57,7 +57,7 @@ CostPlanDefinition
 
 ## Stable preset IDs
 
-A preset ID identifies one real tariff definition. Package maintainers may correct an implementation/data mistake under the same ID when the user-facing input contract remains compatible. Existing plans intentionally pick up that correction the next time they compile.
+A non-generic preset ID identifies one real tariff or offer definition. Generic preset IDs identify a versioned reusable configuration shape. Package maintainers may correct an implementation/data mistake under the same ID when the user-facing input contract remains compatible. Existing plans intentionally pick up that correction the next time they compile.
 
 A real operator change (new validity period, changed tariff semantics, new product) must be published under a new preset ID. Do not use a new revision hash as a substitute for a new semantic ID.
 

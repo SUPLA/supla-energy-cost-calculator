@@ -1,5 +1,7 @@
 # Frontend tariff presets (Poland, 2026)
 
+> The production catalogue now separates supply and distribution component presets and exposes simple whole-plan starters through `CostPlanStarterCatalog`. The examples in this directory document the original combined-preset UI work and remain useful for tariff schedule/reference examples. For the current persistence and selection model see `docs/component-presets-and-starters.md` and `docs/cost-plans.md`.
+
 These files are UI-oriented starting points for building a calculator `BillingDefinition`. They are deliberately not a second calculation language. A frontend should clone `billingDefinitionTemplate`, ask the user for the fields from `inputs[]`, write each value to every JSON Pointer listed in `targets[]`, and then validate the completed object with `schema/billing-definition.schema.json`.
 
 ## Scope

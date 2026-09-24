@@ -11,29 +11,36 @@ use Supla\EnergyCostCalculator\Preset\TariffPresetCompiler;
 
 final class TariffPresetCompilerTest extends TestCase
 {
-    public function testCompilesBundledG11UsingUserValuesAndPresetDefaults(): void
+    public function testCompilesSupplyG11UsingUserValue(): void
     {
-        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_DYSTRYBUCJA.G11.2026', [
-            'billingCycle.anchor' => '2026-01-15',
+        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_SPRZEDAZ.G11.2026', [
             'energy.rate' => '0.71',
         ]);
 
-        self::assertSame('2026-01-15', $compiled['billingCycle']['anchor']);
-        self::assertSame(1, $compiled['billingCycle']['length']);
+        self::assertSame('2026-01-01', $compiled['billingCycle']['anchor']);
+        self::assertCount(1, $compiled['periods'][0]['components']);
+        self::assertSame('energy-purchase', $compiled['periods'][0]['components'][0]['id']);
         self::assertSame('0.71', $compiled['periods'][0]['components'][0]['rate']['value']);
-        self::assertSame('0.2464', $compiled['periods'][0]['components'][1]['rate']['value']);
     }
 
-    public function testCompilesBundledG12WithZonedEnergyRates(): void
+    public function testCompilesDistributionG11UsingUserValue(): void
     {
-        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_DYSTRYBUCJA.G12.2026', [
-            'billingCycle.anchor' => '2026-01-15',
-            'billingCycle.length' => '2',
+        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_DYSTRYBUCJA.G11.2026', [
+            'distribution.rate' => '0.30',
+        ]);
+
+        self::assertCount(1, $compiled['periods'][0]['components']);
+        self::assertSame('distribution-variable', $compiled['periods'][0]['components'][0]['id']);
+        self::assertSame('0.30', $compiled['periods'][0]['components'][0]['rate']['value']);
+    }
+
+    public function testCompilesSupplyG12WithZonedEnergyRates(): void
+    {
+        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_SPRZEDAZ.G12.2026', [
             'energy.DAY' => '0.98',
             'energy.NIGHT' => '0.62',
         ]);
 
-        self::assertSame(2, $compiled['billingCycle']['length']);
         self::assertSame('0.98', $compiled['periods'][0]['components'][0]['rate']['rates']['DAY']);
         self::assertSame('0.62', $compiled['periods'][0]['components'][0]['rate']['rates']['NIGHT']);
     }
@@ -48,10 +55,10 @@ final class TariffPresetCompilerTest extends TestCase
         ]);
     }
 
-    public function testCompilesOneComponentWithoutRequiringOtherInputOverrides(): void
+    public function testCompilesOneSupplyComponentWithScheduleOverride(): void
     {
         $compiled = (new TariffPresetCompiler())->compileComponentToArray(
-            'PL.ENEA_OPERATOR.G12.2026',
+            'PL.ENEA.G12.2026',
             'energy-purchase',
             [
                 'energy.DAY' => '0.58',
@@ -76,14 +83,15 @@ final class TariffPresetCompilerTest extends TestCase
 
     public function testRejectsIntegerBelowPresetMinimum(): void
     {
+        $preset = $this->customPreset('/periods/0/components/0/rate/rates/A~1B');
+        $document = $preset->document;
+        $document['inputs'][0]['type'] = 'INTEGER';
+        $document['inputs'][0]['minimum'] = 1;
+        $preset = new TariffPreset($preset->id, $preset->revision, $preset->metadata, $document);
+
         $this->expectException(TariffPresetCompilationException::class);
         $this->expectExceptionMessage('must be at least 1');
-
-        (new TariffPresetCompiler())->compile('PL.TAURON_DYSTRYBUCJA.G11.2026', [
-            'billingCycle.anchor' => '2026-01-15',
-            'billingCycle.length' => 0,
-            'energy.rate' => '0.71',
-        ]);
+        (new TariffPresetCompiler())->compile($preset, ['rate' => 0]);
     }
 
     public function testSupportsEscapedJsonPointerTokens(): void
@@ -120,7 +128,7 @@ final class TariffPresetCompilerTest extends TestCase
                 'version' => 1,
                 'currency' => 'PLN',
                 'timezone' => 'Europe/Warsaw',
-                'billingCycle' => ['anchor' => null, 'length' => 1, 'unit' => 'MONTH'],
+                'billingCycle' => ['anchor' => '2026-01-01', 'length' => 1, 'unit' => 'MONTH'],
                 'periods' => [[
                     'validFrom' => '2026-01-01T00:00:00+01:00',
                     'validTo' => '2027-01-01T00:00:00+01:00',
@@ -137,9 +145,6 @@ final class TariffPresetCompilerTest extends TestCase
                 ]],
             ],
         ];
-
-        // Anchor is not an input in this synthetic preset; make it valid for BillingDefinitionParser.
-        $document['billingDefinitionTemplate']['billingCycle']['anchor'] = '2026-01-01';
 
         return new TariffPreset('TEST.G11.2026', str_repeat('0', 64), [], $document);
     }

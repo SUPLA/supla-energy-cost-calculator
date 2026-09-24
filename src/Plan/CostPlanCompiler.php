@@ -67,12 +67,16 @@ final class CostPlanCompiler
                 'validTo' => $entry->validTo?->format(DATE_ATOM),
                 'components' => [],
             ]];
-            $kinds = [];
+            $componentIds = [];
             foreach ($entry->components as $selected) {
-                if (!$selected instanceof CostPlanComponent || isset($kinds[$selected->kind->value])) {
-                    throw new CostPlanDefinitionException("Period $index has an invalid or duplicate component kind.");
+                if (!$selected instanceof CostPlanComponent) {
+                    throw new CostPlanDefinitionException("Period $index has an invalid component.");
                 }
-                $kinds[$selected->kind->value] = true;
+                $componentIdentity = $selected->componentId ?? $selected->kind->componentId();
+                if (isset($componentIds[$componentIdentity])) {
+                    throw new CostPlanDefinitionException("Period $index contains duplicate componentId '$componentIdentity'.");
+                }
+                $componentIds[$componentIdentity] = true;
                 if ($selected->presetId === null && $selected->kind->isPeriodic()) {
                     if ($selected->rate === null || $selected->per === null) {
                         throw new CostPlanDefinitionException("Period $index has an incomplete periodic component.");
@@ -91,9 +95,6 @@ final class CostPlanCompiler
                 }
                 if ($selected->presetId === null || $selected->componentId === null) {
                     throw new CostPlanDefinitionException("Period $index has an incomplete preset component.");
-                }
-                if ($selected->componentId !== $selected->kind->componentId()) {
-                    throw new CostPlanDefinitionException("Component '{$selected->componentId}' does not match {$selected->kind->value}.");
                 }
                 $preset = $this->catalog->get($selected->presetId);
                 foreach (['currency' => $plan->currency, 'timezone' => $plan->timezone, 'priceBasis' => $plan->priceBasis] as $key => $expected) {

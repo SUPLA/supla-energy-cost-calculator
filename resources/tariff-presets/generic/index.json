@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "presets": [
+    {
+      "id": "PL.GENERIC.ENERGY_PURCHASE.CONSTANT.V1",
+      "label": "Własna cena stała",
+      "presetType": "GENERIC",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "path": "generic/energy-purchase-constant.json"
+    },
+    {
+      "id": "PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1",
+      "label": "Własna cena dynamiczna",
+      "presetType": "GENERIC",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "path": "generic/energy-purchase-market-reference.json"
+    }
+  ]
+}

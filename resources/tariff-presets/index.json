@@ -1,137 +1,534 @@
 {
   "version": 1,
   "country": "PL",
-  "year": 2026,
   "presets": [
     {
       "id": "PL.TAURON_DYSTRYBUCJA.G11.2026",
       "label": "TAURON Dystrybucja - G11",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
       "operator": {
         "id": "TAURON_DYSTRYBUCJA",
         "label": "TAURON Dystrybucja"
       },
       "tariffGroup": "G11",
-      "path": "PL/2026/TAURON_DYSTRYBUCJA/G11.json"
+      "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G11.json"
     },
     {
       "id": "PL.TAURON_DYSTRYBUCJA.G12.2026",
       "label": "TAURON Dystrybucja - G12",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
       "operator": {
         "id": "TAURON_DYSTRYBUCJA",
         "label": "TAURON Dystrybucja"
       },
       "tariffGroup": "G12",
-      "path": "PL/2026/TAURON_DYSTRYBUCJA/G12.json"
+      "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G12.json"
     },
     {
       "id": "PL.TAURON_DYSTRYBUCJA.G13.2026",
       "label": "TAURON Dystrybucja - G13",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
       "operator": {
         "id": "TAURON_DYSTRYBUCJA",
         "label": "TAURON Dystrybucja"
       },
       "tariffGroup": "G13",
-      "path": "PL/2026/TAURON_DYSTRYBUCJA/G13.json"
+      "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G13.json"
     },
     {
       "id": "PL.TAURON_DYSTRYBUCJA.G14dynamic.2026",
       "label": "TAURON Dystrybucja - G14dynamic",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
       "operator": {
         "id": "TAURON_DYSTRYBUCJA",
         "label": "TAURON Dystrybucja"
       },
       "tariffGroup": "G14dynamic",
-      "path": "PL/2026/TAURON_DYSTRYBUCJA/G14dynamic.json"
+      "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G14dynamic.json"
     },
     {
       "id": "PL.PGE_DYSTRYBUCJA.G11.2026",
       "label": "PGE Dystrybucja - G11",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
       "operator": {
         "id": "PGE_DYSTRYBUCJA",
         "label": "PGE Dystrybucja"
       },
       "tariffGroup": "G11",
-      "path": "PL/2026/PGE_DYSTRYBUCJA/G11.json"
+      "path": "PL/2026/distribution/PGE_DYSTRYBUCJA/G11.json"
     },
     {
       "id": "PL.PGE_DYSTRYBUCJA.G12.2026",
       "label": "PGE Dystrybucja - G12",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
       "operator": {
         "id": "PGE_DYSTRYBUCJA",
         "label": "PGE Dystrybucja"
       },
       "tariffGroup": "G12",
-      "path": "PL/2026/PGE_DYSTRYBUCJA/G12.json"
+      "path": "PL/2026/distribution/PGE_DYSTRYBUCJA/G12.json"
     },
     {
       "id": "PL.ENEA_OPERATOR.G11.2026",
       "label": "ENEA Operator - G11",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
       "operator": {
         "id": "ENEA_OPERATOR",
         "label": "ENEA Operator"
       },
       "tariffGroup": "G11",
-      "path": "PL/2026/ENEA_OPERATOR/G11.json"
+      "path": "PL/2026/distribution/ENEA_OPERATOR/G11.json"
     },
     {
       "id": "PL.ENEA_OPERATOR.G12.2026",
       "label": "ENEA Operator - G12",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
       "operator": {
         "id": "ENEA_OPERATOR",
         "label": "ENEA Operator"
       },
       "tariffGroup": "G12",
-      "path": "PL/2026/ENEA_OPERATOR/G12.json"
+      "path": "PL/2026/distribution/ENEA_OPERATOR/G12.json"
     },
     {
       "id": "PL.ENEA_OPERATOR.G13active.2026",
       "label": "ENEA Operator - G13active",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
       "operator": {
         "id": "ENEA_OPERATOR",
         "label": "ENEA Operator"
       },
       "tariffGroup": "G13active",
-      "path": "PL/2026/ENEA_OPERATOR/G13active.json"
+      "path": "PL/2026/distribution/ENEA_OPERATOR/G13active.json"
     },
     {
       "id": "PL.ENERGA_OPERATOR.G11.2026",
       "label": "Energa-Operator - G11",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
       "operator": {
         "id": "ENERGA_OPERATOR",
         "label": "Energa-Operator"
       },
       "tariffGroup": "G11",
-      "path": "PL/2026/ENERGA_OPERATOR/G11.json"
+      "path": "PL/2026/distribution/ENERGA_OPERATOR/G11.json"
     },
     {
       "id": "PL.ENERGA_OPERATOR.G12.2026",
       "label": "Energa-Operator - G12",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
       "operator": {
         "id": "ENERGA_OPERATOR",
         "label": "Energa-Operator"
       },
       "tariffGroup": "G12",
-      "path": "PL/2026/ENERGA_OPERATOR/G12.json"
+      "path": "PL/2026/distribution/ENERGA_OPERATOR/G12.json"
     },
     {
       "id": "PL.STOEN_OPERATOR.G11.2026",
       "label": "Stoen Operator - G11",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
       "operator": {
         "id": "STOEN_OPERATOR",
         "label": "Stoen Operator"
       },
       "tariffGroup": "G11",
-      "path": "PL/2026/STOEN_OPERATOR/G11.json"
+      "path": "PL/2026/distribution/STOEN_OPERATOR/G11.json"
     },
     {
       "id": "PL.STOEN_OPERATOR.G12.2026",
       "label": "Stoen Operator - G12",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_VARIABLE",
+          "componentId": "distribution-variable",
+          "label": "Dystrybucja zmienna"
+        }
+      ],
+      "provider": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
       "operator": {
         "id": "STOEN_OPERATOR",
         "label": "Stoen Operator"
       },
       "tariffGroup": "G12",
-      "path": "PL/2026/STOEN_OPERATOR/G12.json"
+      "path": "PL/2026/distribution/STOEN_OPERATOR/G12.json"
+    },
+    {
+      "id": "PL.TAURON_SPRZEDAZ.G11.2026",
+      "label": "TAURON Sprzedaż - G11",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_SPRZEDAZ",
+        "label": "TAURON Sprzedaż"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/supply/TAURON_SPRZEDAZ/G11.json"
+    },
+    {
+      "id": "PL.TAURON_SPRZEDAZ.G12.2026",
+      "label": "TAURON Sprzedaż - G12",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_SPRZEDAZ",
+        "label": "TAURON Sprzedaż"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/supply/TAURON_SPRZEDAZ/G12.json"
+    },
+    {
+      "id": "PL.TAURON_SPRZEDAZ.G13.2026",
+      "label": "TAURON Sprzedaż - G13",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_SPRZEDAZ",
+        "label": "TAURON Sprzedaż"
+      },
+      "tariffGroup": "G13",
+      "path": "PL/2026/supply/TAURON_SPRZEDAZ/G13.json"
+    },
+    {
+      "id": "PL.PGE_OBROT.G11.2026",
+      "label": "PGE Obrót - G11",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "PGE_OBROT",
+        "label": "PGE Obrót"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/supply/PGE_OBROT/G11.json"
+    },
+    {
+      "id": "PL.PGE_OBROT.G12.2026",
+      "label": "PGE Obrót - G12",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "PGE_OBROT",
+        "label": "PGE Obrót"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/supply/PGE_OBROT/G12.json"
+    },
+    {
+      "id": "PL.ENEA.G11.2026",
+      "label": "ENEA - G11",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "ENEA",
+        "label": "ENEA"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/supply/ENEA/G11.json"
+    },
+    {
+      "id": "PL.ENEA.G12.2026",
+      "label": "ENEA - G12",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "ENEA",
+        "label": "ENEA"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/supply/ENEA/G12.json"
+    },
+    {
+      "id": "PL.ENERGA_OBROT.G11.2026",
+      "label": "ENERGA-OBRÓT - G11",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "ENERGA_OBROT",
+        "label": "ENERGA-OBRÓT"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/supply/ENERGA_OBROT/G11.json"
+    },
+    {
+      "id": "PL.ENERGA_OBROT.G12.2026",
+      "label": "ENERGA-OBRÓT - G12",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "ENERGA_OBROT",
+        "label": "ENERGA-OBRÓT"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/supply/ENERGA_OBROT/G12.json"
+    },
+    {
+      "id": "PL.EON_POLSKA.G11.2026",
+      "label": "E.ON Polska - G11",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "EON_POLSKA",
+        "label": "E.ON Polska"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/supply/EON_POLSKA/G11.json"
+    },
+    {
+      "id": "PL.EON_POLSKA.G12.2026",
+      "label": "E.ON Polska - G12",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        }
+      ],
+      "provider": {
+        "id": "EON_POLSKA",
+        "label": "E.ON Polska"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/supply/EON_POLSKA/G12.json"
+    },
+    {
+      "id": "PL.ENERGA_OBROT.OFERTA_DYNAMICZNA_II.2025_11",
+      "label": "ENERGA-OBRÓT - Oferta dynamiczna II",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        },
+        {
+          "kind": "SUPPLIER_FIXED",
+          "componentId": "supplier-fixed",
+          "label": "Opłata handlowa"
+        }
+      ],
+      "provider": {
+        "id": "ENERGA_OBROT",
+        "label": "ENERGA-OBRÓT"
+      },
+      "path": "PL/dynamic/ENERGA_OBROT/oferta-dynamiczna-ii-2025-11.json"
+    },
+    {
+      "id": "PL.ENEA.CENY_DYNAMICZNE.DI12011227_G",
+      "label": "ENEA - Ceny Dynamiczne",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        },
+        {
+          "kind": "SUPPLIER_FIXED",
+          "componentId": "supplier-fixed",
+          "label": "Opłata handlowa"
+        }
+      ],
+      "provider": {
+        "id": "ENEA",
+        "label": "ENEA"
+      },
+      "path": "PL/dynamic/ENEA/ceny-dynamiczne-DI12011227_G.json"
     }
   ]
 }

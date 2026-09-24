@@ -1,0 +1,800 @@
+{
+  "version": 1,
+  "id": "PL.ENEA_OPERATOR.G13active.2026",
+  "label": "ENEA Operator - G13active",
+  "presetType": "TARIFF",
+  "components": [
+    {
+      "kind": "DISTRIBUTION_VARIABLE",
+      "componentId": "distribution-variable",
+      "label": "Dystrybucja zmienna"
+    }
+  ],
+  "provider": {
+    "id": "ENEA_OPERATOR",
+    "label": "ENEA Operator"
+  },
+  "operator": {
+    "id": "ENEA_OPERATOR",
+    "label": "ENEA Operator"
+  },
+  "tariffGroup": "G13active",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "distribution.RECOMMENDED_LIMITATION",
+      "label": "Dystrybucja - Zalecane ograniczanie",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/RECOMMENDED_LIMITATION"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.OTHER",
+      "label": "Dystrybucja - Pozostałe godziny doby",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/OTHER"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.RECOMMENDED_CONSUMPTION",
+      "label": "Dystrybucja - Zalecany pobór",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/RECOMMENDED_CONSUMPTION"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "distribution-variable",
+            "category": "NETWORK",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "RECOMMENDED_LIMITATION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "07:00",
+                      "to": "10:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "20:00"
+                    }
+                  ],
+                  "season": "JAN"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "07:00"
+                    },
+                    {
+                      "from": "10:00",
+                      "to": "15:00"
+                    },
+                    {
+                      "from": "20:00",
+                      "to": "23:00"
+                    }
+                  ],
+                  "season": "JAN"
+                },
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "23:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "06:00"
+                    }
+                  ],
+                  "season": "JAN"
+                },
+                {
+                  "zone": "RECOMMENDED_LIMITATION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "07:00",
+                      "to": "09:00"
+                    },
+                    {
+                      "from": "16:00",
+                      "to": "21:00"
+                    }
+                  ],
+                  "season": "FEB"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "07:00"
+                    },
+                    {
+                      "from": "09:00",
+                      "to": "16:00"
+                    },
+                    {
+                      "from": "21:00",
+                      "to": "23:00"
+                    }
+                  ],
+                  "season": "FEB"
+                },
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "23:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "06:00"
+                    }
+                  ],
+                  "season": "FEB"
+                },
+                {
+                  "zone": "RECOMMENDED_LIMITATION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "09:00"
+                    },
+                    {
+                      "from": "16:00",
+                      "to": "23:00"
+                    }
+                  ],
+                  "season": "MAR"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "09:00",
+                      "to": "10:00"
+                    },
+                    {
+                      "from": "23:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "06:00"
+                    }
+                  ],
+                  "season": "MAR"
+                },
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "10:00",
+                      "to": "16:00"
+                    }
+                  ],
+                  "season": "MAR"
+                },
+                {
+                  "zone": "RECOMMENDED_LIMITATION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "09:00"
+                    },
+                    {
+                      "from": "18:00",
+                      "to": "23:00"
+                    }
+                  ],
+                  "season": "APR"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "09:00",
+                      "to": "10:00"
+                    },
+                    {
+                      "from": "16:00",
+                      "to": "18:00"
+                    },
+                    {
+                      "from": "23:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "06:00"
+                    }
+                  ],
+                  "season": "APR"
+                },
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "10:00",
+                      "to": "16:00"
+                    }
+                  ],
+                  "season": "APR"
+                },
+                {
+                  "zone": "RECOMMENDED_LIMITATION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "09:00"
+                    },
+                    {
+                      "from": "18:00",
+                      "to": "23:00"
+                    }
+                  ],
+                  "season": "MAY_AUG"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "17:00",
+                      "to": "18:00"
+                    },
+                    {
+                      "from": "23:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "06:00"
+                    }
+                  ],
+                  "season": "MAY_AUG"
+                },
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "09:00",
+                      "to": "17:00"
+                    }
+                  ],
+                  "season": "MAY_AUG"
+                },
+                {
+                  "zone": "RECOMMENDED_LIMITATION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "09:00"
+                    },
+                    {
+                      "from": "17:00",
+                      "to": "23:00"
+                    }
+                  ],
+                  "season": "SEP"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "09:00",
+                      "to": "10:00"
+                    },
+                    {
+                      "from": "16:00",
+                      "to": "17:00"
+                    },
+                    {
+                      "from": "23:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "06:00"
+                    }
+                  ],
+                  "season": "SEP"
+                },
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "10:00",
+                      "to": "16:00"
+                    }
+                  ],
+                  "season": "SEP"
+                },
+                {
+                  "zone": "RECOMMENDED_LIMITATION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "07:00",
+                      "to": "09:00"
+                    },
+                    {
+                      "from": "16:00",
+                      "to": "23:00"
+                    }
+                  ],
+                  "season": "OCT"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "09:00",
+                      "to": "10:00"
+                    },
+                    {
+                      "from": "23:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "07:00"
+                    }
+                  ],
+                  "season": "OCT"
+                },
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "10:00",
+                      "to": "16:00"
+                    }
+                  ],
+                  "season": "OCT"
+                },
+                {
+                  "zone": "RECOMMENDED_LIMITATION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "07:00",
+                      "to": "09:00"
+                    },
+                    {
+                      "from": "14:00",
+                      "to": "21:00"
+                    }
+                  ],
+                  "season": "NOV"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "07:00"
+                    },
+                    {
+                      "from": "09:00",
+                      "to": "14:00"
+                    },
+                    {
+                      "from": "21:00",
+                      "to": "23:00"
+                    }
+                  ],
+                  "season": "NOV"
+                },
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "23:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "06:00"
+                    }
+                  ],
+                  "season": "NOV"
+                },
+                {
+                  "zone": "RECOMMENDED_LIMITATION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "07:00",
+                      "to": "10:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "20:00"
+                    }
+                  ],
+                  "season": "DEC"
+                },
+                {
+                  "zone": "OTHER",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "07:00"
+                    },
+                    {
+                      "from": "10:00",
+                      "to": "13:00"
+                    },
+                    {
+                      "from": "20:00",
+                      "to": "23:00"
+                    }
+                  ],
+                  "season": "DEC"
+                },
+                {
+                  "zone": "RECOMMENDED_CONSUMPTION",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "23:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "06:00"
+                    }
+                  ],
+                  "season": "DEC"
+                }
+              ],
+              "seasons": [
+                {
+                  "id": "JAN",
+                  "from": "--01-01",
+                  "to": "--02-01"
+                },
+                {
+                  "id": "FEB",
+                  "from": "--02-01",
+                  "to": "--03-01"
+                },
+                {
+                  "id": "MAR",
+                  "from": "--03-01",
+                  "to": "--04-01"
+                },
+                {
+                  "id": "APR",
+                  "from": "--04-01",
+                  "to": "--05-01"
+                },
+                {
+                  "id": "MAY_AUG",
+                  "from": "--05-01",
+                  "to": "--09-01"
+                },
+                {
+                  "id": "SEP",
+                  "from": "--09-01",
+                  "to": "--10-01"
+                },
+                {
+                  "id": "OCT",
+                  "from": "--10-01",
+                  "to": "--11-01"
+                },
+                {
+                  "id": "NOV",
+                  "from": "--11-01",
+                  "to": "--12-01"
+                },
+                {
+                  "id": "DEC",
+                  "from": "--12-01",
+                  "to": "--01-01"
+                }
+              ]
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "RECOMMENDED_LIMITATION": "0.3032",
+                "OTHER": "0.2456",
+                "RECOMMENDED_CONSUMPTION": "0.0730"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "source": {
+    "title": "Taryfa ENEA Operator na 2026 r.",
+    "url": "https://www.operator.enea.pl/sites/operator/files/dokumenty/Enea%20Operator_wyci%C4%85g%20z%20taryfy_01.01.2026-31.12.2026.pdf",
+    "retrievedAt": "2026-09-22"
+  }
+}

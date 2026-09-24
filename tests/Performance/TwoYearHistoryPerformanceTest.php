@@ -117,7 +117,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                 'components' => [
                     [
                         'kind' => 'ENERGY_PURCHASE',
-                        'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
+                        'presetId' => 'PL.TAURON_SPRZEDAZ.G11.2026',
                         'componentId' => 'energy-purchase',
                         'values' => ['energy.rate' => '0.71'],
                     ],

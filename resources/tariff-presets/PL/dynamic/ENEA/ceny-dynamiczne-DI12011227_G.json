@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "id": "PL.ENEA.CENY_DYNAMICZNE.DI12011227_G",
+  "label": "ENEA - Ceny Dynamiczne",
+  "presetType": "OFFER",
+  "components": [
+    {
+      "kind": "ENERGY_PURCHASE",
+      "componentId": "energy-purchase",
+      "label": "Energia czynna"
+    },
+    {
+      "kind": "SUPPLIER_FIXED",
+      "componentId": "supplier-fixed",
+      "label": "Opłata handlowa"
+    }
+  ],
+  "provider": {
+    "id": "ENEA",
+    "label": "ENEA"
+  },
+  "validFrom": "2026-07-01T00:00:00+02:00",
+  "validTo": "2026-10-01T00:00:00+02:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "energy.add",
+      "label": "Stały składnik ceny energii",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/add"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Domyślna wartość wynika z tej edycji oferty; nadpisz tylko gdy Twoja umowa wskazuje inną wartość."
+    },
+    {
+      "id": "supplier.fixed",
+      "label": "Miesięczna opłata handlowa",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Wartość można nadpisać zgodnie z wariantem faktury/umowy."
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": null,
+        "validTo": null,
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "REFERENCE",
+              "source": "PL.TGE.FIXING1_HOURLY",
+              "sourceUnit": "PLN/MWh",
+              "multiplier": "0.001",
+              "add": "0.0870",
+              "unit": "PLN/kWh"
+            }
+          },
+          {
+            "id": "supplier-fixed",
+            "category": "SERVICE",
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "8.12",
+              "unit": "PLN/month"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "Cena energii: RDN Fixing I + akcyza 0,0050 PLN/kWh + składnik kosztowo-marżowy 0,0820 PLN/kWh, czyli add = 0,0870 PLN/kWh netto.",
+    "Domyślna opłata handlowa 8,12 PLN netto/mies. odpowiada 9,99 PLN brutto dla e-Faktury przy VAT 23%; faktura papierowa 22,29 PLN brutto odpowiada 18,12 PLN netto/mies.; wariant z magazynem energii ma opłatę 0 PLN.",
+    "Ta edycja cennika była oferowana od 01.07.2026 do 30.09.2026 i przewiduje 12-miesięczny okres warunków; ustaw okres CostPlan zgodnie z własną umową. Preset nie obejmuje dystrybucji.",
+    "Cennik przewiduje regułę awaryjną na wypadek nieopublikowania ceny TGE. Ten fallback nie jest modelowany przez REFERENCE; przy brakujących danych kalkulator zgłosi błąd zamiast zgadywać cenę."
+  ],
+  "source": {
+    "title": "Cennik Oferty Ceny Dynamiczne DI12011227_G od 01.07.2026 do 30.09.2026",
+    "url": "https://www.enea.pl/media/9061/cennik-oferty-ceny-dynamicznedi12011227god-01072026-do-30092026pdf.pdf",
+    "retrievedAt": "2026-09-24"
+  }
+}

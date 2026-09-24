@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "id": "PL.GENERIC.ENERGY_PURCHASE.CONSTANT.V1",
+  "label": "Własna cena stała",
+  "presetType": "GENERIC",
+  "components": [
+    {
+      "kind": "ENERGY_PURCHASE",
+      "componentId": "energy-purchase",
+      "label": "Energia czynna"
+    }
+  ],
+  "validFrom": "2000-01-01T00:00:00+01:00",
+  "validTo": "2100-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "energy.rate",
+      "label": "Cena energii",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/value"
+      ],
+      "unit": "PLN/kWh"
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2000-01-01T00:00:00+01:00",
+        "validTo": "2100-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "0.5000",
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "Preset generyczny: ustaw cenę zgodnie z własną umową."
+  ],
+  "source": {
+    "title": "Konfiguracja użytkownika",
+    "url": "https://www.supla.org/",
+    "retrievedAt": "2026-09-24"
+  }
+}

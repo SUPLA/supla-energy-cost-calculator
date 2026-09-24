@@ -29,9 +29,11 @@ final class TariffPresetCatalogTest extends TestCase
     {
         $presets = (new TariffPresetCatalog())->presets();
 
-        self::assertCount(13, $presets);
+        self::assertCount(28, $presets);
         self::assertSame('PL.TAURON_DYSTRYBUCJA.G11.2026', $presets[0]['id']);
         self::assertSame('TAURON Dystrybucja - G11', $presets[0]['label']);
+        self::assertSame('TARIFF', $presets[0]['presetType']);
+        self::assertSame([['kind' => 'DISTRIBUTION_VARIABLE', 'componentId' => 'distribution-variable', 'label' => 'Dystrybucja zmienna']], $presets[0]['components']);
         self::assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $presets[0]['revision']);
         self::assertArrayNotHasKey('path', $presets[0]);
     }

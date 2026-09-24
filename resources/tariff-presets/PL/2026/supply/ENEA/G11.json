@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "id": "PL.ENEA.G11.2026",
+  "label": "ENEA - G11",
+  "presetType": "OFFER",
+  "components": [
+    {
+      "kind": "ENERGY_PURCHASE",
+      "componentId": "energy-purchase",
+      "label": "Energia czynna"
+    }
+  ],
+  "provider": {
+    "id": "ENEA",
+    "label": "ENEA"
+  },
+  "tariffGroup": "G11",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "energyPurchase": {
+    "supplier": {
+      "id": "ENEA",
+      "label": "ENEA"
+    },
+    "energyPriceBasis": "NET_WITH_EXCISE",
+    "assumptions": [
+      "billingCycle.anchor w szablonie jest wyłącznie deterministycznym założeniem do samodzielnej kompilacji presetu; CostPlan konfiguruje billingCycles niezależnie.",
+      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
+    ],
+    "sources": [
+      {
+        "title": "Taryfa ENEA dla energii elektrycznej dla odbiorców z grup taryfowych G na 2026 r.",
+        "url": "https://www.enea.pl/media/6820/taryfa-dla-energii-elektrycznej-dla-odbiorcow-z-grup-taryfowych-gpdf.pdf",
+        "retrievedAt": "2026-09-23"
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "id": "energy.rate",
+      "label": "Cena energii czynnej",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/value"
+      ],
+      "unit": "PLN/kWh"
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "0.5030",
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "source": {
+    "title": "Taryfa ENEA dla energii elektrycznej dla odbiorców z grup taryfowych G na 2026 r.",
+    "url": "https://www.enea.pl/media/6820/taryfa-dla-energii-elektrycznej-dla-odbiorcow-z-grup-taryfowych-gpdf.pdf",
+    "retrievedAt": "2026-09-23"
+  }
+}

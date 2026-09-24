@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "id": "PL.TAURON_DYSTRYBUCJA.G14dynamic.2026",
+  "label": "TAURON Dystrybucja - G14dynamic",
+  "presetType": "TARIFF",
+  "components": [
+    {
+      "kind": "DISTRIBUTION_VARIABLE",
+      "componentId": "distribution-variable",
+      "label": "Dystrybucja zmienna"
+    }
+  ],
+  "provider": {
+    "id": "TAURON_DYSTRYBUCJA",
+    "label": "TAURON Dystrybucja"
+  },
+  "operator": {
+    "id": "TAURON_DYSTRYBUCJA",
+    "label": "TAURON Dystrybucja"
+  },
+  "tariffGroup": "G14dynamic",
+  "validFrom": "2026-01-01T00:00:00+01:00",
+  "validTo": "2027-01-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "distribution.S1",
+      "label": "Dystrybucja - S1",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/S1"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.S2",
+      "label": "Dystrybucja - S2",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/S2"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.S3",
+      "label": "Dystrybucja - S3",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/S3"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    },
+    {
+      "id": "distribution.S4",
+      "label": "Dystrybucja - S4",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/S4"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": "2027-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "distribution-variable",
+            "category": "NETWORK",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "REFERENCE",
+              "source": "PL.PSE.PDGSZ",
+              "mapping": {
+                "0": "S1",
+                "1": "S2",
+                "2": "S3",
+                "3": "S4"
+              }
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "S1": "0.0224",
+                "S2": "0.0893",
+                "S3": "0.3881",
+                "S4": "2.3756"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "G14dynamic wykorzystuje dynamiczne strefy dystrybucyjne PDGSZ S1-S4. Cena zakupu energii jest niezależnym komponentem CostPlan.",
+    "G14dynamic jest rozliczana w jednomiesięcznych okresach; skonfiguruj odpowiadający temu billingCycles w CostPlan."
+  ],
+  "source": {
+    "title": "Taryfa TAURON Dystrybucja na 2026 r.",
+    "url": "https://www.tauron-dystrybucja.pl/-/media/offer-documents/dystrybucja/aktualna-taryfa/taryfa-tauron-dystrybucja-2026_ocr.ashx",
+    "retrievedAt": "2026-09-22"
+  }
+}

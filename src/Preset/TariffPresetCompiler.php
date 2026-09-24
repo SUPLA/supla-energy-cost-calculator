@@ -163,6 +163,7 @@ final class TariffPresetCompiler
             'DATE' => $this->normalizeDate($value, $presetId, $inputId),
             'DATETIME' => $this->normalizeDateTime($value, $presetId, $inputId),
             'TIME' => $this->normalizeTime($value, $presetId, $inputId),
+            'CHOICE' => $this->normalizeChoice($value, $input, $presetId, $inputId),
             default => throw new TariffPresetCompilationException("Tariff preset '$presetId' input '$inputId' uses unsupported type '$type'."),
         };
     }
@@ -224,6 +225,25 @@ final class TariffPresetCompiler
             throw new TariffPresetCompilationException("Input '$inputId' for tariff preset '$presetId' must be an ISO-8601 date.");
         }
         return $value;
+    }
+
+
+    /** @param array<string, mixed> $input */
+    private function normalizeChoice(mixed $value, array $input, string $presetId, string $inputId): string
+    {
+        if (!is_string($value)) {
+            throw new TariffPresetCompilationException("Input '$inputId' for tariff preset '$presetId' must be one of the declared choices.");
+        }
+        $options = $input['options'] ?? null;
+        if (!is_array($options) || !array_is_list($options) || $options === []) {
+            throw new TariffPresetCompilationException("CHOICE input '$inputId' for tariff preset '$presetId' must declare options.");
+        }
+        foreach ($options as $option) {
+            if (is_array($option) && ($option['value'] ?? null) === $value) {
+                return $value;
+            }
+        }
+        throw new TariffPresetCompilationException("Input '$inputId' for tariff preset '$presetId' must be one of the declared choices.");
     }
 
     private function normalizeTime(mixed $value, string $presetId, string $inputId): string

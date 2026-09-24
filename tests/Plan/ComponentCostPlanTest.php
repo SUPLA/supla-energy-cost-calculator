@@ -186,21 +186,22 @@ final class ComponentCostPlanTest extends TestCase
     public function testRejectsPresetComponentAssignedToWrongKind(): void
     {
         $plan = $this->plan();
-        $plan['periods'][0]['components'][1]['componentId'] = 'energy-purchase';
-        $plan['periods'][0]['components'][1]['values'] = ['energy.DAY' => '0.60', 'energy.NIGHT' => '0.40'];
+        array_shift($plan['periods'][0]['components']);
+        $plan['periods'][0]['components'][0]['componentId'] = 'energy-purchase';
+        $plan['periods'][0]['components'][0]['values'] = ['energy.DAY' => '0.60', 'energy.NIGHT' => '0.40'];
 
         $this->expectException(CostPlanDefinitionException::class);
         $this->expectExceptionMessage('does not match DISTRIBUTION_VARIABLE');
         (new CostPlanCompiler())->compile($plan);
     }
 
-    public function testRejectsDuplicateComponentKind(): void
+    public function testRejectsDuplicateComponentId(): void
     {
         $plan = $this->plan();
         $plan['periods'][0]['components'][] = $plan['periods'][0]['components'][0];
 
         $this->expectException(CostPlanDefinitionException::class);
-        $this->expectExceptionMessage('duplicate component kind');
+        $this->expectExceptionMessage("duplicate componentId 'energy-purchase'");
         (new CostPlanCompiler())->compile($plan);
     }
 
@@ -227,7 +228,7 @@ final class ComponentCostPlanTest extends TestCase
         $components = [
             [
                 'kind' => 'ENERGY_PURCHASE',
-                'presetId' => 'PL.TAURON_DYSTRYBUCJA.G11.2026',
+                'presetId' => 'PL.TAURON_SPRZEDAZ.G11.2026',
                 'componentId' => 'energy-purchase',
                 'values' => ['energy.rate' => '0.71'],
             ],

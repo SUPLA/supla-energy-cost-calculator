@@ -84,34 +84,41 @@ final class TariffPresetCatalog
             return $this->entries;
         }
 
-        $indexFile = $this->directory() . DIRECTORY_SEPARATOR . 'index.json';
-        if (!is_file($indexFile)) {
-            throw new InvalidTariffPresetException("Tariff preset catalogue '$indexFile' does not exist.");
-        }
-        $json = file_get_contents($indexFile);
-        if ($json === false) {
-            throw new InvalidTariffPresetException("Cannot read tariff preset catalogue '$indexFile'.");
-        }
-
-        $index = $this->decodeObject($json, 'tariff preset catalogue');
-        $presets = $index['presets'] ?? null;
-        if (!is_array($presets) || !array_is_list($presets)) {
-            throw new InvalidTariffPresetException('Tariff preset catalogue presets must be an array.');
+        $indexFiles = [$this->directory() . DIRECTORY_SEPARATOR . 'index.json'];
+        $genericIndex = $this->directory() . DIRECTORY_SEPARATOR . 'generic' . DIRECTORY_SEPARATOR . 'index.json';
+        if ($this->presetDirectory === null && is_file($genericIndex)) {
+            $indexFiles[] = $genericIndex;
         }
 
         $this->entries = [];
-        foreach ($presets as $position => $entry) {
-            if (!is_array($entry)) {
-                throw new InvalidTariffPresetException("Tariff preset catalogue presets[$position] must be an object.");
+        foreach ($indexFiles as $indexFile) {
+            if (!is_file($indexFile)) {
+                throw new InvalidTariffPresetException("Tariff preset catalogue '$indexFile' does not exist.");
             }
-            $id = $entry['id'] ?? null;
-            if (!is_string($id) || trim($id) === '') {
-                throw new InvalidTariffPresetException("Tariff preset catalogue presets[$position].id must be a non-empty string.");
+            $json = file_get_contents($indexFile);
+            if ($json === false) {
+                throw new InvalidTariffPresetException("Cannot read tariff preset catalogue '$indexFile'.");
             }
-            if (isset($this->entries[$id])) {
-                throw new InvalidTariffPresetException("Duplicate tariff preset id '$id'.");
+
+            $index = $this->decodeObject($json, 'tariff preset catalogue');
+            $presets = $index['presets'] ?? null;
+            if (!is_array($presets) || !array_is_list($presets)) {
+                throw new InvalidTariffPresetException('Tariff preset catalogue presets must be an array.');
             }
-            $this->entries[$id] = $entry;
+
+            foreach ($presets as $position => $entry) {
+                if (!is_array($entry)) {
+                    throw new InvalidTariffPresetException("Tariff preset catalogue presets[$position] must be an object.");
+                }
+                $id = $entry['id'] ?? null;
+                if (!is_string($id) || trim($id) === '') {
+                    throw new InvalidTariffPresetException("Tariff preset catalogue presets[$position].id must be a non-empty string.");
+                }
+                if (isset($this->entries[$id])) {
+                    throw new InvalidTariffPresetException("Duplicate tariff preset id '$id'.");
+                }
+                $this->entries[$id] = $entry;
+            }
         }
 
         return $this->entries;

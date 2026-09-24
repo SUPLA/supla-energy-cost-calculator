@@ -166,7 +166,9 @@ See `examples/definitions/` and `schema/billing-definition.schema.json`.
 
 ## Tariff presets
 
-`resources/tariff-presets/` contains UI-oriented 2026 presets for Polish household groups G11, G12, TAURON G13, ENEA G13active and TAURON G14dynamic, split by OSD where schedule/rates differ. A preset contains a partial `billingDefinitionTemplate` plus `inputs[]` whose JSON Pointer targets tell the host application exactly where to write user values. After filling the required fields, the result is an ordinary `BillingDefinition`.
+`resources/tariff-presets/` contains component presets. Polish OSD tariffs expose distribution components, seller tariffs/offers expose supply components, and generic presets provide user-configurable building blocks. Catalogue metadata includes concrete `components` (`kind`, `componentId`, `label`) so a host can render one compatible selector per cost component without hard-coding component IDs.
+
+`CostPlanStarterCatalog` provides the simple setup path: starters such as `TAURON Dystrybucja - G11` compose the matching default supply and distribution presets into an ordinary version 2 cost plan. The starter is only a scaffold; persisted plans keep component preset IDs and explicit user overrides, not the starter ID.
 
 Use the production-facing catalogue API instead of resolving package paths directly:
 
@@ -181,13 +183,13 @@ $preset->document; // Complete preset document.
 $preset->revision; // SHA-256 of the deterministically encoded JSON document.
 ```
 
-`presets()` returns catalogue metadata with a `revision` and without internal resource paths. `get()` rejects unknown identifiers and resources outside the bundled preset directory. A preset ID is a stable reference to one real tariff definition; compatible corrections to that definition may change its revision without changing its ID. A real operator/tariff change must use a new preset ID.
+`presets()` returns catalogue metadata with a `revision` and without internal resource paths. `get()` rejects unknown identifiers and resources outside the bundled preset directory. A preset ID is a stable reference to one semantic tariff, offer, or generic definition; compatible corrections may change its revision without changing its ID. A real tariff/offer change or incompatible generic contract must use a new preset ID.
 
 Cost plans use the component-based version 2 format described in `docs/cost-plans.md` and `schema/cost-plan-v2.schema.json`. Each effective period selects individual `CostComponentKind` values; `billingCycles` are configured separately.
 
 Plan periods are contiguous and ordered. The first may have an open `validFrom`, the last may have an open `validTo`, and a single period may leave both boundaries open.
 
-Preset validity dates describe the bundled tariff data; the cost-plan period determines when a user applies that tariff.
+Preset validity dates describe the bundled tariff/offer edition; the cost-plan period determines when a user applies the selected component.
 
 Use `TariffPresetCompiler` when compiling one preset and `CostPlanCompiler` for persisted user plans:
 
@@ -210,7 +212,7 @@ $plan = [
         'validFrom' => '2026-01-01T00:00:00+01:00',
         'validTo' => '2027-01-01T00:00:00+01:00',
         'components' => [
-            ['kind' => 'ENERGY_PURCHASE', 'presetId' => 'PL.TAURON_DYSTRYBUCJA.G12.2026', 'componentId' => 'energy-purchase', 'values' => ['energy.DAY' => '0.98', 'energy.NIGHT' => '0.62']],
+            ['kind' => 'ENERGY_PURCHASE', 'presetId' => 'PL.TAURON_SPRZEDAZ.G12.2026', 'componentId' => 'energy-purchase', 'values' => ['energy.DAY' => '0.98', 'energy.NIGHT' => '0.62']],
             ['kind' => 'DISTRIBUTION_VARIABLE', 'presetId' => 'PL.TAURON_DYSTRYBUCJA.G12.2026', 'componentId' => 'distribution-variable', 'values' => []],
         ],
     ]],
@@ -221,11 +223,11 @@ $definition = (new CostPlanCompiler())->compile($plan);
 
 The cost-plan JSON stores stable preset IDs and user values/overrides, not a copied executable definition. Compiling later uses the current document for the same preset ID, so package-owned corrections automatically apply to existing plans. Omit preset-default values from `values` unless the user explicitly overrides them; this preserves inheritance of corrected defaults. See `schema/cost-plan-v2.schema.json` and `docs/cost-plans.md`.
 
-Bundled presets are complete defaults: `TariffPresetCompiler` can compile them with no input values. Every declared input targets a default template value and callers may override any of them when creating a plan. The bundled 2026 billing-cycle anchor is the preset validity start and should be replaced with the customer's invoice anchor when known.
+Bundled presets are complete defaults: `TariffPresetCompiler` can compile them with no input values. Every declared input targets a default template value and callers may override any of them when creating a plan. Billing-cycle settings belong to the cost plan; a preset's internal cycle exists only so that the preset can also compile independently.
 
-`energyPurchase` preserves the provenance of bundled energy-price defaults: the suggested supplier, price basis, assumptions, and source documents. These values are starting points rather than customer contract prices. Simulation results currently cover energy purchase and variable distribution, not a full invoice.
+Standard supply presets preserve the provenance of the energy-price defaults originally bundled with the OSD examples. Named dynamic offers are separate `OFFER` presets and may expose several components, for example `ENERGY_PURCHASE` plus `SUPPLIER_FIXED`. The package also provides generic constant and market-reference energy presets. See `docs/component-presets-and-starters.md`.
 
-These presets intentionally cover only the first UI scope: energy purchase input, variable distribution component, tariff-zone schedule and billing cycle. Fixed/phase-dependent/statutory charges are not baked into the presets. See `examples/tariff-presets/README.md`.
+The current Polish OSD presets still cover variable distribution rather than a complete regulated invoice. Additional fixed/statutory components can be added as the catalogue grows without changing the CostPlan format.
 
 ## SUPLA integration
 

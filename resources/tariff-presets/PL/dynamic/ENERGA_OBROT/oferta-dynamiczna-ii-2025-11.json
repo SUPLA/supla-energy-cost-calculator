@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "id": "PL.ENERGA_OBROT.OFERTA_DYNAMICZNA_II.2025_11",
+  "label": "ENERGA-OBRÓT - Oferta dynamiczna II",
+  "presetType": "OFFER",
+  "components": [
+    {
+      "kind": "ENERGY_PURCHASE",
+      "componentId": "energy-purchase",
+      "label": "Energia czynna"
+    },
+    {
+      "kind": "SUPPLIER_FIXED",
+      "componentId": "supplier-fixed",
+      "label": "Opłata handlowa"
+    }
+  ],
+  "provider": {
+    "id": "ENERGA_OBROT",
+    "label": "ENERGA-OBRÓT"
+  },
+  "validFrom": "2025-11-01T00:00:00+01:00",
+  "validTo": "2026-11-01T00:00:00+01:00",
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "priceBasis": "NET",
+  "inputs": [
+    {
+      "id": "energy.add",
+      "label": "Stały składnik ceny energii",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/add"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Domyślna wartość wynika z tej edycji oferty; nadpisz tylko gdy Twoja umowa wskazuje inną wartość."
+    },
+    {
+      "id": "supplier.fixed",
+      "label": "Miesięczna opłata handlowa",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Wartość można nadpisać zgodnie z wariantem faktury/umowy."
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": null,
+        "validTo": null,
+        "components": [
+          {
+            "id": "energy-purchase",
+            "category": "ENERGY",
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT"
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "REFERENCE",
+              "source": "PL.TGE.FIXING1_HOURLY",
+              "sourceUnit": "PLN/MWh",
+              "multiplier": "0.001",
+              "add": "0.0878",
+              "unit": "PLN/kWh"
+            }
+          },
+          {
+            "id": "supplier-fixed",
+            "category": "SERVICE",
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "8.12",
+              "unit": "PLN/month"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "Cena energii: RDN Fixing I przeliczony z PLN/MWh na PLN/kWh + 0,0878 PLN/kWh netto.",
+    "Domyślna opłata handlowa 8,12 PLN netto/mies. odpowiada 9,99 PLN brutto dla eFaktury przy VAT 23%; wariant papierowy 14,99 PLN brutto odpowiada 12,19 PLN netto/mies.",
+    "Ta edycja oferty była udostępniana od 01.11.2025 do 31.10.2026. Umowa ma indywidualny okres 24 miesięcy; ustaw okres CostPlan zgodnie z własną umową. Preset nie obejmuje dystrybucji.",
+    "Regulamin przewiduje awaryjne użycie ostatnio udostępnionych cen dla odpowiedniego typu dnia, gdy bieżące ceny nie zostaną udostępnione. Ten fallback nie jest modelowany przez REFERENCE; przy brakujących danych kalkulator zgłosi błąd zamiast zgadywać cenę."
+  ],
+  "source": {
+    "title": "Regulamin naszej oferty Oferta dynamiczna II dla domu obowiązujący od 1 listopada 2025 roku",
+    "url": "https://www.energa.pl/dam/jcr%3A2971d640-ec36-434b-ab84-e310a8b1ea07/Regulamin%20naszej%20oferty%20Oferta%20dynamiczna%20II%20dla%20domu%20obowi%C4%85zuj%C4%85cy%20od%201%20listopada%202025%20roku.pdf",
+    "retrievedAt": "2026-09-24"
+  }
+}

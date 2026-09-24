@@ -1,0 +1,577 @@
+{
+  "version": 1,
+  "starters": [
+    {
+      "id": "PL.STARTER.TAURON_DYSTRYBUCJA.G11.2026",
+      "label": "TAURON Dystrybucja - G11",
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G11",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.TAURON_SPRZEDAZ.G11.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.TAURON_DYSTRYBUCJA.G11.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.TAURON_DYSTRYBUCJA.G12.2026",
+      "label": "TAURON Dystrybucja - G12",
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G12",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.TAURON_SPRZEDAZ.G12.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.TAURON_DYSTRYBUCJA.G12.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.TAURON_DYSTRYBUCJA.G13.2026",
+      "label": "TAURON Dystrybucja - G13",
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G13",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.TAURON_SPRZEDAZ.G13.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.TAURON_DYSTRYBUCJA.G13.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.TAURON_DYSTRYBUCJA.G14dynamic.2026",
+      "label": "TAURON Dystrybucja - G14dynamic",
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G14dynamic",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.TAURON_SPRZEDAZ.G11.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.TAURON_DYSTRYBUCJA.G14dynamic.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.PGE_DYSTRYBUCJA.G11.2026",
+      "label": "PGE Dystrybucja - G11",
+      "operator": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "tariffGroup": "G11",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.PGE_OBROT.G11.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.PGE_DYSTRYBUCJA.G11.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.PGE_DYSTRYBUCJA.G12.2026",
+      "label": "PGE Dystrybucja - G12",
+      "operator": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "tariffGroup": "G12",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.PGE_OBROT.G12.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.PGE_DYSTRYBUCJA.G12.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.ENEA_OPERATOR.G11.2026",
+      "label": "ENEA Operator - G11",
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G11",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.ENEA.G11.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.ENEA_OPERATOR.G11.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.ENEA_OPERATOR.G12.2026",
+      "label": "ENEA Operator - G12",
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G12",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.ENEA.G12.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.ENEA_OPERATOR.G12.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.ENEA_OPERATOR.G13active.2026",
+      "label": "ENEA Operator - G13active",
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G13active",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.ENEA.G11.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.ENEA_OPERATOR.G13active.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.ENERGA_OPERATOR.G11.2026",
+      "label": "Energa-Operator - G11",
+      "operator": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "tariffGroup": "G11",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.ENERGA_OBROT.G11.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.ENERGA_OPERATOR.G11.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.ENERGA_OPERATOR.G12.2026",
+      "label": "Energa-Operator - G12",
+      "operator": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "tariffGroup": "G12",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.ENERGA_OBROT.G12.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.ENERGA_OPERATOR.G12.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.STOEN_OPERATOR.G11.2026",
+      "label": "Stoen Operator - G11",
+      "operator": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "tariffGroup": "G11",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.EON_POLSKA.G11.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.STOEN_OPERATOR.G11.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "PL.STARTER.STOEN_OPERATOR.G12.2026",
+      "label": "Stoen Operator - G12",
+      "operator": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "tariffGroup": "G12",
+      "plan": {
+        "version": 2,
+        "currency": "PLN",
+        "timezone": "Europe/Warsaw",
+        "priceBasis": "NET",
+        "billingCycles": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "anchor": "2026-01-01",
+            "length": 1,
+            "unit": "MONTH"
+          }
+        ],
+        "periods": [
+          {
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
+            "components": [
+              {
+                "kind": "ENERGY_PURCHASE",
+                "presetId": "PL.EON_POLSKA.G12.2026",
+                "componentId": "energy-purchase",
+                "values": {}
+              },
+              {
+                "kind": "DISTRIBUTION_VARIABLE",
+                "presetId": "PL.STOEN_OPERATOR.G12.2026",
+                "componentId": "distribution-variable",
+                "values": {}
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
