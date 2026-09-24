@@ -39,7 +39,7 @@ Version 2 selects a fixed `CostComponentKind` for each line of each effective pe
 }
 ```
 
-Preset input targets are applied only to the selected component. The compiler verifies the component category and quantity, compatible currency/timezone/price basis, full preset and billing-cycle coverage, and unique kinds per plan period. It splits executable periods at preset boundaries. Bundled presets compile from their template defaults; a cost plan's `values` override those defaults explicitly. Selecting a sale offer from a supplier requires actual supplier preset data; the current bundled energy components are tariff-zone examples grouped by distribution operator.
+Preset input targets are applied only to the selected component. The compiler verifies the component category and quantity, compatible currency/timezone/price basis, full billing-cycle coverage, and unique kinds per plan period. Preset `validFrom` and `validTo` values are informative; the cost-plan period controls when its selected tariff applies. The compiler preserves any internal template rule changes while extending its outer rules to the configured plan period. Bundled presets compile from their template defaults; a cost plan's `values` override those defaults explicitly. Selecting a sale offer from a supplier requires actual supplier preset data; the current bundled energy components are tariff-zone examples grouped by distribution operator.
 
 For non-prorated periodic fees, the calculator charges a given component once per charge bucket even when several plan periods intersect that bucket. If its rate changes within the same bucket, calculation rejects the ambiguous fee; split the billing cycle or use explicit proration.
 
@@ -78,7 +78,7 @@ A real operator change (new validity period, changed tariff semantics, new produ
 - resolves selected components through the current `TariffPresetCatalog`;
 - compiles each selected component with its own user overrides;
 - combines selected components into one `BillingDefinition`;
-- validates continuous preset and billing-cycle coverage;
+- validates continuous billing-cycle coverage and component rule coverage;
 - delegates final validation to `BillingDefinitionParser`.
 
 ## Preset corrections

@@ -10,8 +10,10 @@ use Supla\EnergyCostCalculator\Exception\CostPlanDefinitionException;
 use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Plan\CostPlanCompiler;
+use Supla\EnergyCostCalculator\Plan\CostPlanDefinition;
 use Supla\EnergyCostCalculator\Plan\CostPlanDefinitionParser;
 use Supla\EnergyCostCalculator\Plan\CostComponentKind;
+use Supla\EnergyCostCalculator\Plan\CostPlanPeriod;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryEnergyDeltaSource;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
 
@@ -46,15 +48,17 @@ final class ComponentCostPlanTest extends TestCase
         self::assertSame('12', $result->billingPeriods[0]['costs']['periodic']['total']);
     }
 
-    public function testRejectsMissingPresetCoverage(): void
+    public function testPlanPeriodCanExtendBeyondPresetValidity(): void
     {
         $plan = $this->plan();
+        $plan['periods'][0]['validFrom'] = null;
         $plan['periods'][1]['validTo'] = '2027-02-01T00:00:00+01:00';
+        $plan['billingCycles'][0]['validFrom'] = null;
         $plan['billingCycles'][0]['validTo'] = '2027-02-01T00:00:00+01:00';
 
-        $this->expectException(CostPlanDefinitionException::class);
-        $this->expectExceptionMessage('does not cover');
-        (new CostPlanCompiler())->compile($plan);
+        $compiled = (new CostPlanCompiler())->compileToArray($plan);
+        self::assertNull($compiled['periods'][0]['validFrom']);
+        self::assertSame('2027-02-01T00:00:00+01:00', $compiled['periods'][1]['validTo']);
     }
 
     public function testCanAddFixedDistributionAsSeparateKind(): void
@@ -135,6 +139,28 @@ final class ComponentCostPlanTest extends TestCase
         $this->expectException(CostPlanDefinitionException::class);
         $this->expectExceptionMessage('contiguous and ordered');
         (new CostPlanDefinitionParser())->parse($plan);
+    }
+
+    public function testCompilerRejectsGapsInPrebuiltCostPlanDefinition(): void
+    {
+        $parsed = (new CostPlanDefinitionParser())->parse($this->plan());
+        $periods = $parsed->periods;
+        $periods[1] = new CostPlanPeriod(
+            new \DateTimeImmutable('2026-01-16T00:00:00+01:00'),
+            $periods[1]->validTo,
+            $periods[1]->components,
+        );
+        $plan = new CostPlanDefinition(
+            $parsed->billingCycles,
+            $parsed->currency,
+            $parsed->timezone,
+            $parsed->priceBasis,
+            $periods,
+        );
+
+        $this->expectException(CostPlanDefinitionException::class);
+        $this->expectExceptionMessage('contiguous and ordered');
+        (new CostPlanCompiler())->compile($plan);
     }
 
     public function testRejectsDateTimeBillingCycleAnchor(): void

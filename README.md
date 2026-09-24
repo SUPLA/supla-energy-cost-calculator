@@ -187,6 +187,8 @@ Cost plans use the component-based version 2 format described in `docs/cost-plan
 
 Plan periods are contiguous and ordered. The first may have an open `validFrom`, the last may have an open `validTo`, and a single period may leave both boundaries open.
 
+Preset validity dates describe the bundled tariff data; the cost-plan period determines when a user applies that tariff.
+
 Use `TariffPresetCompiler` when compiling one preset and `CostPlanCompiler` for persisted user plans:
 
 ```php

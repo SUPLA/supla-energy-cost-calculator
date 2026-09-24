@@ -42,6 +42,7 @@ final class CostPlanCompiler
             || $plan->timezone === null || !in_array($plan->priceBasis, ['NET', 'GROSS'], true)) {
             throw new CostPlanDefinitionException('Version 2 plan requires periods, billing cycles and billing metadata.');
         }
+        $this->assertContinuousPlanPeriods($plan->periods);
         $periods = [];
         foreach ($plan->periods as $index => $entry) {
             if (!$entry instanceof CostPlanPeriod
@@ -106,17 +107,18 @@ final class CostPlanCompiler
                 }
                 $next = [];
                 foreach ($segments as $segment) {
-                    foreach ($fragment['periods'] as $source) {
+                    foreach ($fragment['periods'] as $sourceIndex => $source) {
                         $from = $this->maxDate(
                             $this->documentDate($segment['validFrom'], 'plan period validFrom'),
-                            $this->documentDate($source['validFrom'] ?? null, 'preset period validFrom'),
+                            // The outer preset range is descriptive. Plan periods control when a selected tariff applies.
+                            $sourceIndex === 0 ? null : $this->documentDate($source['validFrom'] ?? null, 'preset period validFrom'),
                         );
-                        $from = $this->maxDate($from, $this->documentDate($preset->document['validFrom'] ?? null, 'preset validFrom'));
                         $to = $this->minDate(
                             $this->documentDate($segment['validTo'], 'plan period validTo'),
-                            $this->documentDate($source['validTo'] ?? null, 'preset period validTo'),
+                            $sourceIndex === array_key_last($fragment['periods'])
+                                ? null
+                                : $this->documentDate($source['validTo'] ?? null, 'preset period validTo'),
                         );
-                        $to = $this->minDate($to, $this->documentDate($preset->document['validTo'] ?? null, 'preset validTo'));
                         if ($from !== null && $to !== null && $from >= $to) {
                             continue;
                         }
@@ -127,8 +129,8 @@ final class CostPlanCompiler
                             throw new CostPlanDefinitionException("Preset '{$preset->id}' component '{$selected->componentId}' does not match {$selected->kind->value}.");
                         }
                         $next[] = [
-                            'validFrom' => $from->format(DATE_ATOM),
-                            'validTo' => $to->format(DATE_ATOM),
+                            'validFrom' => $from?->format(DATE_ATOM),
+                            'validTo' => $to?->format(DATE_ATOM),
                             'components' => [...$segment['components'], $component],
                         ];
                     }
@@ -175,6 +177,34 @@ final class CostPlanCompiler
     private function sameBoundary(?\DateTimeImmutable $left, ?\DateTimeImmutable $right): bool
     {
         return $left === null ? $right === null : $right !== null && $left == $right;
+    }
+
+    /** @param list<CostPlanPeriod> $periods */
+    private function assertContinuousPlanPeriods(array $periods): void
+    {
+        $count = count($periods);
+        foreach ($periods as $index => $period) {
+            if (!$period instanceof CostPlanPeriod
+                || ($period->validFrom !== null && $period->validTo !== null && $period->validFrom >= $period->validTo)
+                || $period->components === []) {
+                throw new CostPlanDefinitionException("Invalid cost plan period $index.");
+            }
+            if ($count === 1) {
+                continue;
+            }
+            if ($index === 0 && $period->validTo === null) {
+                throw new CostPlanDefinitionException('periods[0].validTo is required when multiple periods are defined.');
+            }
+            if ($index === $count - 1 && $period->validFrom === null) {
+                throw new CostPlanDefinitionException("periods[$index].validFrom is required when multiple periods are defined.");
+            }
+            if ($index > 0 && $index < $count - 1 && ($period->validFrom === null || $period->validTo === null)) {
+                throw new CostPlanDefinitionException("periods[$index] must define validFrom and validTo.");
+            }
+            if ($index > 0 && !$this->sameBoundary($periods[$index - 1]->validTo, $period->validFrom)) {
+                throw new CostPlanDefinitionException('Cost plan periods must be contiguous and ordered.');
+            }
+        }
     }
 
     private function boundaryTimestamp(mixed $value, int $nullValue): int
