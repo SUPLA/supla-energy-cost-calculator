@@ -9,9 +9,10 @@ use Supla\EnergyCostCalculator\Contract\HolidayCalendarProvider;
 use Supla\EnergyCostCalculator\Definition\SelectorDefinition;
 use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
+use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Reference\ReferenceDataCache;
 
-final class DefaultSelectorResolver implements SelectorResolver
+final class DefaultSelectorResolver implements SelectorResolver, TimeRangeSelectorResolver
 {
     private const DEFAULT_RULE_PRIORITY = 500;
 
@@ -32,18 +33,66 @@ final class DefaultSelectorResolver implements SelectorResolver
 
     public function resolve(EnergyDelta $delta, SelectorDefinition $definition, ReferenceDataCache $references): ?string
     {
+        return $this->resolveAt($delta->from, null, $definition, $references);
+    }
+
+    public function resolveRange(
+        TimeRange $range,
+        SelectorDefinition $definition,
+        ReferenceDataCache $references,
+    ): ?string {
+        $selection = $this->resolveAt($range->from, $range, $definition, $references);
+        if ($definition->type !== 'WEEKLY_SCHEDULE') {
+            return $selection;
+        }
+
+        // WEEKLY_SCHEDULE clocks have minute resolution. Check every minute in
+        // the half-open pricing range so an allocation slot cannot hide a zone
+        // transition in its interior.
+        for ($cursor = $range->from->modify('+1 minute'); $cursor < $range->to; $cursor = $cursor->modify('+1 minute')) {
+            if ($this->resolveWeeklySchedule($cursor, $definition) !== $selection) {
+                throw new CalculationException(sprintf(
+                    'Selector result changes inside pricing interval %s..%s.',
+                    $range->from->format(DATE_ATOM),
+                    $range->to->format(DATE_ATOM),
+                ));
+            }
+        }
+
+        return $selection;
+    }
+
+    private function resolveAt(
+        \DateTimeImmutable $timestamp,
+        ?TimeRange $range,
+        SelectorDefinition $definition,
+        ReferenceDataCache $references,
+    ): ?string {
         return match ($definition->type) {
             'ALWAYS' => null,
-            'REFERENCE' => $this->resolveReference($delta, $definition, $references),
-            'WEEKLY_SCHEDULE' => $this->resolveWeeklySchedule($delta, $definition),
+            'REFERENCE' => $this->resolveReference($timestamp, $range, $definition, $references),
+            'WEEKLY_SCHEDULE' => $this->resolveWeeklySchedule($timestamp, $definition),
             default => throw new CalculationException("Unsupported selector {$definition->type}."),
         };
     }
 
-    private function resolveReference(EnergyDelta $delta, SelectorDefinition $definition, ReferenceDataCache $references): string
-    {
+    private function resolveReference(
+        \DateTimeImmutable $timestamp,
+        ?TimeRange $range,
+        SelectorDefinition $definition,
+        ReferenceDataCache $references,
+    ): string {
         $source = (string)$definition->config['source'];
-        $rawValue = $references->series($source)->valueAt($delta->from)->value;
+        $interval = $references->series($source)->valueAt($timestamp);
+        if ($range !== null && $interval->to < $range->to) {
+            throw new CalculationException(sprintf(
+                "Reference selector '%s' changes inside pricing interval %s..%s.",
+                $source,
+                $range->from->format(DATE_ATOM),
+                $range->to->format(DATE_ATOM),
+            ));
+        }
+        $rawValue = $interval->value;
         $mapping = $definition->config['mapping'] ?? null;
         if (!is_array($mapping)) {
             return $rawValue;
@@ -54,10 +103,10 @@ final class DefaultSelectorResolver implements SelectorResolver
         return (string)$mapping[$rawValue];
     }
 
-    private function resolveWeeklySchedule(EnergyDelta $delta, SelectorDefinition $definition): string
+    private function resolveWeeklySchedule(\DateTimeImmutable $timestamp, SelectorDefinition $definition): string
     {
         $timezone = new \DateTimeZone((string)($definition->config['timezone'] ?? 'UTC'));
-        $local = $delta->from->setTimezone($timezone);
+        $local = $timestamp->setTimezone($timezone);
         $localDay = $local->setTime(0, 0, 0);
         $rules = $definition->config['rules'];
         $seasons = $definition->config['seasons'] ?? [];

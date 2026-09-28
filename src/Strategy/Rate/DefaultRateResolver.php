@@ -8,9 +8,10 @@ use Supla\EnergyCostCalculator\Definition\RateDefinition;
 use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Math\DecimalMath;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
+use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Reference\ReferenceDataCache;
 
-final class DefaultRateResolver implements RateResolver
+final class DefaultRateResolver implements RateResolver, TimeRangeRateResolver
 {
     public function resolve(
         EnergyDelta $delta,
@@ -19,10 +20,31 @@ final class DefaultRateResolver implements RateResolver
         ReferenceDataCache $references,
         DecimalMath $math,
     ): string {
+        return $this->resolveAt($delta->from, null, $definition, $selection, $references, $math);
+    }
+
+    public function resolveRange(
+        TimeRange $range,
+        RateDefinition $definition,
+        ?string $selection,
+        ReferenceDataCache $references,
+        DecimalMath $math,
+    ): string {
+        return $this->resolveAt($range->from, $range, $definition, $selection, $references, $math);
+    }
+
+    private function resolveAt(
+        \DateTimeImmutable $timestamp,
+        ?TimeRange $range,
+        RateDefinition $definition,
+        ?string $selection,
+        ReferenceDataCache $references,
+        DecimalMath $math,
+    ): string {
         return match ($definition->type) {
             'CONSTANT' => (string)$definition->config['value'],
             'ZONED' => $this->resolveZoned($definition, $selection),
-            'REFERENCE' => $this->resolveReference($delta, $definition, $references, $math),
+            'REFERENCE' => $this->resolveReference($timestamp, $range, $definition, $references, $math),
             default => throw new CalculationException("Unsupported rate type {$definition->type}."),
         };
     }
@@ -40,13 +62,23 @@ final class DefaultRateResolver implements RateResolver
     }
 
     private function resolveReference(
-        EnergyDelta $delta,
+        \DateTimeImmutable $timestamp,
+        ?TimeRange $range,
         RateDefinition $definition,
         ReferenceDataCache $references,
         DecimalMath $math,
     ): string {
         $source = (string)$definition->config['source'];
-        $interval = $references->series($source)->valueAt($delta->from);
+        $interval = $references->series($source)->valueAt($timestamp);
+        if ($range !== null && $interval->to < $range->to) {
+            throw new CalculationException(sprintf(
+                "Reference source '%s' changes inside pricing interval %s..%s.",
+                $source,
+                $range->from->format(DATE_ATOM),
+                $range->to->format(DATE_ATOM),
+            ));
+        }
+
         $sourceUnit = $definition->config['sourceUnit'] ?? null;
         if ($sourceUnit !== null && $interval->unit !== $sourceUnit) {
             $actualUnit = $interval->unit ?? '<missing>';
@@ -61,7 +93,7 @@ final class DefaultRateResolver implements RateResolver
         $sourceMin = isset($definition->config['sourceMin']) ? (string)$definition->config['sourceMin'] : null;
         $sourceMax = isset($definition->config['sourceMax']) ? (string)$definition->config['sourceMax'] : null;
         if ($sourceMin !== null && $sourceMax !== null && $this->compare($math, $sourceMin, $sourceMax) > 0) {
-            throw new CalculationException("REFERENCE sourceMin must be less than or equal to sourceMax.");
+            throw new CalculationException('REFERENCE sourceMin must be less than or equal to sourceMax.');
         }
         if ($sourceMin !== null && $this->compare($math, $value, $sourceMin) < 0) {
             $value = $sourceMin;

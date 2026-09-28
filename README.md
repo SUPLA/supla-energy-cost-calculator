@@ -87,7 +87,7 @@ A validity boundary cuts the nominal cycle. In the example above, `15 Jun -> 15 
 
 The result exposes `billingPeriods[]` summaries with usage, usage-based costs, periodic costs and totals for every effective billing period. Usage-based costs also expose `byZone`, both globally and per billing-period summary.
 
-Usage-based costs are calculated from their natural charge windows. Periodic charges are deliberately kept out of time-series charge facts. Use `charges[]` for cost charts: ordinary components produce charges at meter-delta resolution, while temporally netted components produce one charge per complete netting window. `intervals[]` remains a meter-interval diagnostic view and never receives an artificial share of a wider netting-window cost.
+Usage-based costs are calculated from their natural charge windows. Periodic charges are deliberately kept out of time-series charge facts. Use `charges[]` for cost charts: ordinary components produce charges at meter-delta resolution, temporally netted components without allocation produce one charge per complete netting window, and allocated netting components produce one charge per allocation slot. `intervals[]` remains a meter-interval diagnostic view and never receives an artificial share of a wider netting-window cost.
 
 When the requested range covers complete billing cycles, periodic charges are also calculated and `costs.total` contains the full amount. When the range covers only part of a billing cycle and periodic charges exist, `costs.periodic.total` and `costs.total` are `null`; `periodicCharges[]` still contains the fee definitions so the UI can display e.g. `+ 12 PLN/month`.
 
@@ -115,7 +115,20 @@ Temporal netting is declared directly on the quantity:
 }
 ```
 
-Supported strategies are `IMPORT_MINUS_EXPORT` and `IMPORT_MINUS_EXPORT_CAP_ZERO`. Without `strategy`, `ACTIVE_ENERGY_IMPORT` keeps the existing forward/import behavior. A netting window must be complete and its selector result and rate must remain constant for the whole window. Therefore a 60-minute netting component can use an hourly Fixing series, but it is invalid with a rate or zone changing every 15 minutes.
+Supported strategies are `IMPORT_MINUS_EXPORT` and `IMPORT_MINUS_EXPORT_CAP_ZERO`. Without `strategy`, `ACTIVE_ENERGY_IMPORT` keeps the existing forward/import behavior. Without an allocation rule, a netting window must be complete and its selector result and rate must remain constant for the whole window.
+
+Contracts that explicitly redistribute a wider net quantity may add a named allocation rule:
+
+```json
+"quantity": {
+  "type": "ACTIVE_ENERGY_IMPORT",
+  "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+  "periodInMinutes": 60,
+  "allocation": {"strategy": "EQUAL", "periodInMinutes": 15}
+}
+```
+
+`EQUAL` splits the resolved 60-minute quantity equally into complete 15-minute pricing slots. Selector/rate stability is then required per allocated slot, and `charges[]` contains one fact per slot. `intervals[]` remains tied to raw meter deltas and never receives an allocated share.
 
 A `REFERENCE` rate may declare `sourceUnit` as a runtime assertion and optional `sourceMin`/`sourceMax` bounds. The bounds clamp the raw source value before `multiplier` and `add`; they do not cap a billing-period weighted-average/effective price.
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Supla\EnergyCostCalculator\Definition;
 
 use Supla\EnergyCostCalculator\Exception\DefinitionException;
+use Supla\EnergyCostCalculator\Model\QuantityAllocationStrategy;
 use Supla\EnergyCostCalculator\Model\QuantityStrategy;
 use Supla\EnergyCostCalculator\Model\QuantityType;
 
@@ -83,8 +84,9 @@ final class BillingDefinitionParser
         unset($quantityOptions['type']);
         $quantityStrategy = null;
         $periodInMinutes = null;
+        $quantityAllocation = null;
         if ($quantityType === QuantityType::PERIOD) {
-            if (array_key_exists('strategy', $quantityOptions) || array_key_exists('periodInMinutes', $quantityOptions)) {
+            if (array_key_exists('strategy', $quantityOptions) || array_key_exists('periodInMinutes', $quantityOptions) || array_key_exists('allocation', $quantityOptions)) {
                 throw new DefinitionException("$path.quantity: PERIOD quantity does not support temporal netting.");
             }
             $period = strtoupper((string)($quantityOptions['period'] ?? ''));
@@ -96,10 +98,14 @@ final class BillingDefinitionParser
         } else {
             $strategyRaw = $quantityOptions['strategy'] ?? null;
             $periodRaw = $quantityOptions['periodInMinutes'] ?? null;
-            unset($quantityOptions['strategy'], $quantityOptions['periodInMinutes']);
+            $allocationRaw = $quantityOptions['allocation'] ?? null;
+            unset($quantityOptions['strategy'], $quantityOptions['periodInMinutes'], $quantityOptions['allocation']);
 
             if ($strategyRaw === null && $periodRaw !== null) {
                 throw new DefinitionException("$path.quantity.periodInMinutes requires quantity.strategy.");
+            }
+            if ($strategyRaw === null && $allocationRaw !== null) {
+                throw new DefinitionException("$path.quantity.allocation requires quantity.strategy.");
             }
             if ($strategyRaw !== null) {
                 if (!is_string($strategyRaw) || trim($strategyRaw) === '') {
@@ -114,6 +120,32 @@ final class BillingDefinitionParser
                     throw new DefinitionException("$path.quantity.periodInMinutes must be a positive integer when strategy is set.");
                 }
                 $periodInMinutes = $periodRaw;
+            }
+
+            if ($allocationRaw !== null) {
+                if (!is_array($allocationRaw)) {
+                    throw new DefinitionException("$path.quantity.allocation must be an object.");
+                }
+                $allocationStrategyRaw = $allocationRaw['strategy'] ?? null;
+                $allocationPeriodRaw = $allocationRaw['periodInMinutes'] ?? null;
+                if (!is_string($allocationStrategyRaw) || trim($allocationStrategyRaw) === '') {
+                    throw new DefinitionException("$path.quantity.allocation.strategy must be a non-empty string.");
+                }
+                $allocationStrategy = QuantityAllocationStrategy::tryFrom(strtoupper($allocationStrategyRaw))
+                    ?? throw new DefinitionException("Unsupported quantity allocation strategy '$allocationStrategyRaw' at $path.quantity.allocation.strategy.");
+                if (!is_int($allocationPeriodRaw) || $allocationPeriodRaw < 1) {
+                    throw new DefinitionException("$path.quantity.allocation.periodInMinutes must be a positive integer.");
+                }
+                if ($periodInMinutes === null) {
+                    throw new DefinitionException("$path.quantity.allocation requires quantity.periodInMinutes.");
+                }
+                if ($allocationPeriodRaw >= $periodInMinutes) {
+                    throw new DefinitionException("$path.quantity.allocation.periodInMinutes must be shorter than quantity.periodInMinutes.");
+                }
+                if ($periodInMinutes % $allocationPeriodRaw !== 0) {
+                    throw new DefinitionException("$path.quantity.allocation.periodInMinutes must divide quantity.periodInMinutes exactly.");
+                }
+                $quantityAllocation = new QuantityAllocationDefinition($allocationStrategy, $allocationPeriodRaw);
             }
         }
 
@@ -146,7 +178,7 @@ final class BillingDefinitionParser
         return new ComponentDefinition(
             $id,
             $category,
-            new QuantityDefinition($quantityType, $quantityStrategy, $periodInMinutes, $quantityOptions),
+            new QuantityDefinition($quantityType, $quantityStrategy, $periodInMinutes, $quantityOptions, $quantityAllocation),
             new SelectorDefinition($selectorType, $selectorData),
             new RateDefinition($rateType, $rateData),
         );

@@ -18,14 +18,18 @@ use Supla\EnergyCostCalculator\Model\EnergyDelta;
 use Supla\EnergyCostCalculator\Model\QuantityType;
 use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Reference\ReferenceDataCache;
+use Supla\EnergyCostCalculator\Strategy\Quantity\DefaultQuantityAllocationResolver;
 use Supla\EnergyCostCalculator\Strategy\Quantity\DefaultQuantityResolver;
 use Supla\EnergyCostCalculator\Strategy\Quantity\DefaultQuantityWindowResolver;
+use Supla\EnergyCostCalculator\Strategy\Quantity\QuantityAllocationResolver;
 use Supla\EnergyCostCalculator\Strategy\Quantity\QuantityResolver;
 use Supla\EnergyCostCalculator\Strategy\Quantity\QuantityWindowResolver;
 use Supla\EnergyCostCalculator\Strategy\Rate\DefaultRateResolver;
 use Supla\EnergyCostCalculator\Strategy\Rate\RateResolver;
+use Supla\EnergyCostCalculator\Strategy\Rate\TimeRangeRateResolver;
 use Supla\EnergyCostCalculator\Strategy\Selector\DefaultSelectorResolver;
 use Supla\EnergyCostCalculator\Strategy\Selector\SelectorResolver;
+use Supla\EnergyCostCalculator\Strategy\Selector\TimeRangeSelectorResolver;
 
 final class CostCalculator
 {
@@ -39,6 +43,7 @@ final class CostCalculator
         private readonly DecimalMath $math = new NativeDecimalMath(),
         private readonly BillingCycleResolver $billingCycleResolver = new BillingCycleResolver(),
         private readonly QuantityWindowResolver $quantityWindowResolver = new DefaultQuantityWindowResolver(),
+        private readonly QuantityAllocationResolver $quantityAllocationResolver = new DefaultQuantityAllocationResolver(),
     ) {
     }
 
@@ -126,43 +131,105 @@ final class CostCalculator
                 $window['component']->quantity,
                 $this->math,
             );
-            $cost = $this->math->multiply($resolution->value, $window['rate']);
-
             $componentId = $window['component']->id;
-            $usageBasedTotal = $this->math->add($usageBasedTotal, $cost);
-            $this->addAmount($usageBasedByComponent, $componentId, $cost);
-            if ($window['selection'] !== null) {
-                $this->addAmount($usageBasedByZone, (string)$window['selection'], $cost);
-            }
-
             $summaryKey = $this->billingPeriodKey($billingPeriod);
             $summary = &$billingSummaryState[$summaryKey];
-            $summary['usageBasedTotal'] = $this->math->add($summary['usageBasedTotal'], $cost);
-            $this->addAmount($summary['usageBasedByComponent'], $componentId, $cost);
-            if ($window['selection'] !== null) {
-                $this->addAmount($summary['usageBasedByZone'], (string)$window['selection'], $cost);
-            }
-            unset($summary);
 
-            if ($options->includeIntervals) {
-                $charges[] = [
-                    'componentId' => $componentId,
-                    'category' => $window['component']->category,
-                    'from' => $window['from']->format(DATE_ATOM),
-                    'to' => $window['to']->format(DATE_ATOM),
-                    'quantity' => [
+            $chargeParts = [];
+            $allocationDefinition = $window['component']->quantity->allocation;
+            if ($allocationDefinition === null) {
+                $chargeParts[] = [
+                    'range' => $windowRange,
+                    'value' => $resolution->value,
+                    'selection' => $window['selection'],
+                    'rate' => $window['rate'],
+                    'allocation' => null,
+                ];
+            } else {
+                if (!$this->selectorResolver instanceof TimeRangeSelectorResolver) {
+                    throw new CalculationException('Quantity allocation requires a TimeRangeSelectorResolver.');
+                }
+                if (!$this->rateResolver instanceof TimeRangeRateResolver) {
+                    throw new CalculationException('Quantity allocation requires a TimeRangeRateResolver.');
+                }
+                foreach ($this->quantityAllocationResolver->resolve(
+                    $windowRange,
+                    $resolution->value,
+                    $allocationDefinition,
+                    $this->math,
+                ) as $allocation) {
+                    $selection = $this->selectorResolver->resolveRange(
+                        $allocation->range,
+                        $window['component']->selector,
+                        $window['references'],
+                    );
+                    $rate = $this->rateResolver->resolveRange(
+                        $allocation->range,
+                        $window['component']->rate,
+                        $selection,
+                        $window['references'],
+                        $this->math,
+                    );
+                    $chargeParts[] = [
+                        'range' => $allocation->range,
+                        'value' => $allocation->value,
+                        'selection' => $selection,
+                        'rate' => $rate,
+                        'allocation' => $allocation,
+                    ];
+                }
+            }
+
+            foreach ($chargeParts as $chargePart) {
+                $cost = $this->math->multiply($chargePart['value'], $chargePart['rate']);
+                $usageBasedTotal = $this->math->add($usageBasedTotal, $cost);
+                $this->addAmount($usageBasedByComponent, $componentId, $cost);
+                if ($chargePart['selection'] !== null) {
+                    $this->addAmount($usageBasedByZone, (string)$chargePart['selection'], $cost);
+                }
+
+                $summary['usageBasedTotal'] = $this->math->add($summary['usageBasedTotal'], $cost);
+                $this->addAmount($summary['usageBasedByComponent'], $componentId, $cost);
+                if ($chargePart['selection'] !== null) {
+                    $this->addAmount($summary['usageBasedByZone'], (string)$chargePart['selection'], $cost);
+                }
+
+                if ($options->includeIntervals) {
+                    $quantity = [
                         'type' => $window['component']->quantity->type->value,
                         'strategy' => $window['component']->quantity->strategy?->value,
                         'periodInMinutes' => $window['component']->quantity->periodInMinutes,
                         'import' => $resolution->sourceQuantities[QuantityType::ACTIVE_ENERGY_IMPORT->value] ?? '0',
                         'export' => $resolution->sourceQuantities[QuantityType::ACTIVE_ENERGY_EXPORT->value] ?? '0',
-                        'value' => $resolution->value,
-                    ],
-                    'selection' => $window['selection'],
-                    'rate' => $window['rate'],
-                    'cost' => $cost,
-                ];
+                        'value' => $chargePart['value'],
+                    ];
+                    if ($chargePart['allocation'] !== null) {
+                        $allocation = $chargePart['allocation'];
+                        $quantity['windowValue'] = $resolution->value;
+                        $quantity['allocation'] = [
+                            'strategy' => $allocationDefinition->strategy->value,
+                            'periodInMinutes' => $allocationDefinition->periodInMinutes,
+                            'index' => $allocation->index,
+                            'count' => $allocation->count,
+                            'sourceWindow' => [
+                                'from' => $window['from']->format(DATE_ATOM),
+                                'to' => $window['to']->format(DATE_ATOM),
+                            ],
+                        ];
+                    }
+                    $charges[] = [
+                        'componentId' => $componentId,
+                        'category' => $window['component']->category,
+                        'from' => $chargePart['range']->from->format(DATE_ATOM),
+                        'to' => $chargePart['range']->to->format(DATE_ATOM),
+                        'quantity' => $quantity,
+                        'selection' => $chargePart['selection'],
+                        'rate' => $chargePart['rate'],
+                        'cost' => $cost,
+                    ];
+                }
             }
+            unset($summary);
         };
 
         foreach ($this->deltaSource->getDeltas($meterId, $range) as $delta) {
@@ -246,8 +313,12 @@ final class CostCalculator
                         ));
                     }
 
-                    $selection = $this->selectorResolver->resolve($delta, $component->selector, $references);
-                    $rate = $this->rateResolver->resolve($delta, $component->rate, $selection, $references, $this->math);
+                    $selection = null;
+                    $rate = null;
+                    if ($component->quantity->allocation === null) {
+                        $selection = $this->selectorResolver->resolve($delta, $component->selector, $references);
+                        $rate = $this->rateResolver->resolve($delta, $component->rate, $selection, $references, $this->math);
+                    }
                     $key = $component->id;
                     if (!isset($activeNettingWindows[$key])) {
                         $activeNettingWindows[$key] = [
@@ -259,6 +330,7 @@ final class CostCalculator
                             'lastTo' => null,
                             'selection' => $selection,
                             'rate' => $rate,
+                            'references' => $references,
                         ];
                     } else {
                         $active = $activeNettingWindows[$key];
@@ -276,7 +348,7 @@ final class CostCalculator
                                 $window->to->format(DATE_ATOM),
                             ));
                         }
-                        if ($active['selection'] !== $selection) {
+                        if ($component->quantity->allocation === null && $active['selection'] !== $selection) {
                             throw new CalculationException(sprintf(
                                 "Component '%s' changes selector result inside netting window %s..%s.",
                                 $component->id,
@@ -284,7 +356,7 @@ final class CostCalculator
                                 $window->to->format(DATE_ATOM),
                             ));
                         }
-                        if ($active['rate'] !== $rate) {
+                        if ($component->quantity->allocation === null && $active['rate'] !== $rate) {
                             throw new CalculationException(sprintf(
                                 "Component '%s' changes rate inside netting window %s..%s.",
                                 $component->id,

@@ -134,6 +134,9 @@
             "periodInMinutes": {
               "type": "integer",
               "minimum": 1
+            },
+            "allocation": {
+              "$ref": "#/$defs/quantityAllocation"
             }
           },
           "additionalProperties": false
@@ -214,6 +217,9 @@
             "periodInMinutes": {
               "type": "integer",
               "minimum": 1
+            },
+            "allocation": {
+              "$ref": "#/$defs/quantityAllocation"
             }
           },
           "additionalProperties": false
@@ -245,6 +251,23 @@
           "additionalProperties": false
         }
       ]
+    },
+    "quantityAllocation": {
+      "type": "object",
+      "required": [
+        "strategy",
+        "periodInMinutes"
+      ],
+      "properties": {
+        "strategy": {
+          "const": "EQUAL"
+        },
+        "periodInMinutes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
     },
     "selector": {
       "oneOf": [

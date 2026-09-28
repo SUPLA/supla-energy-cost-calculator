@@ -595,6 +595,28 @@
       "path": "PL/dynamic/PGE_OBROT/dynamiczna-energia-g1x-konsument-2026.json"
     },
     {
+      "id": "PL.PGE_OBROT.DYNAMICZNA_ENERGIA.G1X.PROSUMENT.2026",
+      "label": "PGE Obrót - Dynamiczna energia z PGE (prosument)",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        },
+        {
+          "kind": "SUPPLIER_FIXED",
+          "componentId": "supplier-fixed",
+          "label": "Opłata handlowa"
+        }
+      ],
+      "provider": {
+        "id": "PGE_OBROT",
+        "label": "PGE Obrót"
+      },
+      "path": "PL/dynamic/PGE_OBROT/dynamiczna-energia-g1x-prosument-2026.json"
+    },
+    {
       "id": "PL.PGE_OBROT.G12w.2026",
       "label": "PGE Obrót - G12w",
       "presetType": "OFFER",
@@ -757,8 +779,8 @@
       "path": "PL/2026/supply/EON_POLSKA/G12w.json"
     },
     {
-      "id": "PL.ENERGA_OBROT.OFERTA_DYNAMICZNA_II.2025_11",
-      "label": "ENERGA-OBRÓT - Oferta dynamiczna II",
+      "id": "PL.ENERGA_OBROT.OFERTA_DYNAMICZNA_II.KONSUMENT.2025_11",
+      "label": "ENERGA-OBRÓT - Oferta dynamiczna II (konsument)",
       "presetType": "OFFER",
       "components": [
         {
@@ -777,6 +799,28 @@
         "label": "ENERGA-OBRÓT"
       },
       "path": "PL/dynamic/ENERGA_OBROT/oferta-dynamiczna-ii-2025-11.json"
+    },
+    {
+      "id": "PL.ENERGA_OBROT.OFERTA_DYNAMICZNA_II.PROSUMENT.2025_11",
+      "label": "ENERGA-OBRÓT - Oferta dynamiczna II (prosument)",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        },
+        {
+          "kind": "SUPPLIER_FIXED",
+          "componentId": "supplier-fixed",
+          "label": "Opłata handlowa"
+        }
+      ],
+      "provider": {
+        "id": "ENERGA_OBROT",
+        "label": "ENERGA-OBRÓT"
+      },
+      "path": "PL/dynamic/ENERGA_OBROT/oferta-dynamiczna-ii-prosument-2025-11.json"
     },
     {
       "id": "PL.ENERGA_OBROT.G12w.2026",
@@ -815,8 +859,8 @@
       "path": "PL/2026/supply/ENERGA_OBROT/G12r.json"
     },
     {
-      "id": "PL.ENEA.CENY_DYNAMICZNE.DI12011227_G",
-      "label": "ENEA - Ceny Dynamiczne",
+      "id": "PL.ENEA.CENY_DYNAMICZNE.DI12011227_G.KONSUMENT",
+      "label": "ENEA - Ceny Dynamiczne (konsument)",
       "presetType": "OFFER",
       "components": [
         {
@@ -835,6 +879,28 @@
         "label": "ENEA"
       },
       "path": "PL/dynamic/ENEA/ceny-dynamiczne-DI12011227_G.json"
+    },
+    {
+      "id": "PL.ENEA.CENY_DYNAMICZNE.DI12011227_G.PROSUMENT",
+      "label": "ENEA - Ceny Dynamiczne (prosument)",
+      "presetType": "OFFER",
+      "components": [
+        {
+          "kind": "ENERGY_PURCHASE",
+          "componentId": "energy-purchase",
+          "label": "Energia czynna"
+        },
+        {
+          "kind": "SUPPLIER_FIXED",
+          "componentId": "supplier-fixed",
+          "label": "Opłata handlowa"
+        }
+      ],
+      "provider": {
+        "id": "ENEA",
+        "label": "ENEA"
+      },
+      "path": "PL/dynamic/ENEA/ceny-dynamiczne-DI12011227_G-prosument.json"
     },
     {
       "id": "PL.ENEA.G12w.2026",

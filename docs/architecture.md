@@ -17,7 +17,7 @@ The package never imports Doctrine, Symfony or SUPLA entities.
 4. Stream meter deltas.
 5. Resolve the active billing-definition period for each delta.
 6. For ordinary metered components: resolve quantity -> selector -> rate -> charge.
-7. For temporally netted quantities: accumulate complete aligned windows, require a stable selector/rate across the window, then resolve one charge for the whole window.
+7. For temporally netted quantities: accumulate complete aligned windows, resolve the window quantity, optionally allocate it to named sub-slots, then resolve selector/rate and one charge per resulting pricing interval.
 8. Resolve the billing-cycle context (`anchor + length + unit`).
 9. Keep periodic charge definitions separate from usage-based charge facts.
 10. Calculate periodic charges only when the requested range covers complete billing cycles.
@@ -46,7 +46,6 @@ This is an initial package skeleton. Before production billing use, consider add
 - explicit handling of gaps in delta logs,
 - configurable behavior for definition boundaries that cut through meter intervals,
 - richer component compatibility and unit-conversion semantics,
-- a contract-defined allocation strategy for 60-minute net quantities priced by changing 15-minute rates,
 - billing-period effective-rate adjustments (weighted-average min/max/floor/cap),
 - reference-series fallback policies for missing market data,
 - history-dependent quantity baselines such as G12as previous-year thresholds,
@@ -93,3 +92,14 @@ A metered quantity may declare a temporal strategy, for example:
 Netting windows are aligned using the billing-definition timezone. The engine keeps raw meter deltas as source facts and combines them only for the component that declares the strategy. `IMPORT_MINUS_EXPORT` returns signed `sum(import) - sum(export)`. `IMPORT_MINUS_EXPORT_CAP_ZERO` returns `max(sum(import) - sum(export), 0)`.
 
 A charge exists only for a complete netting window. Missing meter intervals, requested ranges cutting a window, billing-definition or billing-cycle boundaries inside a window, selector changes inside a window, or rate changes inside a window are explicit calculation errors. This makes a 60-minute netting component compatible with hourly Fixing data and intentionally incompatible with a price or selector that changes every 15 minutes.
+
+
+Without `quantity.allocation`, selector and rate must stay stable across the whole window and the engine emits one charge for the whole window. A contract may instead declare:
+
+```json
+"allocation": {"strategy": "EQUAL", "periodInMinutes": 15}
+```
+
+The engine then resolves the parent net quantity first, divides it equally into complete child slots, resolves selector/rate for each child slot, and emits one charge per slot. `quantity.value` on that charge is the allocated amount actually multiplied by its rate; `quantity.windowValue` preserves the parent net result for auditability.
+
+Allocation is settlement semantics, not meter reconstruction. `intervals[]` remains the raw meter-interval view and never receives allocated cost. Consumer offers whose price can change inside the hour should keep natural raw import quantities unless their contract explicitly requires an allocation rule.

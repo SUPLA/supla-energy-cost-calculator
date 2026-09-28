@@ -15,6 +15,7 @@ final readonly class QuantityDefinition
         public ?QuantityStrategy $strategy = null,
         public ?int $periodInMinutes = null,
         public array $options = [],
+        public ?QuantityAllocationDefinition $allocation = null,
     ) {
     }
 
