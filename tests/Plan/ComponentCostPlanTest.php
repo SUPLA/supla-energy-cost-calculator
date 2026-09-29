@@ -43,9 +43,9 @@ final class ComponentCostPlanTest extends TestCase
             new \DateTimeImmutable('2026-01-01T00:00:00+01:00'),
             new \DateTimeImmutable('2026-02-01T00:00:00+01:00'),
         ), $this->periodicOnly($compiled));
-        self::assertSame('14.76', $result->costs['taxInclusive']['periodic']['total']);
-        self::assertSame('14.76', $result->costs['taxInclusive']['total']);
-        self::assertSame('14.76', $result->billingPeriods[0]['costs']['taxInclusive']['periodic']['total']);
+        self::assertSame('14.76', $result->costs['gross']['periodic']['total']);
+        self::assertSame('14.76', $result->costs['gross']['total']);
+        self::assertSame('14.76', $result->billingPeriods[0]['costs']['gross']['periodic']['total']);
     }
 
     public function testRejectsPlanPeriodOutsidePresetValidity(): void
@@ -126,7 +126,7 @@ final class ComponentCostPlanTest extends TestCase
             new \DateTimeImmutable('2026-02-01T00:00:00+01:00'),
         ), $compiled);
 
-        self::assertSame('14.76', $result->costs['taxInclusive']['total']);
+        self::assertSame('14.76', $result->costs['gross']['total']);
     }
 
     public function testAllowsOpenStartAndEndAroundContiguousPeriods(): void

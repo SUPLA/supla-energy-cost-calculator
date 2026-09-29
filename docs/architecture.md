@@ -27,9 +27,9 @@ The package never imports Doctrine, Symfony or SUPLA entities.
 
 Tax law is independent of tariff and billing-cycle history. A `CostPlan` references a continuous `taxProfiles[]` timeline, and `CostPlanCompiler` resolves those immutable resources into `BillingDefinition.taxRuleSets[]`. The calculator only consumes the executable rules.
 
-Each component carries a `kind` and explicit `taxTreatment.included`. For each charge, the engine removes included taxes in reverse declaration order, yielding `taxExclusive`; it then applies all applicable rules in order, yielding a canonical tax breakdown and `taxInclusive`. `PER_QUANTITY` rules use the charge quantity, while `PERCENTAGE` with `CURRENT_SUBTOTAL` uses the base plus all preceding taxes. A tax boundary must not cut a usage charge or periodic effective period.
+Each component carries a `kind` and explicit `taxTreatment.included`. For each charge, the engine removes included taxes in reverse declaration order, yielding canonical `net`; it then applies all applicable rules in order, yielding a canonical tax breakdown and `gross`. `PER_QUANTITY` rules use the charge quantity, while `PERCENTAGE` with `CURRENT_SUBTOTAL` uses the base plus all preceding taxes. A tax boundary must not cut a usage charge or periodic effective period.
 
-`charges[]` exposes `amounts.taxExclusive`, `amounts.taxes`, `amounts.taxTotal`, and `amounts.taxInclusive`. Result-level `costs` uses the same names and never exposes an unqualified financial total.
+`charges[]` exposes `amounts.net`, `amounts.taxes`, `amounts.taxTotal`, and `amounts.gross`. Result-level `costs` uses the same names and never exposes an unqualified financial total.
 
 Persisted cost-plan periods compile into the same billing-definition periods. Their boundaries may be open at either outer edge, so calculation can resolve logs before the first dated tariff change and after the last one.
 

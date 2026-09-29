@@ -8,10 +8,10 @@ final readonly class TaxCalculation
 {
     /** @param array<string, array<string, mixed>> $taxes */
     public function __construct(
-        public string $taxExclusive,
+        public string $net,
         public array $taxes,
         public string $taxTotal,
-        public string $taxInclusive,
+        public string $gross,
     ) {
     }
 
@@ -19,10 +19,10 @@ final readonly class TaxCalculation
     public function jsonSerialize(): array
     {
         return [
-            'taxExclusive' => $this->taxExclusive,
+            'net' => $this->net,
             'taxes' => $this->taxes,
             'taxTotal' => $this->taxTotal,
-            'taxInclusive' => $this->taxInclusive,
+            'gross' => $this->gross,
         ];
     }
 }

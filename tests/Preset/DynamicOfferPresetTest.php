@@ -53,7 +53,8 @@ final class DynamicOfferPresetTest extends TestCase
             $default = $compiler->compileComponentToArray($presetId, 'supplier-fixed', []);
             self::assertSame('PERIOD', $default['periods'][0]['components'][0]['quantity']['type']);
             self::assertSame('MONTH', $default['periods'][0]['components'][0]['quantity']['period']);
-            self::assertSame('8.12', $default['periods'][0]['components'][0]['rate']['value']);
+            self::assertSame('9.99', $default['periods'][0]['components'][0]['rate']['value']);
+            self::assertSame(['VAT'], $default['periods'][0]['components'][0]['taxTreatment']['included']);
         }
     }
 
@@ -69,6 +70,14 @@ final class DynamicOfferPresetTest extends TestCase
         self::assertSame('PL.TGE.FIXING1', $consumer['rate']['source']);
         self::assertSame('0.0870', $consumer['rate']['add']);
         self::assertArrayNotHasKey('strategy', $consumer['quantity']);
+
+        $fee = $compiler->compileComponentToArray(
+            'PL.ENEA.CENY_DYNAMICZNE.DI12011227_G.KONSUMENT',
+            'supplier-fixed',
+            [],
+        )['periods'][0]['components'][0];
+        self::assertSame('9.99', $fee['rate']['value']);
+        self::assertSame(['VAT'], $fee['taxTreatment']['included']);
 
         $prosumer = $compiler->compileComponentToArray(
             'PL.ENEA.CENY_DYNAMICZNE.DI12011227_G.PROSUMENT',

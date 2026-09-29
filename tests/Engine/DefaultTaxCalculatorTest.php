@@ -12,6 +12,7 @@ use Supla\EnergyCostCalculator\Engine\DefaultTaxCalculator;
 use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Definition\BillingDefinitionParser;
 use Supla\EnergyCostCalculator\Exception\DefinitionException;
+use Supla\EnergyCostCalculator\Math\NativeDecimalMath;
 
 final class DefaultTaxCalculatorTest extends TestCase
 {
@@ -20,11 +21,12 @@ final class DefaultTaxCalculatorTest extends TestCase
     {
         $result = (new DefaultTaxCalculator())->calculate($source, '1', 'ENERGY_PURCHASE', new TaxTreatment($included), $this->rules());
 
-        self::assertSame($exclusive, $result->taxExclusive);
+        self::assertSame($exclusive, $result->net);
         self::assertSame('0.005', $result->taxes['EXCISE']['amount']);
         self::assertSame('0.505', $result->taxes['VAT']['taxableBase']);
         self::assertSame('0.11615', $result->taxes['VAT']['amount']);
-        self::assertSame('0.62115', $result->taxInclusive);
+        self::assertSame('0.62115', $result->gross);
+        self::assertSame($result->gross, (new NativeDecimalMath())->add($result->net, $result->taxTotal));
     }
 
     public static function includedTaxCases(): iterable
@@ -45,10 +47,10 @@ final class DefaultTaxCalculatorTest extends TestCase
         $rules = [new TaxRuleDefinition('VAT', 'PERCENTAGE', ['DISTRIBUTION_VARIABLE'], '0.23', null, 'CURRENT_SUBTOTAL')];
         $result = (new DefaultTaxCalculator())->calculate('0.500', '1', 'DISTRIBUTION_VARIABLE', new TaxTreatment([]), $rules);
 
-        self::assertSame('0.500', $result->taxExclusive);
+        self::assertSame('0.500', $result->net);
         self::assertSame('0.500', $result->taxes['VAT']['taxableBase']);
         self::assertSame('0.115', $result->taxes['VAT']['amount']);
-        self::assertSame('0.615', $result->taxInclusive);
+        self::assertSame('0.615', $result->gross);
     }
 
     public function testReversesVatOnlyComponentFromInclusiveSourceAmount(): void
@@ -56,9 +58,9 @@ final class DefaultTaxCalculatorTest extends TestCase
         $rules = [new TaxRuleDefinition('VAT', 'PERCENTAGE', ['DISTRIBUTION_VARIABLE'], '0.23', null, 'CURRENT_SUBTOTAL')];
         $result = (new DefaultTaxCalculator())->calculate('0.615', '1', 'DISTRIBUTION_VARIABLE', new TaxTreatment(['VAT']), $rules);
 
-        self::assertSame('0.5', $result->taxExclusive);
+        self::assertSame('0.5', $result->net);
         self::assertSame('0.115', $result->taxes['VAT']['amount']);
-        self::assertSame('0.615', $result->taxInclusive);
+        self::assertSame('0.615', $result->gross);
     }
 
     public function testRejectsUnknownIncludedTax(): void

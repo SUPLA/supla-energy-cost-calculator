@@ -24,17 +24,17 @@ final class DefaultTaxCalculator implements TaxCalculator
             throw new CalculationException("Included taxes for component kind '$kind' must be an ordered prefix of applicable tax rules.");
         }
 
-        $exclusive = $sourceAmount;
+        $net = $sourceAmount;
         for ($index = count($treatment->included) - 1; $index >= 0; $index--) {
             $rule = $applicable[$index];
-            $exclusive = match ($rule->type) {
-                'PER_QUANTITY' => $this->subtract($exclusive, $this->perQuantityAmount($rule, $quantity)),
-                'PERCENTAGE' => $this->math->divide($exclusive, $this->math->add('1', $rule->rate)),
+            $net = match ($rule->type) {
+                'PER_QUANTITY' => $this->subtract($net, $this->perQuantityAmount($rule, $quantity)),
+                'PERCENTAGE' => $this->math->divide($net, $this->math->add('1', $rule->rate)),
                 default => throw new CalculationException("Unsupported tax rule type '$rule->type'."),
             };
         }
 
-        $subtotal = $exclusive;
+        $subtotal = $net;
         $taxes = [];
         foreach ($applicable as $index => $rule) {
             $taxableBase = $rule->type === 'PERCENTAGE' ? $subtotal : null;
@@ -52,7 +52,7 @@ final class DefaultTaxCalculator implements TaxCalculator
             $subtotal = $this->math->add($subtotal, $amount);
         }
 
-        return new TaxCalculation($exclusive, $taxes, $this->subtract($subtotal, $exclusive), $subtotal);
+        return new TaxCalculation($net, $taxes, $this->subtract($subtotal, $net), $subtotal);
     }
 
     private function perQuantityAmount(TaxRuleDefinition $rule, string $quantity): string

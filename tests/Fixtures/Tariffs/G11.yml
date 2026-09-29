@@ -11,7 +11,7 @@ cases:
         usage:
           ACTIVE_ENERGY_IMPORT: '2'
         costs:
-          taxInclusive:
+          gross:
             usageBased:
               total: '1.6'
               byComponent: { energy-purchase: '1', distribution-variable: '0.6' }
@@ -38,7 +38,7 @@ cases:
     expected:
       result:
         costs:
-          taxInclusive:
+          gross:
             usageBased:
               total: '1.6'
             periodic:
@@ -49,7 +49,7 @@ cases:
           requestedRangeCoversWholePeriods: true
         periodicCharges:
           - id: distribution-fixed
-            calculated: { units: '1', amounts: { taxInclusive: '1.2' } }
+            calculated: { units: '1', amounts: { gross: '1.2' } }
 
   two_full_billing_periods:
     query:
@@ -61,7 +61,7 @@ cases:
     expected:
       result:
         costs:
-          taxInclusive:
+          gross:
             usageBased: { total: '1.6' }
             periodic:
               total: '2.4'
@@ -74,4 +74,4 @@ cases:
             - { from: '2026-02-15T00:00:00+01:00', to: '2026-03-15T00:00:00+01:00', fullyCovered: true }
         periodicCharges:
           - id: distribution-fixed
-            calculated: { units: '2', amounts: { taxInclusive: '2.4' } }
+            calculated: { units: '2', amounts: { gross: '2.4' } }

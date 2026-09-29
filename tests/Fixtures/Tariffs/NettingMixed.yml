@@ -11,7 +11,7 @@ cases:
     expected:
       result:
         costs:
-          taxInclusive:
+          gross:
             usageBased:
               total: '1.7'
               byComponent:
@@ -19,22 +19,22 @@ cases:
                 energy: '0.5'
         intervals:
           - costs:
-              taxInclusive:
+              gross:
                 total: '1'
                 byComponent:
                   distribution-variable: '1'
           - costs:
-              taxInclusive:
+              gross:
                 total: '0'
                 byComponent:
                   distribution-variable: '0'
           - costs:
-              taxInclusive:
+              gross:
                 total: '0.2'
                 byComponent:
                   distribution-variable: '0.2'
           - costs:
-              taxInclusive:
+              gross:
                 total: '0'
                 byComponent:
                   distribution-variable: '0'

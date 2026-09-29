@@ -11,7 +11,7 @@ cases:
     expected:
       result:
         costs:
-          taxInclusive:
+          gross:
             usageBased:
               total: '-0.5'
         charges:
@@ -19,4 +19,4 @@ cases:
               import: '0.3'
               export: '0.8'
               value: '-0.5'
-            amounts: { taxInclusive: '-0.5' }
+            amounts: { gross: '-0.5' }

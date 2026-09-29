@@ -89,7 +89,7 @@ The result exposes `billingPeriods[]` summaries with usage, usage-based costs, p
 
 Usage-based costs are calculated from their natural charge windows. Periodic charges are deliberately kept out of time-series charge facts. Use `charges[]` for cost charts: ordinary components produce charges at meter-delta resolution, temporally netted components without allocation produce one charge per complete netting window, and allocated netting components produce one charge per allocation slot. `intervals[]` remains a meter-interval diagnostic view and never receives an artificial share of a wider netting-window cost.
 
-When the requested range covers complete billing cycles, periodic charges are also calculated and `costs.taxInclusive.total` contains the full amount. When the range covers only part of a billing cycle and periodic charges exist, `costs.taxExclusive.periodic.total`, `costs.taxInclusive.periodic.total`, `costs.taxes.total`, and both full totals are `null`; `periodicCharges[]` still contains the fee definitions so the UI can display e.g. `+ 12 PLN/month`.
+When the requested range covers complete billing cycles, periodic charges are also calculated and `costs.gross.total` contains the full amount. When the range covers only part of a billing cycle and periodic charges exist, `costs.net.periodic.total`, `costs.gross.periodic.total`, `costs.taxes.total`, and both full totals are `null`; `periodicCharges[]` still contains the fee definitions so the UI can display e.g. `+ 12 PLN/month`.
 
 `charges[]` is always returned and is the authoritative cost-fact series. Each charge has its natural `[from,to)` window, resolved quantity, selector result, `pricing` and tax-qualified `amounts`. `includeIntervals` adds only the raw meter diagnostic `intervals[]`; a 60-minute netted component is intentionally absent from the four underlying 15-minute interval costs. The top-level `usage` is always the sum of the returned meter deltas.
 
@@ -103,7 +103,7 @@ A component is defined by three independent concerns:
 2. **selector** — which zone/rule applies at the timestamp,
 3. **rate** — the actual rate, possibly from an external time series.
 
-Tariff presets define source pricing and the explicit taxes already included in that source price. A CostPlan independently selects a continuous `taxProfiles[]` history. `CostPlanCompiler` combines both axes into executable `taxRuleSets[]`; the calculator normalizes every source amount as `taxExclusive`, individual `taxes`, and `taxInclusive`. There is no global net/gross or price-basis switch.
+Tariff presets define source pricing and the explicit taxes already included in that source price. A CostPlan independently selects a continuous `taxProfiles[]` history. `CostPlanCompiler` combines both axes into executable `taxRuleSets[]`; the calculator normalizes every source amount as canonical `net`, individual `taxes`, and `gross`. `pricing.rate` remains the source rate and can include the taxes listed in `pricing.includedTaxes`; `amounts.net` removes every tax modeled by the profile. There is no global net/gross or price-basis switch.
 
 Temporal netting is declared directly on the quantity:
 

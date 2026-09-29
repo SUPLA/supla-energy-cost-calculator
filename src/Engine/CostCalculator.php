@@ -69,9 +69,9 @@ final class CostCalculator
         $coversWholeBillingPeriods = $this->billingCycleResolver->rangeCoversWholeResolvedPeriods($range, $billingPeriods);
 
         $usageBasedTotal = '0';
-        $usageBasedTaxExclusiveTotal = '0';
-        $usageBasedTaxExclusiveByComponent = [];
-        $usageBasedTaxExclusiveByZone = [];
+        $usageBasedNetTotal = '0';
+        $usageBasedNetByComponent = [];
+        $usageBasedNetByZone = [];
         $usageBasedTaxes = [];
         $usageBasedByComponent = [];
         $usageBasedByZone = [];
@@ -89,9 +89,9 @@ final class CostCalculator
                 'period' => $billingPeriod,
                 'usage' => [],
                 'usageBasedTotal' => '0',
-                'usageBasedTaxExclusiveTotal' => '0',
-                'usageBasedTaxExclusiveByComponent' => [],
-                'usageBasedTaxExclusiveByZone' => [],
+                'usageBasedNetTotal' => '0',
+                'usageBasedNetByComponent' => [],
+                'usageBasedNetByZone' => [],
                 'usageBasedTaxes' => [],
                 'usageBasedByComponent' => [],
                 'usageBasedByZone' => [],
@@ -103,9 +103,9 @@ final class CostCalculator
 
         $finalizeNettingWindow = function (array $window) use (
             &$usageBasedTotal,
-            &$usageBasedTaxExclusiveTotal,
-            &$usageBasedTaxExclusiveByComponent,
-            &$usageBasedTaxExclusiveByZone,
+            &$usageBasedNetTotal,
+            &$usageBasedNetByComponent,
+            &$usageBasedNetByZone,
             &$usageBasedTaxes,
             &$usageBasedByComponent,
             &$usageBasedByZone,
@@ -203,25 +203,25 @@ final class CostCalculator
                     $sourceAmount,
                     $chargePart['value'],
                 );
-                $cost = $taxCalculation->taxInclusive;
-                $usageBasedTaxExclusiveTotal = $this->math->add($usageBasedTaxExclusiveTotal, $taxCalculation->taxExclusive);
+                $cost = $taxCalculation->gross;
+                $usageBasedNetTotal = $this->math->add($usageBasedNetTotal, $taxCalculation->net);
                 $this->addTaxes($usageBasedTaxes, $taxCalculation);
                 $this->addTaxes($summary['usageBasedTaxes'], $taxCalculation);
-                $this->addAmount($usageBasedTaxExclusiveByComponent, $componentId, $taxCalculation->taxExclusive);
+                $this->addAmount($usageBasedNetByComponent, $componentId, $taxCalculation->net);
                 $usageBasedTotal = $this->math->add($usageBasedTotal, $cost);
                 $this->addAmount($usageBasedByComponent, $componentId, $cost);
                 if ($chargePart['selection'] !== null) {
                     $this->addAmount($usageBasedByZone, (string)$chargePart['selection'], $cost);
-                    $this->addAmount($usageBasedTaxExclusiveByZone, (string)$chargePart['selection'], $taxCalculation->taxExclusive);
+                    $this->addAmount($usageBasedNetByZone, (string)$chargePart['selection'], $taxCalculation->net);
                 }
 
                 $summary['usageBasedTotal'] = $this->math->add($summary['usageBasedTotal'], $cost);
-                $summary['usageBasedTaxExclusiveTotal'] = $this->math->add($summary['usageBasedTaxExclusiveTotal'], $taxCalculation->taxExclusive);
+                $summary['usageBasedNetTotal'] = $this->math->add($summary['usageBasedNetTotal'], $taxCalculation->net);
                 $this->addAmount($summary['usageBasedByComponent'], $componentId, $cost);
-                $this->addAmount($summary['usageBasedTaxExclusiveByComponent'], $componentId, $taxCalculation->taxExclusive);
+                $this->addAmount($summary['usageBasedNetByComponent'], $componentId, $taxCalculation->net);
                 if ($chargePart['selection'] !== null) {
                     $this->addAmount($summary['usageBasedByZone'], (string)$chargePart['selection'], $cost);
-                    $this->addAmount($summary['usageBasedTaxExclusiveByZone'], (string)$chargePart['selection'], $taxCalculation->taxExclusive);
+                    $this->addAmount($summary['usageBasedNetByZone'], (string)$chargePart['selection'], $taxCalculation->net);
                 }
 
                 {
@@ -416,29 +416,29 @@ final class CostCalculator
                 $rate = $this->rateResolver->resolve($delta, $component->rate, $selection, $references, $this->math);
                 $sourceAmount = $this->math->multiply($quantity, $rate);
                 $taxCalculation = $this->taxCalculation($definition, $component, $delta->range(), $sourceAmount, $quantity);
-                $cost = $taxCalculation->taxInclusive;
-                $usageBasedTaxExclusiveTotal = $this->math->add($usageBasedTaxExclusiveTotal, $taxCalculation->taxExclusive);
+                $cost = $taxCalculation->gross;
+                $usageBasedNetTotal = $this->math->add($usageBasedNetTotal, $taxCalculation->net);
                 $this->addTaxes($usageBasedTaxes, $taxCalculation);
                 $this->addTaxes($billingSummaryState[$summaryKey]['usageBasedTaxes'], $taxCalculation);
-                $this->addAmount($usageBasedTaxExclusiveByComponent, $component->id, $taxCalculation->taxExclusive);
+                $this->addAmount($usageBasedNetByComponent, $component->id, $taxCalculation->net);
 
                 $usageBasedTotal = $this->math->add($usageBasedTotal, $cost);
                 $this->addAmount($usageBasedByComponent, $component->id, $cost);
                 if ($selection !== null) {
                     $this->addAmount($usageBasedByZone, $selection, $cost);
-                    $this->addAmount($usageBasedTaxExclusiveByZone, $selection, $taxCalculation->taxExclusive);
+                    $this->addAmount($usageBasedNetByZone, $selection, $taxCalculation->net);
                 }
 
                 $billingSummaryState[$summaryKey]['usageBasedTotal'] = $this->math->add(
                     $billingSummaryState[$summaryKey]['usageBasedTotal'],
                     $cost,
                 );
-                $billingSummaryState[$summaryKey]['usageBasedTaxExclusiveTotal'] = $this->math->add($billingSummaryState[$summaryKey]['usageBasedTaxExclusiveTotal'], $taxCalculation->taxExclusive);
+                $billingSummaryState[$summaryKey]['usageBasedNetTotal'] = $this->math->add($billingSummaryState[$summaryKey]['usageBasedNetTotal'], $taxCalculation->net);
                 $this->addAmount($billingSummaryState[$summaryKey]['usageBasedByComponent'], $component->id, $cost);
-                $this->addAmount($billingSummaryState[$summaryKey]['usageBasedTaxExclusiveByComponent'], $component->id, $taxCalculation->taxExclusive);
+                $this->addAmount($billingSummaryState[$summaryKey]['usageBasedNetByComponent'], $component->id, $taxCalculation->net);
                 if ($selection !== null) {
                     $this->addAmount($billingSummaryState[$summaryKey]['usageBasedByZone'], $selection, $cost);
-                    $this->addAmount($billingSummaryState[$summaryKey]['usageBasedTaxExclusiveByZone'], $selection, $taxCalculation->taxExclusive);
+                    $this->addAmount($billingSummaryState[$summaryKey]['usageBasedNetByZone'], $selection, $taxCalculation->net);
                 }
 
                 $intervalTotal = $this->math->add($intervalTotal, $cost);
@@ -482,7 +482,7 @@ final class CostCalculator
                     'to' => $delta->to->format(DATE_ATOM),
                     'usage' => $intervalUsage,
                     'costs' => [
-                        'taxInclusive' => [
+                        'gross' => [
                             'total' => $intervalTotal,
                             'byComponent' => $intervalByComponent,
                             'byZone' => $intervalByZone,
@@ -509,8 +509,8 @@ final class CostCalculator
         ksort($usage);
         ksort($usageBasedByComponent);
         ksort($usageBasedByZone);
-        ksort($usageBasedTaxExclusiveByComponent);
-        ksort($usageBasedTaxExclusiveByZone);
+        ksort($usageBasedNetByComponent);
+        ksort($usageBasedNetByZone);
 
         [$periodicCharges, $periodicTotal, $periodicByComponent, $periodicAmounts] = $this->periodicCharges(
             $definition,
@@ -557,7 +557,7 @@ final class CostCalculator
             $definition->billingCycles,
             $usage,
             $this->costSummary(
-                $this->usageCosts($usageBasedTaxExclusiveTotal, $usageBasedTaxExclusiveByComponent, $usageBasedTaxExclusiveByZone),
+                $this->usageCosts($usageBasedNetTotal, $usageBasedNetByComponent, $usageBasedNetByZone),
                 $usageBasedTaxes,
                 $this->usageCosts($usageBasedTotal, $usageBasedByComponent, $usageBasedByZone),
                 $periodicAmounts,
@@ -590,9 +590,9 @@ final class CostCalculator
         $total = $calculate ? '0' : null;
         $byComponent = [];
         $amounts = [
-            'taxExclusive' => ['total' => $calculate ? '0' : null, 'byComponent' => []],
+            'net' => ['total' => $calculate ? '0' : null, 'byComponent' => []],
             'taxes' => ['total' => $calculate ? '0' : null, 'byTax' => []],
-            'taxInclusive' => ['total' => $calculate ? '0' : null, 'byComponent' => []],
+            'gross' => ['total' => $calculate ? '0' : null, 'byComponent' => []],
         ];
 
         foreach ($definition->periods as $period) {
@@ -619,15 +619,15 @@ final class CostCalculator
                             $bucket['units'],
                         );
                         $this->addPeriodicTaxCalculation($calculated, $taxCalculation);
-                        $total = $this->math->add($total ?? '0', $taxCalculation->taxInclusive);
+                        $total = $this->math->add($total ?? '0', $taxCalculation->gross);
                         $taxAmount = $this->taxAmount($taxCalculation);
-                        $amounts['taxExclusive']['total'] = $this->math->add($amounts['taxExclusive']['total'] ?? '0', $taxCalculation->taxExclusive);
+                        $amounts['net']['total'] = $this->math->add($amounts['net']['total'] ?? '0', $taxCalculation->net);
                         $amounts['taxes']['total'] = $this->math->add($amounts['taxes']['total'] ?? '0', $taxAmount);
                         $this->addTaxes($amounts['taxes']['byTax'], $taxCalculation);
-                        $amounts['taxInclusive']['total'] = $this->math->add($amounts['taxInclusive']['total'] ?? '0', $taxCalculation->taxInclusive);
-                        $this->addAmount($amounts['taxExclusive']['byComponent'], $component->id, $taxCalculation->taxExclusive);
-                        $this->addAmount($amounts['taxInclusive']['byComponent'], $component->id, $taxCalculation->taxInclusive);
-                        $this->addAmount($byComponent, $component->id, $taxCalculation->taxInclusive);
+                        $amounts['gross']['total'] = $this->math->add($amounts['gross']['total'] ?? '0', $taxCalculation->gross);
+                        $this->addAmount($amounts['net']['byComponent'], $component->id, $taxCalculation->net);
+                        $this->addAmount($amounts['gross']['byComponent'], $component->id, $taxCalculation->gross);
+                        $this->addAmount($byComponent, $component->id, $taxCalculation->gross);
                     }
                 }
 
@@ -651,9 +651,9 @@ final class CostCalculator
 
         if ($charges === []) {
             return [[], '0', [], [
-                'taxExclusive' => ['total' => '0', 'byComponent' => []],
+                'net' => ['total' => '0', 'byComponent' => []],
                 'taxes' => ['total' => '0', 'byTax' => []],
-                'taxInclusive' => ['total' => '0', 'byComponent' => []],
+                'gross' => ['total' => '0', 'byComponent' => []],
             ]];
         }
         ksort($byComponent);
@@ -696,7 +696,7 @@ final class CostCalculator
                 'billingCycle' => $billingPeriod->definition->cycle->jsonSerialize(),
                 'usage' => $periodUsage,
                 'costs' => $this->costSummary(
-                    $this->usageCosts($state['usageBasedTaxExclusiveTotal'], $state['usageBasedTaxExclusiveByComponent'], $state['usageBasedTaxExclusiveByZone']),
+                    $this->usageCosts($state['usageBasedNetTotal'], $state['usageBasedNetByComponent'], $state['usageBasedNetByZone']),
                     $state['usageBasedTaxes'],
                     $this->usageCosts($state['usageBasedTotal'], $state['usageBasedByComponent'], $state['usageBasedByZone']),
                     $periodicCosts,
@@ -821,10 +821,10 @@ final class CostCalculator
         return [
             'units' => $calculation->units,
             'amounts' => [
-                'taxExclusive' => '0',
+                'net' => '0',
                 'taxes' => [],
                 'taxTotal' => '0',
-                'taxInclusive' => '0',
+                'gross' => '0',
             ],
         ];
     }
@@ -832,9 +832,9 @@ final class CostCalculator
     /** @param array{units: string, amounts: array<string, mixed>} $summary */
     private function addPeriodicTaxCalculation(array &$summary, TaxCalculation $calculation): void
     {
-        $summary['amounts']['taxExclusive'] = $this->math->add($summary['amounts']['taxExclusive'], $calculation->taxExclusive);
+        $summary['amounts']['net'] = $this->math->add($summary['amounts']['net'], $calculation->net);
         $summary['amounts']['taxTotal'] = $this->math->add($summary['amounts']['taxTotal'], $calculation->taxTotal);
-        $summary['amounts']['taxInclusive'] = $this->math->add($summary['amounts']['taxInclusive'], $calculation->taxInclusive);
+        $summary['amounts']['gross'] = $this->math->add($summary['amounts']['gross'], $calculation->gross);
         foreach ($calculation->taxes as $id => $tax) {
             if (!isset($summary['amounts']['taxes'][$id])) {
                 $summary['amounts']['taxes'][$id] = $tax;
@@ -890,10 +890,10 @@ final class CostCalculator
     }
 
     /** @param array<string, string> $usageTaxes @param array<string, array<string, mixed>> $periodic */
-    private function costSummary(array $usageExclusive, array $usageTaxes, array $usageInclusive, array $periodic, bool $periodicUnknown): array
+    private function costSummary(array $usageNet, array $usageTaxes, array $usageGross, array $periodic, bool $periodicUnknown): array
     {
         $result = [];
-        foreach (['taxExclusive' => $usageExclusive, 'taxInclusive' => $usageInclusive] as $basis => $usage) {
+        foreach (['net' => $usageNet, 'gross' => $usageGross] as $basis => $usage) {
             $periodicCosts = $periodicUnknown
                 ? ['total' => null, 'byComponent' => []]
                 : $periodic[$basis];

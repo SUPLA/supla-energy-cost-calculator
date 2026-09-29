@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Engine\CalculationOptions;
 use Supla\EnergyCostCalculator\Engine\CostCalculator;
 use Supla\EnergyCostCalculator\Exception\CalculationException;
+use Supla\EnergyCostCalculator\Math\NativeDecimalMath;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
 use Supla\EnergyCostCalculator\Model\QuantityType;
 use Supla\EnergyCostCalculator\Model\TimeRange;
@@ -50,7 +51,7 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('0.2', $result->costs['taxInclusive']['usageBased']['total']);
+        self::assertSame('0.2', $result->costs['gross']['usageBased']['total']);
         self::assertSame('NIGHT', $result->intervals[0]['components'][0]['selection']);
         self::assertSame('NIGHT', $result->intervals[1]['components'][0]['selection']);
     }
@@ -106,7 +107,7 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('0.3', $result->costs['taxInclusive']['usageBased']['total']);
+        self::assertSame('0.3', $result->costs['gross']['usageBased']['total']);
         self::assertSame('WINTER', $result->intervals[0]['components'][0]['selection']);
         self::assertSame('SUMMER', $result->intervals[1]['components'][0]['selection']);
     }
@@ -152,9 +153,9 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             ),
             $definition,
         );
-        self::assertSame('0.5', $partial->costs['taxInclusive']['usageBased']['total']);
-        self::assertNull($partial->costs['taxInclusive']['periodic']['total']);
-        self::assertNull($partial->costs['taxInclusive']['total']);
+        self::assertSame('0.5', $partial->costs['gross']['usageBased']['total']);
+        self::assertNull($partial->costs['gross']['periodic']['total']);
+        self::assertNull($partial->costs['gross']['total']);
         self::assertNull($partial->periodicCharges[0]['calculated']);
 
         $full = $calculator->calculate(
@@ -165,11 +166,22 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             ),
             $definition,
         );
-        self::assertSame('0.5', $full->costs['taxInclusive']['usageBased']['total']);
-        self::assertSame('10', $full->costs['taxInclusive']['periodic']['total']);
-        self::assertSame('10.5', $full->costs['taxInclusive']['total']);
+        self::assertSame('0.5', $full->costs['gross']['usageBased']['total']);
+        self::assertSame('10', $full->costs['gross']['periodic']['total']);
+        self::assertSame('10.5', $full->costs['gross']['total']);
         self::assertSame('1', $full->periodicCharges[0]['calculated']['units']);
-        self::assertSame('10', $full->periodicCharges[0]['calculated']['amounts']['taxInclusive']);
+        self::assertSame('10', $full->periodicCharges[0]['calculated']['amounts']['gross']);
+
+        $json = $full->jsonSerialize();
+        self::assertArrayHasKey('net', $json['costs']);
+        self::assertArrayHasKey('taxes', $json['costs']);
+        self::assertArrayHasKey('gross', $json['costs']);
+        self::assertArrayNotHasKey('tax' . 'Exclusive', $json['costs']);
+        self::assertArrayNotHasKey('tax' . 'Inclusive', $json['costs']);
+        self::assertFinancialInvariant($json['charges'][0]['amounts']);
+        self::assertFinancialInvariant($json['periodicCharges'][0]['calculated']['amounts']);
+        self::assertCostsInvariant($json['costs']);
+        self::assertCostsInvariant($json['billingPeriods'][0]['costs']);
     }
 
     public function testBillingPeriodFixedCostIsChargedOncePerBillingCycle(): void
@@ -199,8 +211,8 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             $definition,
         );
 
-        self::assertSame('7', $result->costs['taxInclusive']['periodic']['total']);
-        self::assertSame('7', $result->costs['taxInclusive']['total']);
+        self::assertSame('7', $result->costs['gross']['periodic']['total']);
+        self::assertSame('7', $result->costs['gross']['total']);
         self::assertSame('1', $result->periodicCharges[0]['calculated']['units']);
     }
 
@@ -208,10 +220,10 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
     {
         $result = $this->periodicCalculator()->calculate('meter', $this->range('2026-01-15', '2026-02-15'), $this->periodicDefinition([]));
 
-        self::assertSame('10', $result->costs['taxExclusive']['periodic']['total']);
+        self::assertSame('10', $result->costs['net']['periodic']['total']);
         self::assertSame('2', $result->costs['taxes']['byTax']['VAT']);
         self::assertSame('2', $result->costs['taxes']['total']);
-        self::assertSame('12', $result->costs['taxInclusive']['periodic']['total']);
+        self::assertSame('12', $result->costs['gross']['periodic']['total']);
     }
 
     public function testPeriodicFeeReversesIncludedVat(): void
@@ -222,19 +234,19 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             $this->periodicDefinition(['VAT']),
         );
 
-        self::assertSame('10', $result->costs['taxExclusive']['periodic']['total']);
+        self::assertSame('10', $result->costs['net']['periodic']['total']);
         self::assertSame('2', $result->costs['taxes']['byTax']['VAT']);
         self::assertSame('2', $result->costs['taxes']['total']);
-        self::assertSame('12', $result->costs['taxInclusive']['periodic']['total']);
+        self::assertSame('12', $result->costs['gross']['periodic']['total']);
     }
 
     public function testPartialPeriodicFeeOutcomeRemainsUnknown(): void
     {
         $result = $this->periodicCalculator()->calculate('meter', $this->range('2026-01-20', '2026-01-27'), $this->periodicDefinition([]));
 
-        self::assertNull($result->costs['taxExclusive']['periodic']['total']);
+        self::assertNull($result->costs['net']['periodic']['total']);
         self::assertNull($result->costs['taxes']['total']);
-        self::assertNull($result->costs['taxInclusive']['total']);
+        self::assertNull($result->costs['gross']['total']);
     }
 
     public function testTaxBoundaryInsidePeriodicBucketThrows(): void
@@ -267,7 +279,7 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
 
         $result = $this->periodicCalculator()->calculate('meter', $this->range('2026-01-15', '2026-03-15'), $definition);
 
-        self::assertSame('24', $result->costs['taxInclusive']['periodic']['total']);
+        self::assertSame('24', $result->costs['gross']['periodic']['total']);
     }
 
     public function testTaxTreatmentChangeInsidePeriodicBucketThrows(): void
@@ -364,5 +376,30 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
     private function vatRule(): array
     {
         return ['id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['SUPPLIER_FIXED'], 'rate' => '0.2', 'base' => 'CURRENT_SUBTOTAL'];
+    }
+
+    /** @param array<string, mixed> $amounts */
+    private static function assertFinancialInvariant(array $amounts): void
+    {
+        self::assertArrayHasKey('net', $amounts);
+        self::assertArrayHasKey('taxes', $amounts);
+        self::assertArrayHasKey('gross', $amounts);
+        self::assertArrayNotHasKey('tax' . 'Exclusive', $amounts);
+        self::assertArrayNotHasKey('tax' . 'Inclusive', $amounts);
+        self::assertSame($amounts['gross'], (new NativeDecimalMath())->add($amounts['net'], $amounts['taxTotal']));
+    }
+
+    /** @param array<string, mixed> $costs */
+    private static function assertCostsInvariant(array $costs): void
+    {
+        self::assertArrayHasKey('net', $costs);
+        self::assertArrayHasKey('taxes', $costs);
+        self::assertArrayHasKey('gross', $costs);
+        self::assertArrayNotHasKey('tax' . 'Exclusive', $costs);
+        self::assertArrayNotHasKey('tax' . 'Inclusive', $costs);
+        self::assertSame(
+            $costs['gross']['total'],
+            (new NativeDecimalMath())->add($costs['net']['total'], $costs['taxes']['total']),
+        );
     }
 }

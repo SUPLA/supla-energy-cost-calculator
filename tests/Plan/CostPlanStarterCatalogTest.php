@@ -82,7 +82,7 @@ final class CostPlanStarterCatalogTest extends TestCase
             $definition,
         );
 
-        self::assertSame('0', $result->costs['taxInclusive']['usageBased']['total']);
+        self::assertSame('0', $result->costs['gross']['usageBased']['total']);
     }
 
     private function delta(string $from, string $to, string $import, string $export): EnergyDelta

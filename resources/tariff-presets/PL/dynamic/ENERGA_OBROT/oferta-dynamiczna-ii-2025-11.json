@@ -88,7 +88,7 @@
             "kind": "SUPPLIER_FIXED",
             "category": "SERVICE",
             "taxTreatment": {
-              "included": []
+            "included": ["VAT"]
             },
             "quantity": {
               "type": "PERIOD",
@@ -97,7 +97,7 @@
             },
             "rate": {
               "type": "CONSTANT",
-              "value": "8.12",
+            "value": "9.99",
               "unit": "PLN/month"
             }
           }
@@ -108,7 +108,7 @@
   "warnings": [
     "Cena energii: RDN Fixing I w naturalnej rozdzielczości publikacji TGE, przeliczony z PLN/MWh na PLN/kWh + 0,0878 PLN/kWh netto.",
     "Preset konsumencki nie narzuca 60-minutowego nettingu ani alokacji; rzeczywisty profil poboru jest wyceniany według ceny właściwej dla danego interwału.",
-    "Domyślna opłata handlowa 8,12 PLN netto/mies. odpowiada 9,99 PLN brutto dla eFaktury przy VAT 23%; wariant papierowy 14,99 PLN brutto odpowiada 12,19 PLN netto/mies.",
+    "Domyślna opłata handlowa 9,99 PLN brutto/mies. dla eFaktury zawiera VAT; wariant papierowy kosztuje 14,99 PLN brutto/mies.",
     "Ta edycja oferty była udostępniana od 01.11.2025 do 31.10.2026. Umowa ma indywidualny okres 24 miesięcy; ustaw okres CostPlan zgodnie z własną umową. Preset nie obejmuje dystrybucji.",
     "Regulamin przewiduje awaryjne użycie ostatnio udostępnionych cen dla odpowiedniego typu dnia, gdy bieżące ceny nie zostaną udostępnione. Ten fallback nie jest modelowany przez REFERENCE; przy brakujących danych kalkulator zgłosi błąd zamiast zgadywać cenę."
   ],

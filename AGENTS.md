@@ -33,7 +33,7 @@ Never reintroduce a global "static tariff vs dynamic tariff" distinction. Differ
 
 ## Taxes
 
-Taxes are data-driven. A component declares `kind` and an explicit `taxTreatment.included` ordered prefix. `TaxProfile` resources are atomic, versioned rule sets; `CostPlan.taxProfiles[]` is the independent validity timeline compiled into executable `BillingDefinition.taxRuleSets[]`. The engine first reverses included taxes to `taxExclusive`, then applies all applicable rules in declaration order to produce `taxInclusive`. Do not introduce a global net/gross or price-basis flag.
+Taxes are data-driven. A component declares `kind` and an explicit `taxTreatment.included` ordered prefix. `TaxProfile` resources are atomic, versioned rule sets; `CostPlan.taxProfiles[]` is the independent validity timeline compiled into executable `BillingDefinition.taxRuleSets[]`. The engine first reverses included taxes to canonical `net`, then applies all applicable rules in declaration order to produce `gross`. Do not introduce a global net/gross or price-basis flag.
 
 ## Data access
 

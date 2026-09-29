@@ -76,9 +76,9 @@ final class CostCalculatorTest extends TestCase
         if (isset($expected['result'])) {
             $this->assertExpectedSubset($expected['result'], $result->jsonSerialize(), $name);
         } else {
-            self::assertSame((string)$expected['total'], $this->taxInclusiveTotal($result), $name);
+            self::assertSame((string)$expected['total'], $this->grossTotal($result), $name);
             foreach ($expected['byComponent'] as $component => $value) {
-                self::assertSame((string)$value, $result->costs['taxInclusive']['usageBased']['byComponent'][$component], $name);
+                self::assertSame((string)$value, $result->costs['gross']['usageBased']['byComponent'][$component], $name);
             }
         }
 
@@ -159,12 +159,12 @@ final class CostCalculatorTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('1', $result->costs['taxInclusive']['usageBased']['total']);
-        self::assertNull($result->costs['taxInclusive']['periodic']['total']);
-        self::assertNull($this->taxInclusiveTotal($result));
+        self::assertSame('1', $result->costs['gross']['usageBased']['total']);
+        self::assertNull($result->costs['gross']['periodic']['total']);
+        self::assertNull($this->grossTotal($result));
         self::assertSame('2', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
         self::assertSame('2', $result->intervals[0]['usage'][QuantityType::ACTIVE_ENERGY_IMPORT->value]);
-        self::assertSame('1', $result->intervals[0]['costs']['taxInclusive']['total']);
+        self::assertSame('1', $result->intervals[0]['costs']['gross']['total']);
         self::assertSame('12.00', $result->periodicCharges[0]['definition']['rate']);
         self::assertNull($result->periodicCharges[0]['calculated']);
         self::assertFalse($result->billingContext['requestedRangeCoversWholePeriods']);
@@ -204,13 +204,13 @@ final class CostCalculatorTest extends TestCase
             $definition,
         );
 
-        self::assertSame('1', $this->taxInclusiveTotal($result));
+        self::assertSame('1', $this->grossTotal($result));
         self::assertSame([], $result->intervals);
         self::assertCount(1, $result->charges);
         self::assertSame('energy', $result->charges[0]['componentId']);
         self::assertSame('ENERGY_PURCHASE', $result->charges[0]['kind']);
         self::assertSame('0.5', $result->charges[0]['pricing']['rate']);
-        self::assertSame('1', $result->charges[0]['amounts']['taxInclusive']);
+        self::assertSame('1', $result->charges[0]['amounts']['gross']);
         self::assertArrayNotHasKey('rate', $result->charges[0]);
         self::assertArrayNotHasKey('cost', $result->charges[0]);
     }
@@ -319,7 +319,7 @@ final class CostCalculatorTest extends TestCase
             $definition,
         );
 
-        self::assertSame('4.18', $this->taxInclusiveTotal($result));
+        self::assertSame('4.18', $this->grossTotal($result));
     }
 
     public function testReferenceRateRejectsInvertedSourceClamp(): void
@@ -379,8 +379,8 @@ final class CostCalculatorTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('2.5', $this->taxInclusiveTotal($result));
-        self::assertSame('2.5', $result->costs['taxInclusive']['usageBased']['byZone']['S4']);
+        self::assertSame('2.5', $this->grossTotal($result));
+        self::assertSame('2.5', $result->costs['gross']['usageBased']['byZone']['S4']);
         self::assertSame('S4', $result->intervals[0]['components'][0]['selection']);
     }
 
@@ -421,7 +421,7 @@ final class CostCalculatorTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('1.1', $this->taxInclusiveTotal($result));
+        self::assertSame('1.1', $this->grossTotal($result));
         self::assertSame('OFF_PEAK', $result->intervals[0]['components'][0]['selection']);
         self::assertSame('PEAK', $result->intervals[1]['components'][0]['selection']);
     }
@@ -494,8 +494,8 @@ final class CostCalculatorTest extends TestCase
             $definition,
         );
 
-        self::assertSame('1.25', $this->taxInclusiveTotal($result));
-        self::assertSame('1.25', $this->taxInclusiveTotal($result));
+        self::assertSame('1.25', $this->grossTotal($result));
+        self::assertSame('1.25', $this->grossTotal($result));
     }
 
     public function testBillingCycleHistoryBuildsTransitionalSummaryAndByZone(): void
@@ -572,19 +572,19 @@ final class CostCalculatorTest extends TestCase
         );
 
         self::assertNull($result->billingCycle);
-        self::assertSame('4', $result->costs['taxInclusive']['usageBased']['total']);
-        self::assertSame('4', $result->costs['taxInclusive']['usageBased']['byZone']['Z1']);
-        self::assertSame('14', $result->costs['taxInclusive']['periodic']['total']);
-        self::assertSame('18', $this->taxInclusiveTotal($result));
+        self::assertSame('4', $result->costs['gross']['usageBased']['total']);
+        self::assertSame('4', $result->costs['gross']['usageBased']['byZone']['Z1']);
+        self::assertSame('14', $result->costs['gross']['periodic']['total']);
+        self::assertSame('18', $this->grossTotal($result));
         self::assertCount(2, $result->billingPeriods);
         self::assertTrue($result->billingPeriods[0]['transitional']);
         self::assertSame('2026-06-15T00:00:00+02:00', $result->billingPeriods[0]['from']);
         self::assertSame('2026-07-01T00:00:00+02:00', $result->billingPeriods[0]['to']);
-        self::assertSame('2', $result->billingPeriods[0]['costs']['taxInclusive']['usageBased']['byZone']['Z1']);
-        self::assertSame('7', $result->billingPeriods[0]['costs']['taxInclusive']['periodic']['total']);
-        self::assertSame('9', $result->billingPeriods[0]['costs']['taxInclusive']['total']);
+        self::assertSame('2', $result->billingPeriods[0]['costs']['gross']['usageBased']['byZone']['Z1']);
+        self::assertSame('7', $result->billingPeriods[0]['costs']['gross']['periodic']['total']);
+        self::assertSame('9', $result->billingPeriods[0]['costs']['gross']['total']);
         self::assertFalse($result->billingPeriods[1]['transitional']);
-        self::assertSame('9', $result->billingPeriods[1]['costs']['taxInclusive']['total']);
+        self::assertSame('9', $result->billingPeriods[1]['costs']['gross']['total']);
     }
 
     public function testProratedMonthlyFeeUsesNominalPeriodWhenBillingCycleIsCutShort(): void
@@ -637,8 +637,8 @@ final class CostCalculatorTest extends TestCase
         );
 
         self::assertTrue($result->billingPeriods[0]['transitional']);
-        self::assertEqualsWithDelta(16.0, (float)$result->costs['taxInclusive']['periodic']['total'], 0.000001);
-        self::assertEqualsWithDelta(16.0, (float)$result->billingPeriods[0]['costs']['taxInclusive']['periodic']['total'], 0.000001);
+        self::assertEqualsWithDelta(16.0, (float)$result->costs['gross']['periodic']['total'], 0.000001);
+        self::assertEqualsWithDelta(16.0, (float)$result->billingPeriods[0]['costs']['gross']['periodic']['total'], 0.000001);
     }
 
     private function delta(string $from, string $to, string $import, string $export = '0'): EnergyDelta
@@ -704,8 +704,8 @@ final class CostCalculatorTest extends TestCase
         }
     }
 
-    private function taxInclusiveTotal(\Supla\EnergyCostCalculator\Engine\CalculationResult $result): ?string
+    private function grossTotal(\Supla\EnergyCostCalculator\Engine\CalculationResult $result): ?string
     {
-        return $result->costs['taxInclusive']['total'];
+        return $result->costs['gross']['total'];
     }
 }

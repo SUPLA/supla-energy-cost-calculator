@@ -75,7 +75,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
 
         self::assertSame(70_176, $result->processedDeltaCount);
         self::assertSame('17544', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
-        self::assertSame('14035.2', $result->costs['taxInclusive']['total']);
+        self::assertSame('14035.2', $result->costs['gross']['total']);
         self::assertLessThan(
             self::MAX_CALCULATION_TIME_SECONDS,
             $elapsedSeconds,
@@ -145,8 +145,8 @@ final class TwoYearHistoryPerformanceTest extends TestCase
 
         self::assertSame(35_040, $result->processedDeltaCount);
         self::assertSame('8760', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
-        self::assertArrayHasKey('energy-purchase', $result->costs['taxInclusive']['usageBased']['byComponent']);
-        self::assertArrayHasKey('distribution-variable', $result->costs['taxInclusive']['usageBased']['byComponent']);
+        self::assertArrayHasKey('energy-purchase', $result->costs['gross']['usageBased']['byComponent']);
+        self::assertArrayHasKey('distribution-variable', $result->costs['gross']['usageBased']['byComponent']);
         self::assertLessThan(
             self::MAX_CALCULATION_TIME_SECONDS,
             $elapsedSeconds,
@@ -266,11 +266,11 @@ final class TwoYearHistoryPerformanceTest extends TestCase
 
         self::assertSame(70_176, $result->processedDeltaCount);
         self::assertSame('17544', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
-        self::assertSame('4392', $result->costs['taxInclusive']['usageBased']['byComponent']['g11-energy-purchase']);
-        self::assertSame('2635.2', $result->costs['taxInclusive']['usageBased']['byComponent']['g11-distribution-variable']);
-        self::assertSame('4380', $result->costs['taxInclusive']['usageBased']['byComponent']['g12-energy-purchase']);
-        self::assertSame('2146.2', $result->costs['taxInclusive']['usageBased']['byComponent']['g12-distribution-variable']);
-        self::assertSame('13553.4', $result->costs['taxInclusive']['total']);
+        self::assertSame('4392', $result->costs['gross']['usageBased']['byComponent']['g11-energy-purchase']);
+        self::assertSame('2635.2', $result->costs['gross']['usageBased']['byComponent']['g11-distribution-variable']);
+        self::assertSame('4380', $result->costs['gross']['usageBased']['byComponent']['g12-energy-purchase']);
+        self::assertSame('2146.2', $result->costs['gross']['usageBased']['byComponent']['g12-distribution-variable']);
+        self::assertSame('13553.4', $result->costs['gross']['total']);
         self::assertLessThan(
             self::MAX_CALCULATION_TIME_SECONDS,
             $elapsedSeconds,
@@ -363,13 +363,13 @@ final class TwoYearHistoryPerformanceTest extends TestCase
         $elapsedSeconds = (hrtime(true) - $startedAt) / 1_000_000_000;
 
         self::assertSame(70_176, $result->processedDeltaCount);
-        self::assertSame('8772', $result->costs['taxInclusive']['usageBased']['byComponent']['energy-purchase']);
-        self::assertSame('12280.8', $result->costs['taxInclusive']['usageBased']['byComponent']['distribution-variable']);
-        self::assertSame('438.6', $result->costs['taxInclusive']['usageBased']['byZone']['S1']);
-        self::assertSame('877.2', $result->costs['taxInclusive']['usageBased']['byZone']['S2']);
-        self::assertSame('2193', $result->costs['taxInclusive']['usageBased']['byZone']['S3']);
-        self::assertSame('8772', $result->costs['taxInclusive']['usageBased']['byZone']['S4']);
-        self::assertSame('21052.8', $result->costs['taxInclusive']['total']);
+        self::assertSame('8772', $result->costs['gross']['usageBased']['byComponent']['energy-purchase']);
+        self::assertSame('12280.8', $result->costs['gross']['usageBased']['byComponent']['distribution-variable']);
+        self::assertSame('438.6', $result->costs['gross']['usageBased']['byZone']['S1']);
+        self::assertSame('877.2', $result->costs['gross']['usageBased']['byZone']['S2']);
+        self::assertSame('2193', $result->costs['gross']['usageBased']['byZone']['S3']);
+        self::assertSame('8772', $result->costs['gross']['usageBased']['byZone']['S4']);
+        self::assertSame('21052.8', $result->costs['gross']['total']);
         self::assertLessThan(
             self::MAX_CALCULATION_TIME_SECONDS,
             $elapsedSeconds,
@@ -395,7 +395,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
         $elapsedSeconds = (hrtime(true) - $startedAt) / 1_000_000_000;
 
         self::assertSame(70_176, $result->processedDeltaCount);
-        self::assertSame('7017.6', $result->costs['taxInclusive']['total']);
+        self::assertSame('7017.6', $result->costs['gross']['total']);
         $this->assertCalculationTime($elapsedSeconds, 'Two-year temporal-netting calculation');
     }
 
@@ -417,7 +417,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
         self::assertSame(70_176, $result->processedDeltaCount);
         self::assertCount(70_176, $result->intervals);
         self::assertCount(70_176, $result->charges);
-        self::assertSame('14035.2', $result->costs['taxInclusive']['total']);
+        self::assertSame('14035.2', $result->costs['gross']['total']);
         $this->assertCalculationTime($elapsedSeconds, 'Two-year detailed calculation');
     }
 
@@ -494,9 +494,9 @@ final class TwoYearHistoryPerformanceTest extends TestCase
         $result = $calculator->calculate('meter', $range, $definition);
         $elapsedSeconds = (hrtime(true) - $startedAt) / 1_000_000_000;
 
-        self::assertSame('31603.2', $result->costs['taxInclusive']['total']);
-        self::assertSame('24', $result->costs['taxInclusive']['periodic']['total']);
-        self::assertSame('12280.8', $result->costs['taxInclusive']['usageBased']['byComponent']['dynamic-distribution']);
+        self::assertSame('31603.2', $result->costs['gross']['total']);
+        self::assertSame('24', $result->costs['gross']['periodic']['total']);
+        self::assertSame('12280.8', $result->costs['gross']['usageBased']['byComponent']['dynamic-distribution']);
         $this->assertCalculationTime($elapsedSeconds, 'Two-year multi-component calculation');
     }
 
@@ -544,11 +544,11 @@ final class TwoYearHistoryPerformanceTest extends TestCase
         $elapsedSeconds = (hrtime(true) - $startedAt) / 1_000_000_000;
 
         self::assertSame(70_176, $result->processedDeltaCount);
-        self::assertArrayHasKey('HOLIDAY', $result->costs['taxInclusive']['usageBased']['byZone']);
-        self::assertArrayHasKey('WINTER', $result->costs['taxInclusive']['usageBased']['byZone']);
-        self::assertArrayHasKey('NIGHT', $result->costs['taxInclusive']['usageBased']['byZone']);
-        self::assertArrayHasKey('DAY', $result->costs['taxInclusive']['usageBased']['byZone']);
-        self::assertArrayHasKey('FALLBACK', $result->costs['taxInclusive']['usageBased']['byZone']);
+        self::assertArrayHasKey('HOLIDAY', $result->costs['gross']['usageBased']['byZone']);
+        self::assertArrayHasKey('WINTER', $result->costs['gross']['usageBased']['byZone']);
+        self::assertArrayHasKey('NIGHT', $result->costs['gross']['usageBased']['byZone']);
+        self::assertArrayHasKey('DAY', $result->costs['gross']['usageBased']['byZone']);
+        self::assertArrayHasKey('FALLBACK', $result->costs['gross']['usageBased']['byZone']);
         $this->assertCalculationTime($elapsedSeconds, 'Two-year holiday and seasonal schedule calculation');
     }
 
@@ -604,7 +604,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
         self::assertSame(71_520, $result->processedDeltaCount);
         self::assertCount(25, $result->billingPeriods);
         self::assertTrue($result->billingPeriods[12]['transitional']);
-        self::assertSame('25', $result->costs['taxInclusive']['periodic']['total']);
+        self::assertSame('25', $result->costs['gross']['periodic']['total']);
         $this->assertCalculationTime($elapsedSeconds, 'Historical billing-cycle calculation');
     }
 
@@ -622,7 +622,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
         $elapsedSeconds = (hrtime(true) - $startedAt) / 1_000_000_000;
 
         self::assertSame(70_176, $result->processedDeltaCount);
-        self::assertSame('8772', $result->costs['taxInclusive']['total']);
+        self::assertSame('8772', $result->costs['gross']['total']);
         $this->assertCalculationTime($elapsedSeconds, 'Two-year quarter-hour reference calculation');
     }
 
