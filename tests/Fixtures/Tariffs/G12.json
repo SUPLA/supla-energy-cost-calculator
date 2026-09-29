@@ -2,6 +2,7 @@
   "version": 1,
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
+  "taxRuleSets": [{"validFrom": null, "validTo": null, "rules": [{"id": "VAT", "type": "PERCENTAGE", "appliesToKinds": ["UNUSED"], "rate": "0.23", "base": "CURRENT_SUBTOTAL"}]}],
   "periods": [
     {
       "validFrom": "2026-01-01T00:00:00+01:00",
@@ -9,13 +10,17 @@
       "components": [
         {
           "id": "energy-purchase",
+          "kind": "ENERGY_PURCHASE",
           "category": "ENERGY",
+          "taxTreatment": {"included": []},
           "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
           "rate": {"type": "CONSTANT", "value": "0.50", "unit": "PLN/kWh"}
         },
         {
           "id": "distribution-variable",
+          "kind": "DISTRIBUTION_VARIABLE",
           "category": "NETWORK",
+          "taxTreatment": {"included": []},
           "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
           "selector": {
             "type": "WEEKLY_SCHEDULE",

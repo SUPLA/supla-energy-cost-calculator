@@ -38,8 +38,8 @@ final class CostPlanComponentMultiplicityTest extends TestCase
     public function testCompilesInlinePeriodicComponentsOfSameKindWithDistinctIds(): void
     {
         $plan = $this->plan([
-            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-subscription', 'rate' => '12.00', 'per' => 'MONTH'],
-            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-support', 'rate' => '3.00', 'per' => 'MONTH'],
+            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-subscription', 'rate' => '12.00', 'per' => 'MONTH', 'taxTreatment' => ['included' => []]],
+            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-support', 'rate' => '3.00', 'per' => 'MONTH', 'taxTreatment' => ['included' => []]],
         ]);
 
         $compiled = (new CostPlanCompiler())->compileToArray($plan);
@@ -50,7 +50,7 @@ final class CostPlanComponentMultiplicityTest extends TestCase
     public function testKeepsLegacyKindDerivedIdForInlinePeriodicComponent(): void
     {
         $plan = $this->plan([
-            ['kind' => 'SUPPLIER_FIXED', 'rate' => '12.00', 'per' => 'MONTH'],
+            ['kind' => 'SUPPLIER_FIXED', 'rate' => '12.00', 'per' => 'MONTH', 'taxTreatment' => ['included' => []]],
         ]);
 
         $compiled = (new CostPlanCompiler())->compileToArray($plan);
@@ -61,8 +61,8 @@ final class CostPlanComponentMultiplicityTest extends TestCase
     public function testRejectsDuplicateExplicitInlinePeriodicComponentId(): void
     {
         $plan = $this->plan([
-            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-fee', 'rate' => '12.00', 'per' => 'MONTH'],
-            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-fee', 'rate' => '3.00', 'per' => 'MONTH'],
+            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-fee', 'rate' => '12.00', 'per' => 'MONTH', 'taxTreatment' => ['included' => []]],
+            ['kind' => 'SUPPLIER_FIXED', 'componentId' => 'supplier-fee', 'rate' => '3.00', 'per' => 'MONTH', 'taxTreatment' => ['included' => []]],
         ]);
 
         $this->expectException(CostPlanDefinitionException::class);
@@ -77,7 +77,11 @@ final class CostPlanComponentMultiplicityTest extends TestCase
             'version' => 2,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
-            'priceBasis' => 'NET',
+            'taxProfiles' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'profileId' => 'PL.HOUSEHOLD.2026',
+            ]],
             'billingCycles' => [['anchor' => '2026-01-01', 'length' => 1, 'unit' => 'MONTH']],
             'periods' => [[
                 'validFrom' => '2026-01-01T00:00:00+01:00',

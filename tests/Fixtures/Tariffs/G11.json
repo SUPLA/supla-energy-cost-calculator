@@ -2,6 +2,7 @@
   "version": 1,
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
+  "taxRuleSets": [{"validFrom": null, "validTo": null, "rules": [{"id": "VAT", "type": "PERCENTAGE", "appliesToKinds": ["UNUSED"], "rate": "0.23", "base": "CURRENT_SUBTOTAL"}]}],
   "billingCycle": {
     "anchor": "2026-01-15",
     "length": 1,
@@ -14,7 +15,9 @@
       "components": [
         {
           "id": "energy-purchase",
+          "kind": "ENERGY_PURCHASE",
           "category": "ENERGY",
+          "taxTreatment": {"included": []},
           "quantity": {
             "type": "ACTIVE_ENERGY_IMPORT"
           },
@@ -26,7 +29,9 @@
         },
         {
           "id": "distribution-variable",
+          "kind": "DISTRIBUTION_VARIABLE",
           "category": "NETWORK",
+          "taxTreatment": {"included": []},
           "quantity": {
             "type": "ACTIVE_ENERGY_IMPORT"
           },
@@ -38,7 +43,9 @@
         },
         {
           "id": "distribution-fixed",
+          "kind": "DISTRIBUTION_FIXED",
           "category": "NETWORK",
+          "taxTreatment": {"included": []},
           "quantity": {
             "type": "PERIOD",
             "period": "MONTH",

@@ -21,6 +21,7 @@ final readonly class CalculationResult implements \JsonSerializable
      * @param list<array<string, mixed>> $billingPeriods
      * @param list<array<string, mixed>> $intervals
      * @param list<array<string, mixed>> $charges
+     * @param array<string, mixed> $taxCostSummary
      */
     public function __construct(
         public string $currency,
@@ -40,6 +41,7 @@ final readonly class CalculationResult implements \JsonSerializable
         public int $processedDeltaCount,
         public array $intervals = [],
         public array $charges = [],
+        public array $taxCostSummary = [],
     ) {
     }
 
@@ -59,18 +61,7 @@ final readonly class CalculationResult implements \JsonSerializable
             'billingContext' => $this->billingContext,
             'billingPeriods' => $this->billingPeriods,
             'usage' => $this->usage,
-            'costs' => [
-                'usageBased' => [
-                    'total' => $this->usageBasedTotal,
-                    'byComponent' => $this->usageBasedByComponent,
-                    'byZone' => $this->usageBasedByZone,
-                ],
-                'periodic' => [
-                    'total' => $this->periodicTotal,
-                    'byComponent' => $this->periodicByComponent,
-                ],
-                'total' => $this->total,
-            ],
+            'costs' => $this->taxCostSummary,
             'periodicCharges' => $this->periodicCharges,
             'processedDeltaCount' => $this->processedDeltaCount,
             'intervals' => $this->intervals,

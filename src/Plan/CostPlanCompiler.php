@@ -9,6 +9,7 @@ use Supla\EnergyCostCalculator\Definition\BillingDefinitionParser;
 use Supla\EnergyCostCalculator\Exception\CostPlanDefinitionException;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCatalog;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCompiler;
+use Supla\EnergyCostCalculator\Tax\TaxProfileCatalog;
 
 final class CostPlanCompiler
 {
@@ -16,6 +17,7 @@ final class CostPlanCompiler
         private readonly TariffPresetCatalog $catalog = new TariffPresetCatalog(),
         private readonly CostPlanDefinitionParser $planParser = new CostPlanDefinitionParser(),
         private readonly BillingDefinitionParser $definitionParser = new BillingDefinitionParser(),
+        private readonly TaxProfileCatalog $taxProfileCatalog = new TaxProfileCatalog(),
         ?TariffPresetCompiler $presetCompiler = null,
     ) {
         $this->presetCompiler = $presetCompiler ?? new TariffPresetCompiler($this->catalog, $this->definitionParser);
@@ -38,8 +40,7 @@ final class CostPlanCompiler
     /** @return array<string, mixed> */
     private function compileComponentPlan(CostPlanDefinition $plan): array
     {
-        if ($plan->periods === [] || $plan->billingCycles === [] || $plan->currency === null
-            || $plan->timezone === null || !in_array($plan->priceBasis, ['NET', 'GROSS'], true)) {
+        if ($plan->periods === [] || $plan->billingCycles === []) {
             throw new CostPlanDefinitionException('Version 2 plan requires periods, billing cycles and billing metadata.');
         }
         $this->assertContinuousPlanPeriods($plan->periods);
@@ -83,9 +84,11 @@ final class CostPlanCompiler
                     }
                     $definition = [
                         'id' => $componentIdentity,
+                        'kind' => $selected->kind->value,
                         'category' => $selected->kind->category(),
                         'quantity' => ['type' => 'PERIOD', 'period' => $selected->per, 'prorate' => $selected->prorate],
                         'rate' => ['type' => 'CONSTANT', 'value' => $selected->rate],
+                        'taxTreatment' => $selected->taxTreatment,
                     ];
                     foreach ($segments as &$segment) {
                         $segment['components'][] = $definition;
@@ -97,7 +100,7 @@ final class CostPlanCompiler
                     throw new CostPlanDefinitionException("Period $index has an incomplete preset component.");
                 }
                 $preset = $this->catalog->get($selected->presetId);
-                foreach (['currency' => $plan->currency, 'timezone' => $plan->timezone, 'priceBasis' => $plan->priceBasis] as $key => $expected) {
+                foreach (['currency' => $plan->currency, 'timezone' => $plan->timezone] as $key => $expected) {
                     if (($preset->document[$key] ?? null) !== $expected) {
                         throw new CostPlanDefinitionException("Preset '{$preset->id}' has incompatible $key in period $index.");
                     }
@@ -153,10 +156,32 @@ final class CostPlanCompiler
             'currency' => $plan->currency,
             'timezone' => $plan->timezone,
             'billingCycles' => $plan->billingCycles,
+            'taxRuleSets' => $this->compileTaxRuleSets($plan),
             'periods' => $periods,
         ];
         $this->definitionParser->parse($compiled);
         return $compiled;
+    }
+
+    /** @return list<array<string, mixed>> */
+    private function compileTaxRuleSets(CostPlanDefinition $plan): array
+    {
+        $sets = [];
+        foreach ($plan->taxProfiles as $entry) {
+            $profile = $this->taxProfileCatalog->get($entry['profileId']);
+            if ($profile->currency !== $plan->currency) {
+                throw new CostPlanDefinitionException("Tax profile '{$profile->id}' has incompatible currency.");
+            }
+            $sets[] = [
+                'validFrom' => $entry['validFrom'] ?? null,
+                'validTo' => $entry['validTo'] ?? null,
+                'rules' => array_map(static fn($rule) => array_filter([
+                    'id' => $rule->id, 'type' => $rule->type, 'appliesToKinds' => $rule->appliesToKinds,
+                    'rate' => $rule->rate, 'unit' => $rule->unit, 'base' => $rule->base,
+                ], static fn($value) => $value !== null), $profile->rules),
+            ];
+        }
+        return $sets;
     }
 
     /** @param list<array<string, mixed>> $segments */

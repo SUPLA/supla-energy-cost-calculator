@@ -30,13 +30,11 @@ final class CostPlanDefinitionParser
     /** @param array<string, mixed> $data */
     private function parseComponentPlan(array $data): CostPlanDefinition
     {
-        $this->onlyKeys($data, ['version', 'currency', 'timezone', 'priceBasis', 'billingCycles', 'periods'], 'cost plan');
+        $this->onlyKeys($data, ['version', 'currency', 'timezone', 'billingCycles', 'taxProfiles', 'periods'], 'cost plan');
         $currency = $data['currency'] ?? null;
         $timezone = $data['timezone'] ?? null;
-        $basis = $data['priceBasis'] ?? null;
-        if (!is_string($currency) || $currency === '' || !is_string($timezone) || $timezone === ''
-            || !in_array($basis, ['NET', 'GROSS'], true)) {
-            throw new CostPlanDefinitionException('Version 2 plan requires currency, timezone and NET or GROSS priceBasis.');
+        if (!is_string($currency) || $currency === '' || !is_string($timezone) || $timezone === '') {
+            throw new CostPlanDefinitionException('Version 2 plan requires currency and timezone.');
         }
         $cycles = $data['billingCycles'] ?? null;
         if (!is_array($cycles) || !array_is_list($cycles) || $cycles === []) {
@@ -60,6 +58,22 @@ final class CostPlanDefinitionParser
                 throw new CostPlanDefinitionException("billingCycles[$i] requires a positive length and valid unit.");
             }
         }
+        $taxProfiles = $data['taxProfiles'] ?? null;
+        if (!is_array($taxProfiles) || !array_is_list($taxProfiles) || $taxProfiles === []) {
+            throw new CostPlanDefinitionException('Version 2 plan requires non-empty taxProfiles.');
+        }
+        foreach ($taxProfiles as $i => $profile) {
+            if (!is_array($profile) || array_is_list($profile)) {
+                throw new CostPlanDefinitionException("taxProfiles[$i] must be an object.");
+            }
+            $this->onlyKeys($profile, ['validFrom', 'validTo', 'profileId'], "taxProfiles[$i]");
+            $from = $this->parseDate($profile['validFrom'] ?? null, "taxProfiles[$i].validFrom");
+            $to = $this->parseDate($profile['validTo'] ?? null, "taxProfiles[$i].validTo");
+            if (($from !== null && $to !== null && $from >= $to) || !is_string($profile['profileId'] ?? null) || $profile['profileId'] === '') {
+                throw new CostPlanDefinitionException("taxProfiles[$i] requires profileId and an ordered validity range.");
+            }
+        }
+        $this->assertContinuousTimeline($taxProfiles, 'taxProfiles');
 
         $rawPeriods = $data['periods'] ?? null;
         if (!is_array($rawPeriods) || !array_is_list($rawPeriods) || $rawPeriods === []) {
@@ -92,22 +106,23 @@ final class CostPlanDefinitionParser
                     throw new CostPlanDefinitionException("$path has unknown component kind.");
                 }
                 if (!array_key_exists('presetId', $raw) && $kind->isPeriodic()) {
-                    $this->onlyKeys($raw, ['kind', 'componentId', 'rate', 'per', 'prorate'], $path);
+                    $this->onlyKeys($raw, ['kind', 'componentId', 'rate', 'per', 'prorate', 'taxTreatment'], $path);
                     $componentId = $raw['componentId'] ?? $kind->componentId();
                     $rate = $raw['rate'] ?? null;
                     $per = $raw['per'] ?? null;
                     $prorate = $raw['prorate'] ?? false;
+                    $taxTreatment = $raw['taxTreatment'] ?? null;
                     if (!is_string($componentId) || trim($componentId) === ''
                         || !is_string($rate) || !preg_match('/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/', $rate)
                         || !in_array($per, ['DAY', 'WEEK', 'MONTH', 'YEAR', 'BILLING_PERIOD'], true)
-                        || !is_bool($prorate)) {
-                        throw new CostPlanDefinitionException("$path requires non-empty componentId when provided, decimal rate, valid per and boolean prorate.");
+                        || !is_bool($prorate) || !is_array($taxTreatment) || !array_is_list($taxTreatment['included'] ?? null)) {
+                        throw new CostPlanDefinitionException("$path requires component pricing and explicit taxTreatment.included.");
                     }
                     if (isset($componentIds[$componentId])) {
                         throw new CostPlanDefinitionException("$path duplicates componentId '$componentId'.");
                     }
                     $componentIds[$componentId] = true;
-                    $components[] = new CostPlanComponent($kind, componentId: $componentId, rate: $rate, per: $per, prorate: $prorate);
+                    $components[] = new CostPlanComponent($kind, componentId: $componentId, rate: $rate, per: $per, prorate: $prorate, taxTreatment: $taxTreatment);
                 } else {
                     $this->onlyKeys($raw, ['kind', 'presetId', 'componentId', 'values'], $path);
                     $presetId = $raw['presetId'] ?? null;
@@ -133,7 +148,7 @@ final class CostPlanDefinitionParser
         }
         $this->assertContinuousPeriods($periods);
 
-        return new CostPlanDefinition($cycles, $currency, $timezone, $basis, $periods);
+        return new CostPlanDefinition($cycles, $currency, $timezone, $taxProfiles, $periods);
     }
 
     /** @param array<string, mixed> $data @param list<string> $allowed */
@@ -165,6 +180,17 @@ final class CostPlanDefinitionParser
             }
             if ($i > 0 && $periods[$i - 1]->validTo != $period->validFrom) {
                 throw new CostPlanDefinitionException('Cost plan periods must be contiguous and ordered.');
+            }
+        }
+    }
+
+    /** @param list<array<string, mixed>> $entries */
+    private function assertContinuousTimeline(array $entries, string $name): void
+    {
+        usort($entries, fn(array $a, array $b) => ($this->parseDate($a['validFrom'] ?? null, $name)?->getTimestamp() ?? PHP_INT_MIN) <=> ($this->parseDate($b['validFrom'] ?? null, $name)?->getTimestamp() ?? PHP_INT_MIN));
+        for ($i = 1; $i < count($entries); $i++) {
+            if (($entries[$i - 1]['validTo'] ?? null) !== ($entries[$i]['validFrom'] ?? null)) {
+                throw new CostPlanDefinitionException("$name must be contiguous without gaps or overlaps.");
             }
         }
     }

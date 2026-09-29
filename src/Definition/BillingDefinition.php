@@ -18,9 +18,13 @@ final readonly class BillingDefinition
     /** @var list<BillingPeriodDefinition> */
     public array $periods;
 
+    /** @var list<TaxRuleSetDefinition> */
+    public array $taxRuleSets;
+
     /**
      * @param BillingCycleDefinition|list<BillingCyclePeriodDefinition> $billingCycleOrCycles
      * @param list<BillingPeriodDefinition> $periods
+     * @param list<TaxRuleSetDefinition> $taxRuleSets
      */
     public function __construct(
         public int $version,
@@ -28,6 +32,7 @@ final readonly class BillingDefinition
         public string $timezone,
         BillingCycleDefinition|array $billingCycleOrCycles,
         array $periods,
+        array $taxRuleSets = [],
     ) {
         $billingCycles = $billingCycleOrCycles instanceof BillingCycleDefinition
             ? [new BillingCyclePeriodDefinition(null, null, $billingCycleOrCycles)]
@@ -45,10 +50,26 @@ final readonly class BillingDefinition
                 throw new \InvalidArgumentException('BillingDefinition periods must contain BillingPeriodDefinition objects.');
             }
         }
+        foreach ($taxRuleSets as $set) {
+            if (!$set instanceof TaxRuleSetDefinition) {
+                throw new \InvalidArgumentException('BillingDefinition taxRuleSets must contain TaxRuleSetDefinition objects.');
+            }
+        }
 
         $this->billingCycles = array_values($billingCycles);
         $this->billingCycle = $this->billingCycles[0]->cycle;
         $this->periods = array_values($periods);
+        $this->taxRuleSets = array_values($taxRuleSets);
+    }
+
+    public function taxRuleSetAt(\DateTimeImmutable $timestamp): ?TaxRuleSetDefinition
+    {
+        foreach ($this->taxRuleSets as $set) {
+            if ($set->contains($timestamp)) {
+                return $set;
+            }
+        }
+        return null;
     }
 
     public function periodAt(\DateTimeImmutable $timestamp): ?BillingPeriodDefinition

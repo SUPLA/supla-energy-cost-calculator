@@ -23,6 +23,7 @@ final class BillingDefinitionParser
         $timezone = (string)($data['timezone'] ?? 'UTC');
         $this->assertTimezone($timezone);
         $billingCycles = $this->parseBillingCycles($data, $timezone);
+        $taxRuleSets = $this->parseTaxRuleSets($data);
 
         $rawPeriods = $data['periods'] ?? null;
         if (!is_array($rawPeriods) || $rawPeriods === []) {
@@ -65,13 +66,24 @@ final class BillingDefinitionParser
         usort($periods, static fn(BillingPeriodDefinition $a, BillingPeriodDefinition $b) => ($a->validFrom?->getTimestamp() ?? PHP_INT_MIN) <=> ($b->validFrom?->getTimestamp() ?? PHP_INT_MIN));
         $this->assertNoOverlappingPeriods($periods);
 
-        return new BillingDefinition($version, $currency, $timezone, $billingCycles, $periods);
+        return new BillingDefinition($version, $currency, $timezone, $billingCycles, $periods, $taxRuleSets);
     }
 
     private function parseComponent(array $data, string $path): ComponentDefinition
     {
         $id = $this->requiredString($data, 'id', $path);
         $category = $this->requiredString($data, 'category', $path);
+        $kind = $this->requiredString($data, 'kind', $path);
+        $taxTreatmentData = $data['taxTreatment'] ?? null;
+        if (!is_array($taxTreatmentData) || !array_key_exists('included', $taxTreatmentData)
+            || !is_array($taxTreatmentData['included']) || !array_is_list($taxTreatmentData['included'])) {
+            throw new DefinitionException("$path.taxTreatment.included must be an array.");
+        }
+        foreach ($taxTreatmentData['included'] as $taxId) {
+            if (!is_string($taxId) || $taxId === '') {
+                throw new DefinitionException("$path.taxTreatment.included must contain tax ids.");
+            }
+        }
 
         $quantityData = $data['quantity'] ?? null;
         if (!is_array($quantityData)) {
@@ -177,11 +189,50 @@ final class BillingDefinitionParser
 
         return new ComponentDefinition(
             $id,
+            $kind,
             $category,
             new QuantityDefinition($quantityType, $quantityStrategy, $periodInMinutes, $quantityOptions, $quantityAllocation),
             new SelectorDefinition($selectorType, $selectorData),
             new RateDefinition($rateType, $rateData),
+            new TaxTreatment($taxTreatmentData['included']),
         );
+    }
+
+    /** @return list<TaxRuleSetDefinition> */
+    private function parseTaxRuleSets(array $data): array
+    {
+        $rawSets = $data['taxRuleSets'] ?? null;
+        if (!is_array($rawSets) || !array_is_list($rawSets) || $rawSets === []) {
+            throw new DefinitionException('Definition.taxRuleSets must be a non-empty array.');
+        }
+        $sets = [];
+        foreach ($rawSets as $i => $rawSet) {
+            if (!is_array($rawSet)) {
+                throw new DefinitionException("taxRuleSets[$i] must be an object.");
+            }
+            $from = $this->dateOrNull($rawSet['validFrom'] ?? null, "taxRuleSets[$i].validFrom");
+            $to = $this->dateOrNull($rawSet['validTo'] ?? null, "taxRuleSets[$i].validTo");
+            if ($from !== null && $to !== null && $from >= $to) {
+                throw new DefinitionException("taxRuleSets[$i].validFrom must be before validTo.");
+            }
+            if (!is_array($rawSet['rules'] ?? null) || !array_is_list($rawSet['rules']) || $rawSet['rules'] === []) {
+                throw new DefinitionException("taxRuleSets[$i].rules must be a non-empty array.");
+            }
+            $rules = (new \Supla\EnergyCostCalculator\Tax\TaxProfileParser())->parse([
+                'version' => 1, 'id' => 'inline', 'label' => 'inline', 'currency' => 'inline', 'rules' => $rawSet['rules'],
+            ])->rules;
+            $sets[] = new TaxRuleSetDefinition($from, $to, $rules);
+        }
+        usort($sets, static fn(TaxRuleSetDefinition $a, TaxRuleSetDefinition $b) => ($a->validFrom?->getTimestamp() ?? PHP_INT_MIN) <=> ($b->validFrom?->getTimestamp() ?? PHP_INT_MIN));
+        for ($i = 1; $i < count($sets); $i++) {
+            if ($sets[$i - 1]->validTo === null || $sets[$i]->validFrom === null || $sets[$i]->validFrom < $sets[$i - 1]->validTo) {
+                throw new DefinitionException('Tax rule sets must not overlap.');
+            }
+            if ($sets[$i]->validFrom != $sets[$i - 1]->validTo) {
+                throw new DefinitionException('Tax rule sets must be continuous without gaps.');
+            }
+        }
+        return $sets;
     }
 
     private function validateSelector(string $type, array $data, string $path): void

@@ -29,9 +29,9 @@ final class TariffPresetDefaultsTest extends TestCase
                 );
             }
 
-            $definition = $compiler->compile($preset, []);
-            self::assertSame($preset->document['currency'], $definition->currency, $preset->id);
-            self::assertSame($preset->document['timezone'], $definition->timezone, $preset->id);
+            $definition = $compiler->compileToArray($preset, []);
+            self::assertSame($preset->document['currency'], $definition['currency'], $preset->id);
+            self::assertSame($preset->document['timezone'], $definition['timezone'], $preset->id);
         }
     }
 

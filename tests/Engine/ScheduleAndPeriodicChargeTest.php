@@ -23,7 +23,9 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
         ];
         $definition = $this->definition([[
             'id' => 'network',
+            'kind' => 'DISTRIBUTION_VARIABLE',
             'category' => 'NETWORK',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'selector' => [
                 'type' => 'WEEKLY_SCHEDULE',
@@ -60,7 +62,9 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
         ];
         $definition = $this->definition([[
             'id' => 'network',
+            'kind' => 'DISTRIBUTION_VARIABLE',
             'category' => 'NETWORK',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'selector' => [
                 'type' => 'WEEKLY_SCHEDULE',
@@ -114,13 +118,17 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
         $definition = $this->definition([
             [
                 'id' => 'energy',
+                'kind' => 'ENERGY_PURCHASE',
                 'category' => 'ENERGY',
+                'taxTreatment' => ['included' => []],
                 'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                 'rate' => ['type' => 'CONSTANT', 'value' => '0.50', 'unit' => 'PLN/kWh'],
             ],
             [
                 'id' => 'fixed-network',
+                'kind' => 'DISTRIBUTION_FIXED',
                 'category' => 'NETWORK',
+                'taxTreatment' => ['included' => []],
                 'quantity' => ['type' => 'PERIOD', 'period' => 'MONTH', 'prorate' => false],
                 'rate' => ['type' => 'CONSTANT', 'value' => '10.00', 'unit' => 'PLN/month'],
             ],
@@ -167,7 +175,9 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
     {
         $definition = $this->definition([[
             'id' => 'billing-fee',
+            'kind' => 'SUPPLIER_FIXED',
             'category' => 'SERVICE',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'PERIOD', 'period' => 'BILLING_PERIOD', 'prorate' => false],
             'rate' => ['type' => 'CONSTANT', 'value' => '7.00', 'unit' => 'PLN/period'],
         ]], [
@@ -207,6 +217,17 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
+            'taxRuleSets' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'rules' => [[
+                    'id' => 'VAT',
+                    'type' => 'PERCENTAGE',
+                    'appliesToKinds' => ['UNUSED'],
+                    'rate' => '0.23',
+                    'base' => 'CURRENT_SUBTOTAL',
+                ]],
+            ]],
             'periods' => [[
                 'validFrom' => '2026-01-01T00:00:00+01:00',
                 'validTo' => null,

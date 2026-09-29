@@ -23,7 +23,6 @@
   "validTo": "2026-10-01T00:00:00+02:00",
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
-  "priceBasis": "NET",
   "inputs": [
     {
       "id": "energy.add",
@@ -64,7 +63,11 @@
         "components": [
           {
             "id": "energy-purchase",
+            "kind": "ENERGY_PURCHASE",
             "category": "ENERGY",
+            "taxTreatment": {
+              "included": ["EXCISE"]
+            },
             "quantity": {
               "type": "ACTIVE_ENERGY_IMPORT"
             },
@@ -82,7 +85,11 @@
           },
           {
             "id": "supplier-fixed",
+            "kind": "SUPPLIER_FIXED",
             "category": "SERVICE",
+            "taxTreatment": {
+              "included": []
+            },
             "quantity": {
               "type": "PERIOD",
               "period": "MONTH",

@@ -15,6 +15,7 @@ final readonly class CostPlanComponent
         public ?string $rate = null,
         public ?string $per = null,
         public bool $prorate = false,
+        public ?array $taxTreatment = null,
     ) {
     }
 }

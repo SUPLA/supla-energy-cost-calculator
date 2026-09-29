@@ -8,10 +8,12 @@ final readonly class ComponentDefinition
 {
     public function __construct(
         public string $id,
+        public string $kind,
         public string $category,
         public QuantityDefinition $quantity,
         public SelectorDefinition $selector,
         public RateDefinition $rate,
+        public TaxTreatment $taxTreatment,
     ) {
     }
 

@@ -6,12 +6,12 @@ namespace Supla\EnergyCostCalculator\Plan;
 
 final readonly class CostPlanDefinition
 {
-    /** @param list<array<string, mixed>> $billingCycles @param list<CostPlanPeriod> $periods */
+    /** @param list<array<string, mixed>> $billingCycles @param list<array<string, mixed>> $taxProfiles @param list<CostPlanPeriod> $periods */
     public function __construct(
         public array $billingCycles,
         public string $currency,
         public string $timezone,
-        public string $priceBasis,
+        public array $taxProfiles,
         public array $periods,
     ) {
     }

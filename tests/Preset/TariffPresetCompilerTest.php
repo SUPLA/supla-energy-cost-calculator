@@ -128,13 +128,23 @@ final class TariffPresetCompilerTest extends TestCase
                 'version' => 1,
                 'currency' => 'PLN',
                 'timezone' => 'Europe/Warsaw',
+                'taxRuleSets' => [[
+                    'validFrom' => null,
+                    'validTo' => null,
+                    'rules' => [[
+                        'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['UNUSED'],
+                        'rate' => '0.23', 'base' => 'CURRENT_SUBTOTAL',
+                    ]],
+                ]],
                 'billingCycle' => ['anchor' => '2026-01-01', 'length' => 1, 'unit' => 'MONTH'],
                 'periods' => [[
                     'validFrom' => '2026-01-01T00:00:00+01:00',
                     'validTo' => '2027-01-01T00:00:00+01:00',
                     'components' => [[
                         'id' => 'energy',
+                        'kind' => 'ENERGY_PURCHASE',
                         'category' => 'ENERGY',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                         'rate' => [
                             'type' => 'ZONED',

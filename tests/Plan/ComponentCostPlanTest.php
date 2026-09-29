@@ -43,9 +43,9 @@ final class ComponentCostPlanTest extends TestCase
             new \DateTimeImmutable('2026-01-01T00:00:00+01:00'),
             new \DateTimeImmutable('2026-02-01T00:00:00+01:00'),
         ), $this->periodicOnly($compiled));
-        self::assertSame('12', $result->periodicTotal);
-        self::assertSame('12', $result->total);
-        self::assertSame('12', $result->billingPeriods[0]['costs']['periodic']['total']);
+        self::assertSame('14.76', $result->periodicTotal);
+        self::assertSame('14.76', $result->total);
+        self::assertSame('14.76', $result->billingPeriods[0]['costs']['periodic']['total']);
     }
 
     public function testPlanPeriodCanExtendBeyondPresetValidity(): void
@@ -65,7 +65,7 @@ final class ComponentCostPlanTest extends TestCase
     {
         $plan = $this->plan();
         foreach ($plan['periods'] as &$period) {
-            $period['components'][] = ['kind' => 'DISTRIBUTION_FIXED', 'rate' => '4.00', 'per' => 'MONTH'];
+            $period['components'][] = ['kind' => 'DISTRIBUTION_FIXED', 'rate' => '4.00', 'per' => 'MONTH', 'taxTreatment' => ['included' => []]];
         }
         unset($period);
 
@@ -81,7 +81,11 @@ final class ComponentCostPlanTest extends TestCase
 
         self::assertCount(2, $plan->periods);
         self::assertSame(CostComponentKind::ENERGY_PURCHASE, $plan->periods[0]->components[0]->kind);
-        self::assertSame('NET', $plan->priceBasis);
+        self::assertSame([[
+            'validFrom' => null,
+            'validTo' => null,
+            'profileId' => 'PL.HOUSEHOLD.2026',
+        ]], $plan->taxProfiles);
     }
 
     public function testCompilesAndCalculatesAPlanWithOpenPeriodBoundaries(): void
@@ -90,7 +94,11 @@ final class ComponentCostPlanTest extends TestCase
             'version' => 2,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
-            'priceBasis' => 'NET',
+            'taxProfiles' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'profileId' => 'PL.HOUSEHOLD.2026',
+            ]],
             'billingCycles' => [[
                 'anchor' => '2026-01-01',
                 'length' => 1,
@@ -101,6 +109,7 @@ final class ComponentCostPlanTest extends TestCase
                     'kind' => 'SUPPLIER_FIXED',
                     'rate' => '12.00',
                     'per' => 'BILLING_PERIOD',
+                    'taxTreatment' => ['included' => []],
                 ]],
             ]],
         ];
@@ -117,7 +126,7 @@ final class ComponentCostPlanTest extends TestCase
             new \DateTimeImmutable('2026-02-01T00:00:00+01:00'),
         ), $compiled);
 
-        self::assertSame('12', $result->total);
+        self::assertSame('14.76', $result->total);
     }
 
     public function testAllowsOpenStartAndEndAroundContiguousPeriods(): void
@@ -154,7 +163,7 @@ final class ComponentCostPlanTest extends TestCase
             $parsed->billingCycles,
             $parsed->currency,
             $parsed->timezone,
-            $parsed->priceBasis,
+            $parsed->taxProfiles,
             $periods,
         );
 
@@ -254,13 +263,18 @@ final class ComponentCostPlanTest extends TestCase
                 'kind' => 'SUPPLIER_FIXED',
                 'rate' => '12.00',
                 'per' => 'BILLING_PERIOD',
+                'taxTreatment' => ['included' => []],
             ],
         ];
         return [
             'version' => 2,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
-            'priceBasis' => 'NET',
+            'taxProfiles' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'profileId' => 'PL.HOUSEHOLD.2026',
+            ]],
             'billingCycles' => [[
                 'validFrom' => '2026-01-01T00:00:00+01:00',
                 'validTo' => '2026-02-01T00:00:00+01:00',

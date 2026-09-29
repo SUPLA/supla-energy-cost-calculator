@@ -141,9 +141,6 @@ final class TariffPresetCompiler
                 }
             }
             unset($period);
-        } else {
-            // The parser is the final semantic authority for the executable definition.
-            $this->definitionParser->parse($compiled);
         }
 
         return $compiled;

@@ -123,12 +123,22 @@ final class TemporalNettingTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
+            'taxRuleSets' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'rules' => [[
+                    'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['UNUSED'],
+                    'rate' => '0.23', 'base' => 'CURRENT_SUBTOTAL',
+                ]],
+            ]],
             'periods' => [[
                 'validFrom' => '2026-01-01T00:00:00+01:00',
                 'validTo' => null,
                 'components' => [[
                     'id' => 'energy',
+                    'kind' => 'ENERGY_PURCHASE',
                     'category' => 'ENERGY',
+                    'taxTreatment' => ['included' => []],
                     'quantity' => $quantity,
                     'rate' => ['type' => 'CONSTANT', 'value' => '1'],
                 ]],

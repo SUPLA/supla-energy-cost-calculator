@@ -23,7 +23,6 @@
   "validTo": "2027-01-01T00:00:00+01:00",
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
-  "priceBasis": "NET",
   "inputs": [
     {
       "id": "distribution.DAY",
@@ -104,7 +103,11 @@
         "components": [
           {
             "id": "distribution-variable",
+            "kind": "DISTRIBUTION_VARIABLE",
             "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
             "quantity": {
               "type": "ACTIVE_ENERGY_IMPORT",
               "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",

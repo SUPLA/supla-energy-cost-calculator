@@ -37,6 +37,10 @@
       "items": {
         "$ref": "#/$defs/billingCyclePeriod"
       }
+    },
+    "taxRuleSets": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/taxRuleSet"}
     }
   },
   "additionalProperties": false,
@@ -82,14 +86,23 @@
       "type": "object",
       "required": [
         "id",
+        "kind",
         "category",
         "quantity",
-        "rate"
+        "rate",
+        "taxTreatment"
       ],
       "properties": {
         "id": {
           "type": "string",
           "minLength": 1
+        },
+        "kind": {"type": "string", "minLength": 1},
+        "taxTreatment": {
+          "type": "object",
+          "required": ["included"],
+          "properties": {"included": {"type": "array", "items": {"type": "string"}}},
+          "additionalProperties": false
         },
         "category": {
           "type": "string",
@@ -625,6 +638,16 @@
           ],
           "default": "MONTH"
         }
+      },
+      "additionalProperties": false
+    },
+    "taxRuleSet": {
+      "type": "object",
+      "required": ["rules"],
+      "properties": {
+        "validFrom": {"type": ["string", "null"], "format": "date-time"},
+        "validTo": {"type": ["string", "null"], "format": "date-time"},
+        "rules": {"type": "array", "minItems": 1, "items": {"$ref": "tax-profile.schema.json#/$defs/rule"}}
       },
       "additionalProperties": false
     }

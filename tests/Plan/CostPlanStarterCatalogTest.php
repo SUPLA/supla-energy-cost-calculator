@@ -100,7 +100,11 @@ final class CostPlanStarterCatalogTest extends TestCase
             'version' => 2,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
-            'priceBasis' => 'NET',
+            'taxProfiles' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'profileId' => 'PL.HOUSEHOLD.2026',
+            ]],
             'billingCycles' => [[
                 'length' => 1,
                 'unit' => 'MONTH',

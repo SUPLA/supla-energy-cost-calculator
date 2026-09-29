@@ -9,7 +9,7 @@ Version 2 assigns a `CostComponentKind` compatibility role to each component of 
   "version": 2,
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
-  "priceBasis": "NET",
+  "taxProfiles": [{"validFrom": null, "validTo": null, "profileId": "PL.HOUSEHOLD.2026"}],
   "billingCycles": [{
     "validFrom": "2026-01-01T00:00:00+01:00",
     "validTo": "2027-01-01T00:00:00+01:00",
@@ -33,13 +33,13 @@ Version 2 assigns a `CostComponentKind` compatibility role to each component of 
         "componentId": "distribution-variable",
         "values": {}
       },
-      {"kind": "SUPPLIER_FIXED", "rate": "12.00", "per": "BILLING_PERIOD"}
+      {"kind": "SUPPLIER_FIXED", "rate": "12.00", "per": "BILLING_PERIOD", "taxTreatment": {"included": []}}
     ]
   }]
 }
 ```
 
-Preset input targets are applied only to the selected component. The compiler verifies component category and quantity compatibility, compatible currency/timezone/price basis, full billing-cycle coverage, and unique `componentId` values per plan period. Preset `validFrom` and `validTo` values are informative; the cost-plan period controls when a selected tariff or offer applies. The compiler preserves internal template rule changes while extending its outer rules to the configured plan period. Bundled presets compile from their template defaults; a cost plan's `values` override those defaults explicitly. Distribution tariffs and supply offers are separate presets. `CostPlanStarterCatalog` composes the usual OSD + incumbent-supplier combinations for the simple setup path, while advanced UIs can replace each component independently.
+Preset input targets are applied only to the selected component. The compiler verifies component category and quantity compatibility, compatible currency/timezone, tax-profile timeline coverage, full billing-cycle coverage, and unique `componentId` values per plan period. Preset `validFrom` and `validTo` values are informative; the cost-plan period controls when a selected tariff or offer applies. The compiler preserves internal template rule changes while extending its outer rules to the configured plan period. Bundled presets compile from their template defaults; a cost plan's `values` override those defaults explicitly. Distribution tariffs and supply offers are separate presets. `CostPlanStarterCatalog` composes the usual OSD + incumbent-supplier combinations for the simple setup path, while advanced UIs can replace each component independently.
 
 For non-prorated periodic fees, the calculator charges a given component once per charge bucket even when several plan periods intersect that bucket. If its rate changes within the same bucket, calculation rejects the ambiguous fee; split the billing cycle or use explicit proration.
 

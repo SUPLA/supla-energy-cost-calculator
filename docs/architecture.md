@@ -23,6 +23,14 @@ The package never imports Doctrine, Symfony or SUPLA entities.
 10. Calculate periodic charges only when the requested range covers complete billing cycles.
 11. Return usage totals, optional meter-interval diagnostics, and optional natural-resolution `charges[]`.
 
+## Taxes
+
+Tax law is independent of tariff and billing-cycle history. A `CostPlan` references a continuous `taxProfiles[]` timeline, and `CostPlanCompiler` resolves those immutable resources into `BillingDefinition.taxRuleSets[]`. The calculator only consumes the executable rules.
+
+Each component carries a `kind` and explicit `taxTreatment.included`. For each charge, the engine removes included taxes in reverse declaration order, yielding `taxExclusive`; it then applies all applicable rules in order, yielding a canonical tax breakdown and `taxInclusive`. `PER_QUANTITY` rules use the charge quantity, while `PERCENTAGE` with `CURRENT_SUBTOTAL` uses the base plus all preceding taxes. A tax boundary must not cut a usage charge or periodic effective period.
+
+`charges[]` exposes `amounts.taxExclusive`, `amounts.taxes`, `amounts.taxTotal`, and `amounts.taxInclusive`. Result-level `costs` uses the same names and never exposes an unqualified financial total.
+
 Persisted cost-plan periods compile into the same billing-definition periods. Their boundaries may be open at either outer edge, so calculation can resolve logs before the first dated tariff change and after the last one.
 
 Within a cost-plan period, `CostComponentKind` describes compatibility while `componentId` identifies the resulting charge component. A kind may occur more than once when the IDs differ. Inline periodic components may omit `componentId` only for the legacy kind-derived ID.

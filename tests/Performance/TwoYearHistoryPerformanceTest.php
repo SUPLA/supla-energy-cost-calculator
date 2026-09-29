@@ -48,6 +48,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'UTC',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'billingCycle' => [
                 'anchor' => '2024-01-01',
                 'length' => 1,
@@ -58,7 +59,9 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                 'validTo' => null,
                 'components' => [[
                     'id' => 'energy',
+                    'kind' => 'ENERGY_PURCHASE',
                     'category' => 'ENERGY',
+                    'taxTreatment' => ['included' => []],
                     'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                     'rate' => ['type' => 'CONSTANT', 'value' => '0.8', 'unit' => 'PLN/kWh'],
                 ]],
@@ -103,7 +106,11 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 2,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
-            'priceBasis' => 'NET',
+            'taxProfiles' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'profileId' => 'PL.HOUSEHOLD.2026',
+            ]],
             'billingCycles' => [[
                 'validFrom' => '2026-01-01T00:00:00+01:00',
                 'validTo' => '2027-01-01T00:00:00+01:00',
@@ -172,6 +179,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'billingCycle' => [
                 'anchor' => '2024-01-01',
                 'length' => 1,
@@ -184,13 +192,17 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                     'components' => [
                         [
                             'id' => 'g11-energy-purchase',
+                            'kind' => 'ENERGY_PURCHASE',
                             'category' => 'ENERGY',
+                            'taxTreatment' => ['included' => []],
                             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                             'rate' => ['type' => 'CONSTANT', 'value' => '0.50', 'unit' => 'PLN/kWh'],
                         ],
                         [
                             'id' => 'g11-distribution-variable',
+                            'kind' => 'DISTRIBUTION_VARIABLE',
                             'category' => 'NETWORK',
+                            'taxTreatment' => ['included' => []],
                             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                             'rate' => ['type' => 'CONSTANT', 'value' => '0.30', 'unit' => 'PLN/kWh'],
                         ],
@@ -202,13 +214,17 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                     'components' => [
                         [
                             'id' => 'g12-energy-purchase',
+                            'kind' => 'ENERGY_PURCHASE',
                             'category' => 'ENERGY',
+                            'taxTreatment' => ['included' => []],
                             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                             'rate' => ['type' => 'CONSTANT', 'value' => '0.50', 'unit' => 'PLN/kWh'],
                         ],
                         [
                             'id' => 'g12-distribution-variable',
+                            'kind' => 'DISTRIBUTION_VARIABLE',
                             'category' => 'NETWORK',
+                            'taxTreatment' => ['included' => []],
                             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                             'selector' => [
                                 'type' => 'WEEKLY_SCHEDULE',
@@ -302,6 +318,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'billingCycle' => [
                 'anchor' => '2024-01-01',
                 'length' => 1,
@@ -313,13 +330,17 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                 'components' => [
                     [
                         'id' => 'energy-purchase',
+                        'kind' => 'ENERGY_PURCHASE',
                         'category' => 'ENERGY',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                         'rate' => ['type' => 'CONSTANT', 'value' => '0.50', 'unit' => 'PLN/kWh'],
                     ],
                     [
                         'id' => 'distribution-variable',
+                        'kind' => 'DISTRIBUTION_VARIABLE',
                         'category' => 'NETWORK',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                         'selector' => [
                             'type' => 'REFERENCE',
@@ -422,6 +443,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'UTC',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'billingCycle' => ['anchor' => '2024-01-01', 'length' => 1, 'unit' => 'MONTH'],
             'periods' => [[
                 'validFrom' => null,
@@ -430,7 +452,9 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                     $this->constantEnergyComponent('energy', '0.50'),
                     [
                         'id' => 'market-adjustment',
+                        'kind' => 'ENERGY_PURCHASE',
                         'category' => 'ENERGY',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                         'rate' => [
                             'type' => 'REFERENCE',
@@ -441,7 +465,9 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                     ],
                     [
                         'id' => 'dynamic-distribution',
+                        'kind' => 'DISTRIBUTION_VARIABLE',
                         'category' => 'NETWORK',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                         'selector' => [
                             'type' => 'REFERENCE',
@@ -453,7 +479,9 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                     $this->constantEnergyComponent('network-supplement', '0.10'),
                     [
                         'id' => 'monthly-fee',
+                        'kind' => 'SUPPLIER_FIXED',
                         'category' => 'SERVICE',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'PERIOD', 'period' => 'MONTH', 'prorate' => false],
                         'rate' => ['type' => 'CONSTANT', 'value' => '1'],
                     ],
@@ -479,12 +507,15 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'periods' => [[
                 'validFrom' => null,
                 'validTo' => null,
                 'components' => [[
                     'id' => 'scheduled-distribution',
+                    'kind' => 'DISTRIBUTION_VARIABLE',
                     'category' => 'NETWORK',
+                    'taxTreatment' => ['included' => []],
                     'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                     'selector' => [
                         'type' => 'WEEKLY_SCHEDULE',
@@ -531,6 +562,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'UTC',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'billingCycles' => [
                 [
                     'validFrom' => null,
@@ -554,7 +586,9 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                     $this->constantEnergyComponent('energy', '0.50'),
                     [
                         'id' => 'monthly-fee',
+                        'kind' => 'SUPPLIER_FIXED',
                         'category' => 'SERVICE',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'PERIOD', 'period' => 'MONTH', 'prorate' => false],
                         'rate' => ['type' => 'CONSTANT', 'value' => '1'],
                     ],
@@ -606,6 +640,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'UTC',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'periods' => [[
                 'validFrom' => null,
                 'validTo' => null,
@@ -620,12 +655,15 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'UTC',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'periods' => [[
                 'validFrom' => null,
                 'validTo' => null,
                 'components' => [[
                     'id' => 'energy',
+                    'kind' => 'ENERGY_PURCHASE',
                     'category' => 'ENERGY',
+                    'taxTreatment' => ['included' => []],
                     'quantity' => $quantity,
                     'rate' => [
                         'type' => 'REFERENCE',
@@ -642,7 +680,9 @@ final class TwoYearHistoryPerformanceTest extends TestCase
     {
         return [
             'id' => $id,
+            'kind' => 'ENERGY_PURCHASE',
             'category' => 'ENERGY',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'rate' => ['type' => 'CONSTANT', 'value' => $rate],
         ];
@@ -705,5 +745,17 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             $elapsedSeconds,
             sprintf('%s took %.3f seconds.', $description, $elapsedSeconds),
         );
+    }
+
+    private function noOpTaxRuleSets(): array
+    {
+        return [[
+            'validFrom' => null,
+            'validTo' => null,
+            'rules' => [[
+                'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['UNUSED'],
+                'rate' => '0.23', 'base' => 'CURRENT_SUBTOTAL',
+            ]],
+        ]];
     }
 }

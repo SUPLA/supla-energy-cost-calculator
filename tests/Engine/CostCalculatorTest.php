@@ -74,6 +74,7 @@ final class CostCalculatorTest extends TestCase
         );
 
         if (isset($expected['result'])) {
+            $expected['result'] = $this->migrateLegacyCostExpectation($expected['result']);
             $this->assertExpectedSubset($expected['result'], $result->jsonSerialize(), $name);
         } else {
             self::assertSame((string)$expected['total'], $result->total, $name);
@@ -113,6 +114,7 @@ final class CostCalculatorTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'billingCycle' => [
                 'anchor' => '2026-01-15',
                 'length' => 1,
@@ -124,13 +126,17 @@ final class CostCalculatorTest extends TestCase
                 'components' => [
                     [
                         'id' => 'energy',
+                        'kind' => 'ENERGY_PURCHASE',
                         'category' => 'ENERGY',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                         'rate' => ['type' => 'CONSTANT', 'value' => '0.50', 'unit' => 'PLN/kWh'],
                     ],
                     [
                         'id' => 'fixed',
+                        'kind' => 'DISTRIBUTION_FIXED',
                         'category' => 'NETWORK',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'PERIOD', 'period' => 'MONTH', 'prorate' => false],
                         'rate' => ['type' => 'CONSTANT', 'value' => '12.00', 'unit' => 'PLN/month'],
                     ],
@@ -178,7 +184,9 @@ final class CostCalculatorTest extends TestCase
         ]);
         $definition = $this->singleComponentDefinition([
             'id' => 'energy',
+            'kind' => 'ENERGY_PURCHASE',
             'category' => 'ENERGY',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'rate' => [
                 'type' => 'REFERENCE',
@@ -214,7 +222,9 @@ final class CostCalculatorTest extends TestCase
         ]);
         $definition = $this->singleComponentDefinition([
             'id' => 'energy',
+            'kind' => 'ENERGY_PURCHASE',
             'category' => 'ENERGY',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'rate' => [
                 'type' => 'REFERENCE',
@@ -246,7 +256,7 @@ final class CostCalculatorTest extends TestCase
             )],
         ]);
         $definition = $this->singleComponentDefinition([
-            'id' => 'energy', 'category' => 'ENERGY', 'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'id' => 'energy', 'kind' => 'ENERGY_PURCHASE', 'category' => 'ENERGY', 'taxTreatment' => ['included' => []], 'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'rate' => ['type' => 'REFERENCE', 'source' => 'PL.TGE.FIXING1', 'sourceUnit' => 'PLN/MWh'],
         ]);
 
@@ -281,7 +291,9 @@ final class CostCalculatorTest extends TestCase
         ]);
         $definition = $this->singleComponentDefinition([
             'id' => 'energy',
+            'kind' => 'ENERGY_PURCHASE',
             'category' => 'ENERGY',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'rate' => [
                 'type' => 'REFERENCE',
@@ -308,7 +320,9 @@ final class CostCalculatorTest extends TestCase
     {
         $definition = $this->singleComponentDefinition([
             'id' => 'energy',
+            'kind' => 'ENERGY_PURCHASE',
             'category' => 'ENERGY',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'rate' => [
                 'type' => 'REFERENCE',
@@ -335,7 +349,9 @@ final class CostCalculatorTest extends TestCase
         ]);
         $definition = $this->singleComponentDefinition([
             'id' => 'network',
+            'kind' => 'DISTRIBUTION_VARIABLE',
             'category' => 'NETWORK',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'selector' => [
                 'type' => 'REFERENCE',
@@ -370,7 +386,9 @@ final class CostCalculatorTest extends TestCase
         ];
         $definition = $this->singleComponentDefinition([
             'id' => 'network',
+            'kind' => 'DISTRIBUTION_VARIABLE',
             'category' => 'NETWORK',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'selector' => [
                 'type' => 'WEEKLY_SCHEDULE',
@@ -406,7 +424,9 @@ final class CostCalculatorTest extends TestCase
     {
         $definition = $this->singleComponentDefinition([
             'id' => 'network',
+            'kind' => 'DISTRIBUTION_VARIABLE',
             'category' => 'NETWORK',
+            'taxTreatment' => ['included' => []],
             'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
             'selector' => [
                 'type' => 'WEEKLY_SCHEDULE',
@@ -432,13 +452,16 @@ final class CostCalculatorTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'periods' => [
                 [
                     'validFrom' => '2026-01-01T00:00:00Z',
                     'validTo' => '2026-07-01T00:00:00Z',
                     'components' => [[
                         'id' => 'energy',
+                        'kind' => 'ENERGY_PURCHASE',
                         'category' => 'ENERGY',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                         'rate' => ['type' => 'CONSTANT', 'value' => '0.50'],
                     ]],
@@ -448,7 +471,9 @@ final class CostCalculatorTest extends TestCase
                     'validTo' => null,
                     'components' => [[
                         'id' => 'energy',
+                        'kind' => 'ENERGY_PURCHASE',
                         'category' => 'ENERGY',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                         'rate' => ['type' => 'CONSTANT', 'value' => '0.75'],
                     ]],
@@ -473,6 +498,7 @@ final class CostCalculatorTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'billingCycles' => [
                 [
                     'validFrom' => null,
@@ -495,7 +521,9 @@ final class CostCalculatorTest extends TestCase
                 'components' => [
                     [
                         'id' => 'energy',
+                        'kind' => 'ENERGY_PURCHASE',
                         'category' => 'ENERGY',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
                         'selector' => [
                             'type' => 'WEEKLY_SCHEDULE',
@@ -511,7 +539,9 @@ final class CostCalculatorTest extends TestCase
                     ],
                     [
                         'id' => 'billing-fee',
+                        'kind' => 'SUPPLIER_FIXED',
                         'category' => 'SERVICE',
+                        'taxTreatment' => ['included' => []],
                         'quantity' => ['type' => 'PERIOD', 'period' => 'BILLING_PERIOD', 'prorate' => false],
                         'rate' => ['type' => 'CONSTANT', 'value' => '7'],
                     ],
@@ -557,6 +587,7 @@ final class CostCalculatorTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'billingCycles' => [
                 [
                     'validFrom' => null,
@@ -578,7 +609,9 @@ final class CostCalculatorTest extends TestCase
                 'validTo' => null,
                 'components' => [[
                     'id' => 'monthly-fee',
+                    'kind' => 'SUPPLIER_FIXED',
                     'category' => 'SERVICE',
+                    'taxTreatment' => ['included' => []],
                     'quantity' => ['type' => 'PERIOD', 'period' => 'MONTH', 'prorate' => true],
                     'rate' => ['type' => 'CONSTANT', 'value' => '30'],
                 ]],
@@ -627,12 +660,28 @@ final class CostCalculatorTest extends TestCase
             'version' => 1,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
+            'taxRuleSets' => $this->noOpTaxRuleSets(),
             'periods' => [[
                 'validFrom' => '2026-01-01T00:00:00Z',
                 'validTo' => null,
                 'components' => [$component],
             ]],
         ];
+    }
+
+    private function noOpTaxRuleSets(): array
+    {
+        return [[
+            'validFrom' => null,
+            'validTo' => null,
+            'rules' => [[
+                'id' => 'VAT',
+                'type' => 'PERCENTAGE',
+                'appliesToKinds' => ['UNUSED'],
+                'rate' => '0.23',
+                'base' => 'CURRENT_SUBTOTAL',
+            ]],
+        ]];
     }
 
     private function assertExpectedSubset(mixed $expected, mixed $actual, string $path): void
@@ -647,5 +696,23 @@ final class CostCalculatorTest extends TestCase
             self::assertArrayHasKey($key, $actual, $path . '.' . $key);
             $this->assertExpectedSubset($value, $actual[$key], $path . '.' . $key);
         }
+    }
+
+    /** @param array<string, mixed> $result */
+    private function migrateLegacyCostExpectation(array $result): array
+    {
+        if (!isset($result['costs']) || !is_array($result['costs'])) {
+            return $result;
+        }
+        $legacy = $result['costs'];
+        $result['costs'] = ['taxInclusive' => []];
+        foreach (['usageBased', 'periodic', 'total'] as $key) {
+            if (array_key_exists($key, $legacy)) {
+                $result['costs']['taxInclusive'][$key] = is_array($legacy[$key]) && array_key_exists('total', $legacy[$key])
+                    ? $legacy[$key]['total']
+                    : $legacy[$key];
+            }
+        }
+        return $result;
     }
 }

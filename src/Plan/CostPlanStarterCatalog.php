@@ -49,8 +49,8 @@ final class CostPlanStarterCatalog
                 'version' => 2,
                 'currency' => 'XXX',
                 'timezone' => 'UTC',
-                'priceBasis' => 'NET',
                 'billingCycles' => [['length' => 1, 'unit' => 'MONTH']],
+                'taxProfiles' => [['profileId' => 'PL.HOUSEHOLD.2026']],
                 'periods' => [['components' => $components]],
             ]);
         } catch (CostPlanDefinitionException $e) {

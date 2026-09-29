@@ -2,6 +2,7 @@
   "version": 1,
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
+  "taxRuleSets": [{"validFrom": null, "validTo": null, "rules": [{"id": "VAT", "type": "PERCENTAGE", "appliesToKinds": ["UNUSED"], "rate": "0.23", "base": "CURRENT_SUBTOTAL"}]}],
   "billingCycles": [
     {
       "validFrom": null,
@@ -25,7 +26,9 @@
       "components": [
         {
           "id": "energy",
+          "kind": "ENERGY_PURCHASE",
           "category": "ENERGY",
+          "taxTreatment": {"included": []},
           "quantity": {
             "type": "ACTIVE_ENERGY_IMPORT",
             "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
