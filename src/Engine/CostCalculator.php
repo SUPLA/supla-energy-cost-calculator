@@ -56,6 +56,7 @@ final class CostCalculator
     ): CalculationResult {
         $options ??= new CalculationOptions();
         $definition = $definition instanceof BillingDefinition ? $definition : $this->definitionParser->parse($definition);
+        $definitionTimezone = new \DateTimeZone($definition->timezone);
 
         $references = new ReferenceDataCache($this->referenceDataSource, $range);
         $references->preload($definition->referenceDataIds($range));
@@ -263,17 +264,21 @@ final class CostCalculator
             unset($summary);
         };
 
+        $definitionPeriod = null;
+        $billingPeriod = null;
+        $summaryKey = null;
+
         foreach ($this->deltaSource->getDeltas($meterId, $range) as $delta) {
             if (!$delta instanceof EnergyDelta) {
                 throw new \UnexpectedValueException('EnergyDeltaSource must yield EnergyDelta objects.');
             }
-            $intersection = $delta->range()->intersection($range);
-            if ($intersection === null) {
+            if ($delta->to <= $range->from || $delta->from >= $range->to) {
                 continue;
             }
-            if ($intersection->from != $delta->from || $intersection->to != $delta->to) {
+            if ($delta->from < $range->from || $delta->to > $range->to) {
                 throw new IntervalCrossesBillingPeriodException('Requested range cuts through a delta interval. Use boundaries aligned to meter intervals.');
             }
+            $deltaRange = $delta->range();
             if ($requiresCompleteDeltaCoverage && $delta->from != $expectedDeltaFrom) {
                 throw new CalculationException(sprintf(
                     'Meter deltas contain a gap at %s; complete coverage is required for temporal netting.',
@@ -289,19 +294,25 @@ final class CostCalculator
                 }
             }
 
-            $definitionPeriod = $definition->periodAt($delta->from)
-                ?? throw new MissingBillingPeriodException('No billing definition period at ' . $delta->from->format(DATE_ATOM));
+            if ($definitionPeriod === null || !$definitionPeriod->contains($delta->from)) {
+                $definitionPeriod = $definition->periodAt($delta->from)
+                    ?? throw new MissingBillingPeriodException('No billing definition period at ' . $delta->from->format(DATE_ATOM));
+            }
             $this->assertDeltaInsidePeriod($delta, $definitionPeriod);
 
-            $billingPeriod = $this->billingCycleResolver->periodContainingRange($delta->range(), $billingPeriods);
-            if ($billingPeriod === null) {
-                throw new IntervalCrossesBillingPeriodException(sprintf(
-                    'Delta %s..%s crosses a billing-cycle boundary.',
-                    $delta->from->format(DATE_ATOM),
-                    $delta->to->format(DATE_ATOM),
-                ));
+            if ($billingPeriod === null
+                || $deltaRange->from < $billingPeriod->range->from
+                || $deltaRange->to > $billingPeriod->range->to) {
+                $billingPeriod = $this->billingCycleResolver->periodContainingRange($deltaRange, $billingPeriods);
+                if ($billingPeriod === null) {
+                    throw new IntervalCrossesBillingPeriodException(sprintf(
+                        'Delta %s..%s crosses a billing-cycle boundary.',
+                        $delta->from->format(DATE_ATOM),
+                        $delta->to->format(DATE_ATOM),
+                    ));
+                }
+                $summaryKey = $this->billingPeriodKey($billingPeriod);
             }
-            $summaryKey = $this->billingPeriodKey($billingPeriod);
 
             foreach ($delta->quantities as $type => $value) {
                 $usage[$type] = $this->math->add($usage[$type] ?? '0', (string)$value);
@@ -326,7 +337,7 @@ final class CostCalculator
                     $window = $this->nettingWindow(
                         $delta->from,
                         $component->quantity->periodInMinutes ?? 0,
-                        $definition->timezone,
+                        $definitionTimezone,
                     );
                     if ($delta->to > $window->to) {
                         throw new CalculationException(sprintf(
@@ -337,7 +348,9 @@ final class CostCalculator
                             $component->id,
                         ));
                     }
-                    if ($this->billingCycleResolver->periodContainingRange($window, $billingPeriods) === null) {
+                    if ($billingPeriod === null
+                        || $window->from < $billingPeriod->range->from
+                        || $window->to > $billingPeriod->range->to) {
                         throw new CalculationException(sprintf(
                             "Netting window %s..%s for component '%s' crosses a billing-period boundary.",
                             $window->from->format(DATE_ATOM),
@@ -417,7 +430,7 @@ final class CostCalculator
                 $selection = $this->selectorResolver->resolve($delta, $component->selector, $references);
                 $rate = $this->rateResolver->resolve($delta, $component->rate, $selection, $references, $this->math);
                 $sourceAmount = $this->math->multiply($quantity, $rate);
-                $taxCalculation = $this->taxCalculation($definition, $component, $delta->range(), $sourceAmount, $quantity);
+                $taxCalculation = $this->taxCalculation($definition, $component, $deltaRange, $sourceAmount, $quantity);
                 $cost = $taxCalculation->gross;
                 $usageBasedNetTotal = $this->math->add($usageBasedNetTotal, $taxCalculation->net);
                 $this->addTaxes($usageBasedTaxes, $taxCalculation);
@@ -774,21 +787,20 @@ final class CostCalculator
         return false;
     }
 
-    private function nettingWindow(\DateTimeImmutable $timestamp, int $periodInMinutes, string $timezone): TimeRange
+    private function nettingWindow(\DateTimeImmutable $timestamp, int $periodInMinutes, \DateTimeZone $timezone): TimeRange
     {
         if ($periodInMinutes < 1) {
             throw new CalculationException('Netting periodInMinutes must be positive.');
         }
 
-        $tz = new \DateTimeZone($timezone);
         $periodSeconds = $periodInMinutes * 60;
-        $offset = $tz->getOffset($timestamp);
+        $offset = $timezone->getOffset($timestamp);
         $localEpoch = $timestamp->getTimestamp() + $offset;
         $bucketLocalEpoch = intdiv($localEpoch, $periodSeconds) * $periodSeconds;
         $fromTimestamp = $bucketLocalEpoch - $offset;
 
-        $from = (new \DateTimeImmutable('@' . $fromTimestamp))->setTimezone($tz);
-        $to = (new \DateTimeImmutable('@' . ($fromTimestamp + $periodSeconds)))->setTimezone($tz);
+        $from = (new \DateTimeImmutable('@' . $fromTimestamp))->setTimezone($timezone);
+        $to = (new \DateTimeImmutable('@' . ($fromTimestamp + $periodSeconds)))->setTimezone($timezone);
         return new TimeRange($from, $to);
     }
 
