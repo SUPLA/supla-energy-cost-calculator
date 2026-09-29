@@ -9,6 +9,7 @@ use Supla\EnergyCostCalculator\Definition\TaxTreatment;
 use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Math\DecimalMath;
 use Supla\EnergyCostCalculator\Math\NativeDecimalMath;
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
 
 final class DefaultTaxCalculator implements TaxCalculator
 {
@@ -16,12 +17,15 @@ final class DefaultTaxCalculator implements TaxCalculator
     {
     }
 
-    public function calculate(string $sourceAmount, string $quantity, string $kind, TaxTreatment $treatment, array $rules): TaxCalculation
+    public function calculate(string $sourceAmount, string $quantity, CostComponentKind $kind, TaxTreatment $treatment, array $rules): TaxCalculation
     {
-        $applicable = array_values(array_filter($rules, static fn(TaxRuleDefinition $rule) => $rule->appliesTo($kind)));
-        $applicableIds = array_map(static fn(TaxRuleDefinition $rule) => $rule->id, $applicable);
+        $applicable = array_values(array_filter(
+            $rules,
+            static fn(TaxRuleDefinition $rule): bool => $rule->appliesTo($kind),
+        ));
+        $applicableIds = array_map(static fn(TaxRuleDefinition $rule): string => $rule->id, $applicable);
         if ($treatment->included !== array_slice($applicableIds, 0, count($treatment->included))) {
-            throw new CalculationException("Included taxes for component kind '$kind' must be an ordered prefix of applicable tax rules.");
+            throw new CalculationException("Included taxes for component kind '{$kind->value}' must be an ordered prefix of applicable tax rules.");
         }
 
         $net = $sourceAmount;

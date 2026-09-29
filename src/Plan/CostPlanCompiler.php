@@ -7,6 +7,7 @@ namespace Supla\EnergyCostCalculator\Plan;
 use Supla\EnergyCostCalculator\Definition\BillingDefinition;
 use Supla\EnergyCostCalculator\Definition\BillingDefinitionParser;
 use Supla\EnergyCostCalculator\Exception\CostPlanDefinitionException;
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCatalog;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCompiler;
 use Supla\EnergyCostCalculator\Tax\TaxProfileCatalog;
@@ -179,7 +180,12 @@ final class CostPlanCompiler
                 'validFrom' => $entry['validFrom'] ?? null,
                 'validTo' => $entry['validTo'] ?? null,
                 'rules' => array_map(static fn($rule) => array_filter([
-                    'id' => $rule->id, 'type' => $rule->type, 'appliesToKinds' => $rule->appliesToKinds,
+                    'id' => $rule->id,
+                    'type' => $rule->type,
+                    'appliesToKinds' => array_map(
+                        static fn(CostComponentKind $componentKind): string => $componentKind->value,
+                        $rule->appliesToKinds,
+                    ),
                     'rate' => $rule->rate, 'unit' => $rule->unit, 'base' => $rule->base,
                 ], static fn($value) => $value !== null), $profile->rules),
             ];

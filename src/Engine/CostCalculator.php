@@ -799,7 +799,7 @@ final class CostCalculator
         $ruleSet = $definition->taxRuleSetAt($range->from);
         if ($ruleSet === null) {
             if ($definition->taxRuleSets === []) {
-                return $this->taxCalculator->calculate($sourceAmount, $quantity, $component->kind->value, $component->taxTreatment, []);
+                return $this->taxCalculator->calculate($sourceAmount, $quantity, $component->kind, $component->taxTreatment, []);
             }
             throw new CalculationException('Tax rule-set history does not cover charge at ' . $range->from->format(DATE_ATOM));
         }
@@ -812,7 +812,7 @@ final class CostCalculator
                 $component->id,
             ));
         }
-        return $this->taxCalculator->calculate($sourceAmount, $quantity, $component->kind->value, $component->taxTreatment, $ruleSet->rules);
+        return $this->taxCalculator->calculate($sourceAmount, $quantity, $component->kind, $component->taxTreatment, $ruleSet->rules);
     }
 
     /** @return array{units: string, amounts: array<string, mixed>} */

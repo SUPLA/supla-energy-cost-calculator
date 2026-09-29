@@ -6,9 +6,10 @@ namespace Supla\EnergyCostCalculator\Engine;
 
 use Supla\EnergyCostCalculator\Definition\TaxRuleDefinition;
 use Supla\EnergyCostCalculator\Definition\TaxTreatment;
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
 
 interface TaxCalculator
 {
     /** @param list<TaxRuleDefinition> $rules */
-    public function calculate(string $sourceAmount, string $quantity, string $kind, TaxTreatment $treatment, array $rules): TaxCalculation;
+    public function calculate(string $sourceAmount, string $quantity, CostComponentKind $kind, TaxTreatment $treatment, array $rules): TaxCalculation;
 }

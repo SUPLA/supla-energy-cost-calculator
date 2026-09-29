@@ -84,7 +84,7 @@ final class PeriodicChargeCalculator
     {
         $key = $component->id . ':' . $cycleStart . ':' . $bucketStart;
         $signature = json_encode([
-            $component->kind->value,
+            $component->kind,
             $component->category,
             $period,
             $component->rate->config,

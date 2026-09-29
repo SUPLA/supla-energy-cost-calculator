@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Exception\DefinitionException;
 use Supla\EnergyCostCalculator\Tax\TaxProfileParser;
 use Supla\EnergyCostCalculator\Tax\TaxProfileCatalog;
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
 
 final class TaxProfileParserTest extends TestCase
 {
@@ -17,7 +18,7 @@ final class TaxProfileParserTest extends TestCase
         $this->expectExceptionMessage('unknown component kind');
 
         (new TaxProfileParser())->parse($this->profile([
-            'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['UNKNOWN'],
+            'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['TYPO'],
             'rate' => '0.23', 'base' => 'CURRENT_SUBTOTAL',
         ]));
     }
@@ -49,12 +50,12 @@ final class TaxProfileParserTest extends TestCase
         $profile = (new TaxProfileCatalog())->get('PL.HOUSEHOLD.2026');
         $rules = array_column($profile->rules, null, 'id');
 
-        self::assertSame(['ENERGY_PURCHASE'], $rules['EXCISE']->appliesToKinds);
+        self::assertSame(CostComponentKind::ENERGY_PURCHASE, $rules['EXCISE']->appliesToKinds[0]);
         self::assertSame([
-            'ENERGY_PURCHASE',
-            'DISTRIBUTION_VARIABLE',
-            'DISTRIBUTION_FIXED',
-            'SUPPLIER_FIXED',
+            CostComponentKind::ENERGY_PURCHASE,
+            CostComponentKind::DISTRIBUTION_VARIABLE,
+            CostComponentKind::DISTRIBUTION_FIXED,
+            CostComponentKind::SUPPLIER_FIXED,
         ], $rules['VAT']->appliesToKinds);
     }
 

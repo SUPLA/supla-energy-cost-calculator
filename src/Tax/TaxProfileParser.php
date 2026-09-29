@@ -48,10 +48,13 @@ final class TaxProfileParser
                     throw new DefinitionException("Tax profile.rules[$index] has unsupported property '$key'.");
                 }
             }
+            $parsedKinds = [];
             foreach ($kinds as $kind) {
-                if (!is_string($kind) || CostComponentKind::tryFrom($kind) === null) {
+                if (!is_string($kind)) {
                     throw new DefinitionException("Tax profile.rules[$index].appliesToKinds contains an unknown component kind.");
                 }
+                $parsedKinds[] = CostComponentKind::tryFrom($kind)
+                    ?? throw new DefinitionException("Tax profile.rules[$index].appliesToKinds contains an unknown component kind.");
             }
             if ($type === 'PER_QUANTITY' && ($rule['unit'] ?? null) !== $data['currency'] . '/kWh') {
                 throw new DefinitionException("Tax profile.rules[$index].unit must be {$data['currency']}/kWh for PER_QUANTITY.");
@@ -60,7 +63,7 @@ final class TaxProfileParser
                 throw new DefinitionException("Tax profile.rules[$index].base must be CURRENT_SUBTOTAL for PERCENTAGE.");
             }
             $ids[$id] = true;
-            $rules[] = new TaxRuleDefinition($id, $type, array_values($kinds), $rate, $rule['unit'] ?? null, $rule['base'] ?? null);
+            $rules[] = new TaxRuleDefinition($id, $type, $parsedKinds, $rate, $rule['unit'] ?? null, $rule['base'] ?? null);
         }
         return new TaxProfile(1, $data['id'], $data['label'], $data['currency'], $rules, $data);
     }

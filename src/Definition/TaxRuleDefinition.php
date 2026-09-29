@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Supla\EnergyCostCalculator\Definition;
 
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
+
 final readonly class TaxRuleDefinition
 {
-    /** @param list<string> $appliesToKinds */
+    /** @param list<CostComponentKind> $appliesToKinds */
     public function __construct(
         public string $id,
         public string $type,
@@ -17,7 +19,7 @@ final readonly class TaxRuleDefinition
     ) {
     }
 
-    public function appliesTo(string $kind): bool
+    public function appliesTo(CostComponentKind $kind): bool
     {
         return in_array($kind, $this->appliesToKinds, true);
     }

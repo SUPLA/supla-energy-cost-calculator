@@ -13,13 +13,14 @@ use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Definition\BillingDefinitionParser;
 use Supla\EnergyCostCalculator\Exception\DefinitionException;
 use Supla\EnergyCostCalculator\Math\NativeDecimalMath;
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
 
 final class DefaultTaxCalculatorTest extends TestCase
 {
     #[DataProvider('includedTaxCases')]
     public function testNormalizesIncludedTaxes(string $source, array $included, string $exclusive): void
     {
-        $result = (new DefaultTaxCalculator())->calculate($source, '1', 'ENERGY_PURCHASE', new TaxTreatment($included), $this->rules());
+        $result = (new DefaultTaxCalculator())->calculate($source, '1', CostComponentKind::ENERGY_PURCHASE, new TaxTreatment($included), $this->rules());
 
         self::assertSame($exclusive, $result->net);
         self::assertSame('0.005', $result->taxes['EXCISE']['amount']);
@@ -39,13 +40,13 @@ final class DefaultTaxCalculatorTest extends TestCase
     public function testRejectsNonPrefixIncludedTaxes(): void
     {
         $this->expectException(CalculationException::class);
-        (new DefaultTaxCalculator())->calculate('0.5', '1', 'ENERGY_PURCHASE', new TaxTreatment(['VAT']), $this->rules());
+        (new DefaultTaxCalculator())->calculate('0.5', '1', CostComponentKind::ENERGY_PURCHASE, new TaxTreatment(['VAT']), $this->rules());
     }
 
     public function testCalculatesVatOnlyComponentFromExclusiveSourceAmount(): void
     {
-        $rules = [new TaxRuleDefinition('VAT', 'PERCENTAGE', ['DISTRIBUTION_VARIABLE'], '0.23', null, 'CURRENT_SUBTOTAL')];
-        $result = (new DefaultTaxCalculator())->calculate('0.500', '1', 'DISTRIBUTION_VARIABLE', new TaxTreatment([]), $rules);
+        $rules = [new TaxRuleDefinition('VAT', 'PERCENTAGE', [CostComponentKind::DISTRIBUTION_VARIABLE], '0.23', null, 'CURRENT_SUBTOTAL')];
+        $result = (new DefaultTaxCalculator())->calculate('0.500', '1', CostComponentKind::DISTRIBUTION_VARIABLE, new TaxTreatment([]), $rules);
 
         self::assertSame('0.500', $result->net);
         self::assertSame('0.500', $result->taxes['VAT']['taxableBase']);
@@ -55,8 +56,8 @@ final class DefaultTaxCalculatorTest extends TestCase
 
     public function testReversesVatOnlyComponentFromInclusiveSourceAmount(): void
     {
-        $rules = [new TaxRuleDefinition('VAT', 'PERCENTAGE', ['DISTRIBUTION_VARIABLE'], '0.23', null, 'CURRENT_SUBTOTAL')];
-        $result = (new DefaultTaxCalculator())->calculate('0.615', '1', 'DISTRIBUTION_VARIABLE', new TaxTreatment(['VAT']), $rules);
+        $rules = [new TaxRuleDefinition('VAT', 'PERCENTAGE', [CostComponentKind::DISTRIBUTION_VARIABLE], '0.23', null, 'CURRENT_SUBTOTAL')];
+        $result = (new DefaultTaxCalculator())->calculate('0.615', '1', CostComponentKind::DISTRIBUTION_VARIABLE, new TaxTreatment(['VAT']), $rules);
 
         self::assertSame('0.5', $result->net);
         self::assertSame('0.115', $result->taxes['VAT']['amount']);
@@ -67,7 +68,7 @@ final class DefaultTaxCalculatorTest extends TestCase
     {
         $this->expectException(CalculationException::class);
         $this->expectExceptionMessage('prefix');
-        (new DefaultTaxCalculator())->calculate('0.5', '1', 'ENERGY_PURCHASE', new TaxTreatment(['UNKNOWN']), $this->rules());
+        (new DefaultTaxCalculator())->calculate('0.5', '1', CostComponentKind::ENERGY_PURCHASE, new TaxTreatment(['UNKNOWN']), $this->rules());
     }
 
     public function testRejectsTaxRuleSetGap(): void
@@ -90,12 +91,24 @@ final class DefaultTaxCalculatorTest extends TestCase
         ]));
     }
 
+    public function testRejectsUnknownComponentKind(): void
+    {
+        $definition = $this->definitionWithRuleSets([[
+            'validFrom' => null, 'validTo' => null, 'rules' => $this->ruleDocuments(),
+        ]]);
+        $definition['periods'][0]['components'][0]['kind'] = 'ENERGY_PURCHSAE';
+
+        $this->expectException(DefinitionException::class);
+        $this->expectExceptionMessage('Unsupported component kind');
+        (new BillingDefinitionParser())->parse($definition);
+    }
+
     /** @return list<TaxRuleDefinition> */
     private function rules(): array
     {
         return [
-            new TaxRuleDefinition('EXCISE', 'PER_QUANTITY', ['ENERGY_PURCHASE'], '0.005', 'PLN/kWh'),
-            new TaxRuleDefinition('VAT', 'PERCENTAGE', ['ENERGY_PURCHASE'], '0.23', null, 'CURRENT_SUBTOTAL'),
+            new TaxRuleDefinition('EXCISE', 'PER_QUANTITY', [CostComponentKind::ENERGY_PURCHASE], '0.005', 'PLN/kWh'),
+            new TaxRuleDefinition('VAT', 'PERCENTAGE', [CostComponentKind::ENERGY_PURCHASE], '0.23', null, 'CURRENT_SUBTOTAL'),
         ];
     }
 
