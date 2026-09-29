@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "id": "PL.HOUSEHOLD.2026",
-  "label": "Polska - gospodarstwo domowe - 2026",
+  "id": "PL.HOUSEHOLD.VAT23_EXCISE5.V1",
+  "label": "Polska - gospodarstwo domowe - VAT 23%, akcyza 5 PLN/MWh",
   "currency": "PLN",
   "source": {
     "title": "Ustawa o podatku akcyzowym oraz ustawa o VAT",
     "url": "https://isap.sejm.gov.pl/",
-    "retrievedAt": "2026-09-28"
+    "retrievedAt": "2026-09-29"
   },
   "rules": [
     {"id": "EXCISE", "type": "PER_QUANTITY", "appliesToKinds": ["ENERGY_PURCHASE"], "rate": "0.005", "unit": "PLN/kWh"},

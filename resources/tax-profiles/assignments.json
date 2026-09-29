@@ -5,18 +5,27 @@
         "jurisdiction": "PL",
         "customerClass": "HOUSEHOLD"
       },
-      "validFrom": "2025-01-01T00:00:00+01:00",
-      "validTo": "2026-01-01T00:00:00+01:00",
-      "profileId": "PL.HOUSEHOLD.2025"
+      "validFrom": "2019-01-01T00:00:00+01:00",
+      "validTo": "2022-01-01T00:00:00+01:00",
+      "profileId": "PL.HOUSEHOLD.VAT23_EXCISE5.V1"
     },
     {
       "taxContext": {
         "jurisdiction": "PL",
         "customerClass": "HOUSEHOLD"
       },
-      "validFrom": "2026-01-01T00:00:00+01:00",
-      "validTo": "2027-01-01T00:00:00+01:00",
-      "profileId": "PL.HOUSEHOLD.2026"
+      "validFrom": "2022-01-01T00:00:00+01:00",
+      "validTo": "2023-01-01T00:00:00+01:00",
+      "profileId": "PL.HOUSEHOLD.VAT5_EXCISE0.V1"
+    },
+    {
+      "taxContext": {
+        "jurisdiction": "PL",
+        "customerClass": "HOUSEHOLD"
+      },
+      "validFrom": "2023-01-01T00:00:00+01:00",
+      "validTo": null,
+      "profileId": "PL.HOUSEHOLD.VAT23_EXCISE5.V1"
     }
   ]
 }

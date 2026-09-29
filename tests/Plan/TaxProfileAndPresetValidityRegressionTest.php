@@ -13,52 +13,56 @@ use Supla\EnergyCostCalculator\Tax\TaxProfileResolver;
 
 final class TaxProfileAndPresetValidityRegressionTest extends TestCase
 {
-    public function testBundledPolishAssignmentsUseSeparateFiniteProfilesFor2025And2026(): void
+    public function testBundledPolishAssignmentsReuseStandardProfileAroundThe2022Shield(): void
     {
         $resolver = new TaxProfileResolver();
         $context = new TaxContext('PL', 'HOUSEHOLD');
 
-        $resolved2025 = $resolver->resolve(
+        $resolved = $resolver->resolve(
             $context,
-            new \DateTimeImmutable('2025-11-01T00:00:00+01:00'),
-            new \DateTimeImmutable('2025-12-01T00:00:00+01:00'),
-            'PLN',
-        );
-        self::assertSame(['PL.HOUSEHOLD.2025'], array_column($resolved2025, 'profileId'));
-
-        $resolved2026 = $resolver->resolve(
-            $context,
-            new \DateTimeImmutable('2026-01-01T00:00:00+01:00'),
-            new \DateTimeImmutable('2027-01-01T00:00:00+01:00'),
-            'PLN',
-        );
-        self::assertSame(['PL.HOUSEHOLD.2026'], array_column($resolved2026, 'profileId'));
-    }
-
-    public function testBundledPolishAssignmentsRejectUnsupportedHistory(): void
-    {
-        $this->expectException(DefinitionException::class);
-        $this->expectExceptionMessage('do not cover');
-
-        (new TaxProfileResolver())->resolve(
-            new TaxContext('PL', 'HOUSEHOLD'),
+            new \DateTimeImmutable('2019-01-01T00:00:00+01:00'),
             new \DateTimeImmutable('2024-01-01T00:00:00+01:00'),
-            new \DateTimeImmutable('2025-01-01T00:00:00+01:00'),
             'PLN',
         );
+
+        self::assertSame([
+            'PL.HOUSEHOLD.VAT23_EXCISE5.V1',
+            'PL.HOUSEHOLD.VAT5_EXCISE0.V1',
+            'PL.HOUSEHOLD.VAT23_EXCISE5.V1',
+        ], array_column($resolved, 'profileId'));
+        self::assertSame('2019-01-01T00:00:00+01:00', $resolved[0]['validFrom']?->format(DATE_ATOM));
+        self::assertSame('2022-01-01T00:00:00+01:00', $resolved[0]['validTo']?->format(DATE_ATOM));
+        self::assertSame('2022-01-01T00:00:00+01:00', $resolved[1]['validFrom']?->format(DATE_ATOM));
+        self::assertSame('2023-01-01T00:00:00+01:00', $resolved[1]['validTo']?->format(DATE_ATOM));
+        self::assertSame('2023-01-01T00:00:00+01:00', $resolved[2]['validFrom']?->format(DATE_ATOM));
+        self::assertSame('2024-01-01T00:00:00+01:00', $resolved[2]['validTo']?->format(DATE_ATOM));
     }
 
-    public function testBundledPolishAssignmentsRejectUnsupportedFuture(): void
+    public function testBundledPolishAssignmentsRejectHistoryBeforeExciseFiveRegime(): void
     {
         $this->expectException(DefinitionException::class);
         $this->expectExceptionMessage('do not cover');
 
         (new TaxProfileResolver())->resolve(
             new TaxContext('PL', 'HOUSEHOLD'),
-            new \DateTimeImmutable('2027-01-01T00:00:00+01:00'),
-            new \DateTimeImmutable('2028-01-01T00:00:00+01:00'),
+            new \DateTimeImmutable('2018-01-01T00:00:00+01:00'),
+            new \DateTimeImmutable('2019-01-01T00:00:00+01:00'),
             'PLN',
         );
+    }
+
+    public function testBundledPolishStandardProfileRemainsOpenEndedAfter2023(): void
+    {
+        $resolved = (new TaxProfileResolver())->resolve(
+            new TaxContext('PL', 'HOUSEHOLD'),
+            new \DateTimeImmutable('2030-01-01T00:00:00+01:00'),
+            new \DateTimeImmutable('2031-01-01T00:00:00+01:00'),
+            'PLN',
+        );
+
+        self::assertSame(['PL.HOUSEHOLD.VAT23_EXCISE5.V1'], array_column($resolved, 'profileId'));
+        self::assertSame('2030-01-01T00:00:00+01:00', $resolved[0]['validFrom']?->format(DATE_ATOM));
+        self::assertSame('2031-01-01T00:00:00+01:00', $resolved[0]['validTo']?->format(DATE_ATOM));
     }
 
     public function testContractOfferCanApplyAfterItsCatalogueAvailabilityWindow(): void

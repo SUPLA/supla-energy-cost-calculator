@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "PL.HOUSEHOLD.VAT5_EXCISE0.V1",
+  "label": "Polska - gospodarstwo domowe - Tarcza Antyinflacyjna 2022 (VAT 5%, akcyza zwolniona)",
+  "currency": "PLN",
+  "source": {
+    "title": "Ministerstwo Finansów - Tarcza Antyinflacyjna 2022: VAT 5% na energię i zwolnienie gospodarstw domowych z akcyzy",
+    "url": "https://www.gov.pl/web/finanse/rzad-chroni-portfele-polakow-przed-skutkami-wojny-w-ukrainie-kryzysu-energetycznego-oraz-inflacyjnego",
+    "retrievedAt": "2026-09-29"
+  },
+  "rules": [
+    {"id": "EXCISE", "type": "PER_QUANTITY", "appliesToKinds": ["ENERGY_PURCHASE"], "rate": "0", "unit": "PLN/kWh"},
+    {"id": "VAT", "type": "PERCENTAGE", "appliesToKinds": ["ENERGY_PURCHASE", "DISTRIBUTION_VARIABLE", "DISTRIBUTION_FIXED", "SUPPLIER_FIXED"], "rate": "0.05", "base": "CURRENT_SUBTOTAL"}
+  ]
+}

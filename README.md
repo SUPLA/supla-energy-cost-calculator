@@ -223,7 +223,7 @@ Plan periods are contiguous and ordered. The first may have an open `validFrom`,
 
 Top-level preset `validFrom` / `validTo` describe catalogue availability of that tariff or offer edition and do not clip a user's CostPlan. Executable applicability belongs to `billingDefinitionTemplate.periods[]`: annual tariff editions can remain bounded there, while contract offers and generic presets may use open template periods. The CostPlan period records the user's actual effective range.
 
-Tax-profile assignments are deliberately finite. If the CostPlan range reaches a year for which the package does not yet contain a verified tax profile, compilation fails instead of projecting the latest known tax rules into the past or future.
+Tax profiles describe immutable tax regimes rather than calendar years. For Polish households the `VAT23_EXCISE5` profile is reused from 2019 through 2021 and again from 2023 onward, while the 2022 anti-inflation shield uses a dedicated `VAT5_EXCISE0` profile. The current assignment remains open-ended until tax law changes; when it does, close that assignment at the legal boundary and add a new immutable profile instead of publishing annual copies.
 
 Use `CostPlanCompiler` for persisted user plans:
 

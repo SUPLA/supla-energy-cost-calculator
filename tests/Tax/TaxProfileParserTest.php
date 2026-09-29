@@ -45,11 +45,13 @@ final class TaxProfileParserTest extends TestCase
         (new TaxProfileParser())->parse($this->profile($rule, $rule));
     }
 
-    public function testHousehold2026AppliesVatToEverySupportedChargeKind(): void
+    public function testStandardHouseholdProfileAppliesExciseAndVatToExpectedKinds(): void
     {
-        $profile = (new TaxProfileCatalog())->get('PL.HOUSEHOLD.2026');
+        $profile = (new TaxProfileCatalog())->get('PL.HOUSEHOLD.VAT23_EXCISE5.V1');
         $rules = array_column($profile->rules, null, 'id');
 
+        self::assertSame('0.005', $rules['EXCISE']->rate);
+        self::assertSame('0.23', $rules['VAT']->rate);
         self::assertSame(CostComponentKind::ENERGY_PURCHASE, $rules['EXCISE']->appliesToKinds[0]);
         self::assertSame([
             CostComponentKind::ENERGY_PURCHASE,
@@ -57,6 +59,17 @@ final class TaxProfileParserTest extends TestCase
             CostComponentKind::DISTRIBUTION_FIXED,
             CostComponentKind::SUPPLIER_FIXED,
         ], $rules['VAT']->appliesToKinds);
+    }
+
+    public function testAntiInflationShieldProfileKeepsTaxOrderWithZeroExciseAndFivePercentVat(): void
+    {
+        $profile = (new TaxProfileCatalog())->get('PL.HOUSEHOLD.VAT5_EXCISE0.V1');
+        $rules = array_column($profile->rules, null, 'id');
+
+        self::assertSame(['EXCISE', 'VAT'], array_column($profile->rules, 'id'));
+        self::assertSame('0', $rules['EXCISE']->rate);
+        self::assertSame('0.05', $rules['VAT']->rate);
+        self::assertSame(CostComponentKind::ENERGY_PURCHASE, $rules['EXCISE']->appliesToKinds[0]);
     }
 
     /** @return array<string, mixed> */
