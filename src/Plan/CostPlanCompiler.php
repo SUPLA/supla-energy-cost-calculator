@@ -7,10 +7,13 @@ namespace Supla\EnergyCostCalculator\Plan;
 use Supla\EnergyCostCalculator\Definition\BillingDefinition;
 use Supla\EnergyCostCalculator\Definition\BillingDefinitionParser;
 use Supla\EnergyCostCalculator\Exception\CostPlanDefinitionException;
+use Supla\EnergyCostCalculator\Exception\DefinitionException;
 use Supla\EnergyCostCalculator\Model\CostComponentKind;
+use Supla\EnergyCostCalculator\Preset\TariffPreset;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCatalog;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCompiler;
-use Supla\EnergyCostCalculator\Tax\TaxProfileCatalog;
+use Supla\EnergyCostCalculator\Tax\TaxContext;
+use Supla\EnergyCostCalculator\Tax\TaxProfileResolver;
 
 final class CostPlanCompiler
 {
@@ -18,7 +21,7 @@ final class CostPlanCompiler
         private readonly TariffPresetCatalog $catalog = new TariffPresetCatalog(),
         private readonly CostPlanDefinitionParser $planParser = new CostPlanDefinitionParser(),
         private readonly BillingDefinitionParser $definitionParser = new BillingDefinitionParser(),
-        private readonly TaxProfileCatalog $taxProfileCatalog = new TaxProfileCatalog(),
+        private readonly TaxProfileResolver $taxProfileResolver = new TaxProfileResolver(),
         ?TariffPresetCompiler $presetCompiler = null,
     ) {
         $this->presetCompiler = $presetCompiler ?? new TariffPresetCompiler($this->catalog);
@@ -46,6 +49,7 @@ final class CostPlanCompiler
         }
         $this->assertContinuousPlanPeriods($plan->periods);
         $periods = [];
+        $presetContexts = [];
         foreach ($plan->periods as $index => $entry) {
             if (!$entry instanceof CostPlanPeriod
                 || ($entry->validFrom !== null && $entry->validTo !== null && $entry->validFrom >= $entry->validTo)
@@ -63,7 +67,11 @@ final class CostPlanCompiler
                     ];
                 }
             }
-            $this->assertCoverage($cycleCoverage, $entry->validFrom, $entry->validTo, "billing cycles for period $index");
+            $cycleCoverageFrom = $entry->validFrom
+                ?? $this->documentDate($cycleCoverage[0]['validFrom'] ?? null, 'billing cycle coverage validFrom');
+            $cycleCoverageTo = $entry->validTo
+                ?? $this->documentDate($cycleCoverage[array_key_last($cycleCoverage)]['validTo'] ?? null, 'billing cycle coverage validTo');
+            $this->assertCoverage($cycleCoverage, $cycleCoverageFrom, $cycleCoverageTo, "billing cycles for period $index");
             $segments = [[
                 'validFrom' => $entry->validFrom?->format(DATE_ATOM),
                 'validTo' => $entry->validTo?->format(DATE_ATOM),
@@ -101,6 +109,7 @@ final class CostPlanCompiler
                     throw new CostPlanDefinitionException("Period $index has an incomplete preset component.");
                 }
                 $preset = $this->catalog->get($selected->presetId);
+                $presetContexts[$preset->id] = $this->presetTaxContext($preset);
                 foreach (['currency' => $plan->currency, 'timezone' => $plan->timezone] as $key => $expected) {
                     if (($preset->document[$key] ?? null) !== $expected) {
                         throw new CostPlanDefinitionException("Preset '{$preset->id}' has incompatible $key in period $index.");
@@ -155,60 +164,112 @@ final class CostPlanCompiler
                 throw new CostPlanDefinitionException('Cost plan periods must not overlap.');
             }
         }
-        $this->assertTaxProfileCoverage($plan);
-        $taxRuleSets = $this->compileTaxRuleSets($plan);
+
+        $taxContext = $this->resolveTaxContext($plan->taxContext, $presetContexts);
+        [$coverageFrom, $coverageTo] = $this->compiledCoverage($periods, $plan->billingCycles);
+        try {
+            $assignments = $this->taxProfileResolver->resolve($taxContext, $coverageFrom, $coverageTo, $plan->currency);
+        } catch (DefinitionException $e) {
+            throw new CostPlanDefinitionException($e->getMessage(), previous: $e);
+        }
         $compiled = [
             'version' => 1,
             'currency' => $plan->currency,
             'timezone' => $plan->timezone,
             'billingCycles' => $plan->billingCycles,
-            'taxRuleSets' => $taxRuleSets,
+            'taxRuleSets' => $this->compileTaxRuleSets($assignments),
             'periods' => $periods,
         ];
         $this->definitionParser->parse($compiled);
         return $compiled;
     }
 
-    private function assertTaxProfileCoverage(CostPlanDefinition $plan): void
+    /** @param array<string, TaxContext> $presetContexts */
+    private function resolveTaxContext(?TaxContext $explicit, array $presetContexts): TaxContext
     {
-        if ($plan->taxProfiles === []) {
-            throw new CostPlanDefinitionException('Version 2 plan requires a tax profile timeline.');
-        }
-
-        $first = $plan->taxProfiles[0];
-        $last = $plan->taxProfiles[array_key_last($plan->taxProfiles)];
-        if (!is_array($first) || !is_array($last)) {
-            throw new CostPlanDefinitionException('Invalid tax profile timeline.');
-        }
-
-        $coverageFrom = $this->documentDate($first['validFrom'] ?? null, 'tax profile validFrom');
-        $coverageTo = $this->documentDate($last['validTo'] ?? null, 'tax profile validTo');
-
-        foreach ($plan->periods as $index => $period) {
-            if (!$period instanceof CostPlanPeriod) {
-                throw new CostPlanDefinitionException("Period $index has an invalid definition.");
+        $resolved = $explicit;
+        foreach ($presetContexts as $presetId => $context) {
+            if ($resolved === null) {
+                $resolved = $context;
+                continue;
             }
-            if ($period->validFrom !== null && $coverageFrom !== null && $coverageFrom > $period->validFrom) {
-                throw new CostPlanDefinitionException("Tax profile timeline does not cover the start of period $index.");
-            }
-            if ($period->validTo !== null && $coverageTo !== null && $coverageTo < $period->validTo) {
-                throw new CostPlanDefinitionException("Tax profile timeline does not cover the end of period $index.");
+            if (!$resolved->equals($context)) {
+                throw new CostPlanDefinitionException(sprintf(
+                    "Conflicting tax contexts in CostPlan: %s/%s conflicts with preset '%s' (%s/%s).",
+                    $resolved->jurisdiction,
+                    $resolved->customerClass,
+                    $presetId,
+                    $context->jurisdiction,
+                    $context->customerClass,
+                ));
             }
         }
+        if ($resolved === null) {
+            throw new CostPlanDefinitionException('Unable to infer tax context for CostPlan.');
+        }
+        return $resolved;
     }
 
-    /** @return list<array<string, mixed>> */
-    private function compileTaxRuleSets(CostPlanDefinition $plan): array
+    private function presetTaxContext(TariffPreset $preset): TaxContext
+    {
+        $context = $preset->document['taxContext'] ?? null;
+        if (!is_array($context) || array_is_list($context)
+            || !is_string($context['jurisdiction'] ?? null) || trim($context['jurisdiction']) === ''
+            || !is_string($context['customerClass'] ?? null) || trim($context['customerClass']) === '') {
+            throw new CostPlanDefinitionException("Preset '{$preset->id}' has invalid or missing taxContext.");
+        }
+        foreach (array_keys($context) as $key) {
+            if (!in_array($key, ['jurisdiction', 'customerClass'], true)) {
+                throw new CostPlanDefinitionException("Preset '{$preset->id}' taxContext has unsupported property '$key'.");
+            }
+        }
+        return new TaxContext($context['jurisdiction'], $context['customerClass']);
+    }
+
+    /**
+     * @param list<array<string, mixed>> $periods
+     * @param list<array<string, mixed>> $billingCycles
+     * @return array{0: \DateTimeImmutable, 1: \DateTimeImmutable}
+     */
+    private function compiledCoverage(array $periods, array $billingCycles): array
+    {
+        $from = $periods === [] ? null : $this->documentDate($periods[0]['validFrom'] ?? null, 'compiled period validFrom');
+        $to = $periods === [] ? null : $this->documentDate($periods[array_key_last($periods)]['validTo'] ?? null, 'compiled period validTo');
+
+        if ($from === null) {
+            foreach ($billingCycles as $cycle) {
+                $candidate = $this->documentDate($cycle['validFrom'] ?? null, 'billing cycle validFrom');
+                if ($candidate !== null && ($from === null || $candidate < $from)) {
+                    $from = $candidate;
+                }
+            }
+        }
+        if ($to === null) {
+            foreach ($billingCycles as $cycle) {
+                $candidate = $this->documentDate($cycle['validTo'] ?? null, 'billing cycle validTo');
+                if ($candidate !== null && ($to === null || $candidate > $to)) {
+                    $to = $candidate;
+                }
+            }
+        }
+        if ($from === null || $to === null || $from >= $to) {
+            throw new CostPlanDefinitionException('Unable to determine tax profile coverage for CostPlan.');
+        }
+        return [$from, $to];
+    }
+
+    /**
+     * @param list<array{validFrom: ?\DateTimeImmutable, validTo: ?\DateTimeImmutable, profileId: string, profile: \Supla\EnergyCostCalculator\Tax\TaxProfile}> $assignments
+     * @return list<array<string, mixed>>
+     */
+    private function compileTaxRuleSets(array $assignments): array
     {
         $sets = [];
-        foreach ($plan->taxProfiles as $entry) {
-            $profile = $this->taxProfileCatalog->get($entry['profileId']);
-            if ($profile->currency !== $plan->currency) {
-                throw new CostPlanDefinitionException("Tax profile '{$profile->id}' has incompatible currency.");
-            }
+        foreach ($assignments as $entry) {
+            $profile = $entry['profile'];
             $sets[] = [
-                'validFrom' => $entry['validFrom'] ?? null,
-                'validTo' => $entry['validTo'] ?? null,
+                'validFrom' => $entry['validFrom']?->format(DATE_ATOM),
+                'validTo' => $entry['validTo']?->format(DATE_ATOM),
                 'rules' => array_map(static fn($rule) => array_filter([
                     'id' => $rule->id,
                     'type' => $rule->type,

@@ -60,6 +60,7 @@ final class TariffPresetCatalog
         if (($document['id'] ?? null) !== $id) {
             throw new InvalidTariffPresetException("Tariff preset '$id' document id does not match its catalogue id.");
         }
+        $this->validateTaxContext($document, $id);
 
         $metadata = $entry;
         unset($metadata['path']);
@@ -122,6 +123,25 @@ final class TariffPresetCatalog
         }
 
         return $this->entries;
+    }
+
+    /** @param array<string, mixed> $document */
+    private function validateTaxContext(array $document, string $id): void
+    {
+        $context = $document['taxContext'] ?? null;
+        if (!is_array($context) || array_is_list($context)) {
+            throw new InvalidTariffPresetException("Tariff preset '$id' must declare taxContext.");
+        }
+        foreach (array_keys($context) as $key) {
+            if (!in_array($key, ['jurisdiction', 'customerClass'], true)) {
+                throw new InvalidTariffPresetException("Tariff preset '$id' taxContext has unsupported property '$key'.");
+            }
+        }
+        foreach (['jurisdiction', 'customerClass'] as $field) {
+            if (!is_string($context[$field] ?? null) || trim($context[$field]) === '') {
+                throw new InvalidTariffPresetException("Tariff preset '$id' taxContext.$field must be a non-empty string.");
+            }
+        }
     }
 
     private function resolveResourcePath(string $path, string $id): string

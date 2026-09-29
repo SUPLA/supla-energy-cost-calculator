@@ -3,21 +3,17 @@
   "$id": "https://supla.org/schema/energy-cost/cost-plan-v2.json",
   "title": "SUPLA component cost plan",
   "type": "object",
-  "required": ["version", "currency", "timezone", "taxProfiles", "billingCycles", "periods"],
+  "required": ["version", "currency", "timezone", "billingCycles", "periods"],
   "properties": {
     "version": {"const": 2},
     "currency": {"type": "string", "minLength": 1},
     "timezone": {"type": "string", "minLength": 1},
-    "taxProfiles": {
-      "type": "array", "minItems": 1,
-      "items": {
-        "type": "object", "required": ["validFrom", "validTo", "profileId"],
-        "properties": {
-          "validFrom": {"type": ["string", "null"], "format": "date-time"},
-          "validTo": {"type": ["string", "null"], "format": "date-time"},
-          "profileId": {"type": "string", "minLength": 1}
-        }, "additionalProperties": false
-      }
+    "taxContext": {
+      "type": "object", "required": ["jurisdiction", "customerClass"],
+      "properties": {
+        "jurisdiction": {"type": "string", "minLength": 1},
+        "customerClass": {"type": "string", "minLength": 1}
+      }, "additionalProperties": false
     },
     "billingCycles": {
       "type": "array", "minItems": 1,

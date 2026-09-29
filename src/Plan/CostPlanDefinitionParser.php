@@ -6,6 +6,7 @@ namespace Supla\EnergyCostCalculator\Plan;
 
 use Supla\EnergyCostCalculator\Exception\CostPlanDefinitionException;
 use Supla\EnergyCostCalculator\Model\CostComponentKind;
+use Supla\EnergyCostCalculator\Tax\TaxContext;
 
 final class CostPlanDefinitionParser
 {
@@ -20,23 +21,23 @@ final class CostPlanDefinitionParser
         if (!is_array($data) || array_is_list($data)) {
             throw new CostPlanDefinitionException('Cost plan must be a JSON object.');
         }
-
         if (($data['version'] ?? null) !== 2) {
             throw new CostPlanDefinitionException('Cost plan version must be 2.');
         }
-
         return $this->parseComponentPlan($data);
     }
 
     /** @param array<string, mixed> $data */
     private function parseComponentPlan(array $data): CostPlanDefinition
     {
-        $this->onlyKeys($data, ['version', 'currency', 'timezone', 'billingCycles', 'taxProfiles', 'periods'], 'cost plan');
+        $this->onlyKeys($data, ['version', 'currency', 'timezone', 'taxContext', 'billingCycles', 'periods'], 'cost plan');
         $currency = $data['currency'] ?? null;
         $timezone = $data['timezone'] ?? null;
         if (!is_string($currency) || $currency === '' || !is_string($timezone) || $timezone === '') {
             throw new CostPlanDefinitionException('Version 2 plan requires currency and timezone.');
         }
+        $taxContext = array_key_exists('taxContext', $data) ? $this->parseTaxContext($data['taxContext'], 'taxContext') : null;
+
         $cycles = $data['billingCycles'] ?? null;
         if (!is_array($cycles) || !array_is_list($cycles) || $cycles === []) {
             throw new CostPlanDefinitionException('Version 2 plan requires non-empty billingCycles.');
@@ -59,22 +60,6 @@ final class CostPlanDefinitionParser
                 throw new CostPlanDefinitionException("billingCycles[$i] requires a positive length and valid unit.");
             }
         }
-        $taxProfiles = $data['taxProfiles'] ?? null;
-        if (!is_array($taxProfiles) || !array_is_list($taxProfiles) || $taxProfiles === []) {
-            throw new CostPlanDefinitionException('Version 2 plan requires non-empty taxProfiles.');
-        }
-        foreach ($taxProfiles as $i => $profile) {
-            if (!is_array($profile) || array_is_list($profile)) {
-                throw new CostPlanDefinitionException("taxProfiles[$i] must be an object.");
-            }
-            $this->onlyKeys($profile, ['validFrom', 'validTo', 'profileId'], "taxProfiles[$i]");
-            $from = $this->parseDate($profile['validFrom'] ?? null, "taxProfiles[$i].validFrom");
-            $to = $this->parseDate($profile['validTo'] ?? null, "taxProfiles[$i].validTo");
-            if (($from !== null && $to !== null && $from >= $to) || !is_string($profile['profileId'] ?? null) || $profile['profileId'] === '') {
-                throw new CostPlanDefinitionException("taxProfiles[$i] requires profileId and an ordered validity range.");
-            }
-        }
-        $this->assertContinuousTimeline($taxProfiles, 'taxProfiles');
 
         $rawPeriods = $data['periods'] ?? null;
         if (!is_array($rawPeriods) || !array_is_list($rawPeriods) || $rawPeriods === []) {
@@ -149,7 +134,21 @@ final class CostPlanDefinitionParser
         }
         $this->assertContinuousPeriods($periods);
 
-        return new CostPlanDefinition($cycles, $currency, $timezone, $taxProfiles, $periods);
+        return new CostPlanDefinition($cycles, $currency, $timezone, $taxContext, $periods);
+    }
+
+    private function parseTaxContext(mixed $value, string $path): TaxContext
+    {
+        if (!is_array($value) || array_is_list($value)) {
+            throw new CostPlanDefinitionException("$path must be an object.");
+        }
+        $this->onlyKeys($value, ['jurisdiction', 'customerClass'], $path);
+        $jurisdiction = $value['jurisdiction'] ?? null;
+        $customerClass = $value['customerClass'] ?? null;
+        if (!is_string($jurisdiction) || trim($jurisdiction) === '' || !is_string($customerClass) || trim($customerClass) === '') {
+            throw new CostPlanDefinitionException("$path requires jurisdiction and customerClass.");
+        }
+        return new TaxContext($jurisdiction, $customerClass);
     }
 
     /** @param array<string, mixed> $data @param list<string> $allowed */
@@ -168,7 +167,6 @@ final class CostPlanDefinitionParser
         if (count($periods) === 1) {
             return;
         }
-
         foreach ($periods as $i => $period) {
             if ($i > 0 && $i < count($periods) - 1 && ($period->validFrom === null || $period->validTo === null)) {
                 throw new CostPlanDefinitionException("periods[$i] must define validFrom and validTo.");
@@ -181,17 +179,6 @@ final class CostPlanDefinitionParser
             }
             if ($i > 0 && $periods[$i - 1]->validTo != $period->validFrom) {
                 throw new CostPlanDefinitionException('Cost plan periods must be contiguous and ordered.');
-            }
-        }
-    }
-
-    /** @param list<array<string, mixed>> $entries */
-    private function assertContinuousTimeline(array $entries, string $name): void
-    {
-        usort($entries, fn(array $a, array $b) => ($this->parseDate($a['validFrom'] ?? null, $name)?->getTimestamp() ?? PHP_INT_MIN) <=> ($this->parseDate($b['validFrom'] ?? null, $name)?->getTimestamp() ?? PHP_INT_MIN));
-        for ($i = 1; $i < count($entries); $i++) {
-            if (($entries[$i - 1]['validTo'] ?? null) !== ($entries[$i]['validFrom'] ?? null)) {
-                throw new CostPlanDefinitionException("$name must be contiguous without gaps or overlaps.");
             }
         }
     }

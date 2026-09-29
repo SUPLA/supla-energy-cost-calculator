@@ -46,6 +46,7 @@ final class TariffPresetCatalogTest extends TestCase
         self::assertSame($preset->id, $preset->document['id']);
         self::assertSame('G12', $preset->metadata['tariffGroup']);
         self::assertArrayHasKey('billingDefinitionTemplate', $preset->document);
+        self::assertSame(['jurisdiction' => 'PL', 'customerClass' => 'HOUSEHOLD'], $preset->document['taxContext']);
     }
 
     public function testEveryBundledPresetHasCompilableDefaults(): void
@@ -69,6 +70,7 @@ final class TariffPresetCatalogTest extends TestCase
     {
         $document = [
             'id' => 'TEST.G11.2026',
+            'taxContext' => ['jurisdiction' => 'TEST', 'customerClass' => 'HOUSEHOLD'],
             'billingDefinitionTemplate' => ['version' => 1],
         ];
         $json = json_encode($document, JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT);

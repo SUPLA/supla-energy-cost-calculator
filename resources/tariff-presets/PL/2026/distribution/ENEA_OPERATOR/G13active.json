@@ -23,6 +23,10 @@
   "validTo": "2027-01-01T00:00:00+01:00",
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
+  "taxContext": {
+    "jurisdiction": "PL",
+    "customerClass": "HOUSEHOLD"
+  },
   "inputs": [
     {
       "id": "distribution.RECOMMENDED_LIMITATION",

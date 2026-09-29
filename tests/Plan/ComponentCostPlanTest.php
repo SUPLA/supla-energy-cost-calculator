@@ -61,15 +61,14 @@ final class ComponentCostPlanTest extends TestCase
         (new CostPlanCompiler())->compileToArray($plan);
     }
 
-    public function testRejectsTaxProfileTimelineThatDoesNotCoverBoundedPlanPeriod(): void
+    public function testCompilerResolvesTaxRulesAutomaticallyFromPresetContext(): void
     {
-        $plan = $this->plan();
-        $plan['taxProfiles'][0]['validTo'] = '2026-01-20T00:00:00+01:00';
+        $compiled = (new CostPlanCompiler())->compileToArray($this->plan());
 
-        $this->expectException(CostPlanDefinitionException::class);
-        $this->expectExceptionMessage('Tax profile timeline does not cover the end of period 1');
-
-        (new CostPlanCompiler())->compileToArray($plan);
+        self::assertCount(1, $compiled['taxRuleSets']);
+        self::assertSame('2026-01-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validFrom']);
+        self::assertSame('2026-02-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validTo']);
+        self::assertSame(['EXCISE', 'VAT'], array_column($compiled['taxRuleSets'][0]['rules'], 'id'));
     }
 
     public function testCanAddFixedDistributionAsSeparateKind(): void
@@ -92,11 +91,7 @@ final class ComponentCostPlanTest extends TestCase
 
         self::assertCount(2, $plan->periods);
         self::assertSame(CostComponentKind::ENERGY_PURCHASE, $plan->periods[0]->components[0]->kind);
-        self::assertSame([[
-            'validFrom' => '2026-01-01T00:00:00+01:00',
-            'validTo' => '2027-01-01T00:00:00+01:00',
-            'profileId' => 'PL.HOUSEHOLD.2026',
-        ]], $plan->taxProfiles);
+        self::assertNull($plan->taxContext);
     }
 
     public function testCompilesAndCalculatesAPlanWithOpenPeriodBoundaries(): void
@@ -105,12 +100,10 @@ final class ComponentCostPlanTest extends TestCase
             'version' => 2,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
-            'taxProfiles' => [[
-                'validFrom' => '2026-01-01T00:00:00+01:00',
-                'validTo' => '2027-01-01T00:00:00+01:00',
-                'profileId' => 'PL.HOUSEHOLD.2026',
-            ]],
+            'taxContext' => ['jurisdiction' => 'PL', 'customerClass' => 'HOUSEHOLD'],
             'billingCycles' => [[
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => '2026-02-01T00:00:00+01:00',
                 'anchor' => '2026-01-01',
                 'length' => 1,
                 'unit' => 'MONTH',
@@ -174,7 +167,7 @@ final class ComponentCostPlanTest extends TestCase
             $parsed->billingCycles,
             $parsed->currency,
             $parsed->timezone,
-            $parsed->taxProfiles,
+            $parsed->taxContext,
             $periods,
         );
 
@@ -281,11 +274,6 @@ final class ComponentCostPlanTest extends TestCase
             'version' => 2,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
-            'taxProfiles' => [[
-                'validFrom' => '2026-01-01T00:00:00+01:00',
-                'validTo' => '2027-01-01T00:00:00+01:00',
-                'profileId' => 'PL.HOUSEHOLD.2026',
-            ]],
             'billingCycles' => [[
                 'validFrom' => '2026-01-01T00:00:00+01:00',
                 'validTo' => '2026-02-01T00:00:00+01:00',

@@ -13,6 +13,7 @@
     "validTo",
     "currency",
     "timezone",
+    "taxContext",
     "inputs",
     "billingDefinitionTemplate"
   ],
@@ -105,6 +106,24 @@
     },
     "timezone": {
       "const": "Europe/Warsaw"
+    },
+    "taxContext": {
+      "type": "object",
+      "required": [
+        "jurisdiction",
+        "customerClass"
+      ],
+      "properties": {
+        "jurisdiction": {
+          "type": "string",
+          "minLength": 1
+        },
+        "customerClass": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
     },
     "energyPurchase": {
       "$ref": "#/$defs/energyPurchase"

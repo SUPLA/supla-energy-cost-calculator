@@ -31,6 +31,8 @@ The Polish catalogue separates the components that were previously bundled in on
 
 The default G11/G12/G13 starters compose the incumbent 2026 seller tariff from the original bundled data with the matching OSD distribution tariff. `G14dynamic` uses TAURON's G11 supply component plus the PDGSZ-driven G14dynamic distribution component. ENEA `G13active` uses ENEA G11 supply because the previously bundled energy price was the same constant price in every G13active zone.
 
+Every bundled Polish preset also declares `taxContext: {jurisdiction: PL, customerClass: HOUSEHOLD}`. This is compatibility/context metadata, not tax law: VAT/excise rates live in immutable tax-profile resources and are selected by the library for the effective date range. `taxTreatment.included` remains separate and tells the compiler which applicable taxes are already present in the preset's source price.
+
 Catalogue metadata declares concrete `components` (`kind`, `componentId`, `label`) so a UI can present one compatible dropdown per component without a hard-coded `kind -> componentId` map. Multi-component offers can therefore tell the host which sibling components should be instantiated together by default. `presetType` distinguishes `TARIFF`, `OFFER` and `GENERIC` entries. `provider` is generic seller/operator metadata; `operator` and `tariffGroup` remain available where useful for the simple starter path.
 
 ## Generic energy presets

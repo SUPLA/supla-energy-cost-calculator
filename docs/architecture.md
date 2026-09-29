@@ -25,7 +25,9 @@ The package never imports Doctrine, Symfony or SUPLA entities.
 
 ## Taxes
 
-Tax law is independent of tariff and billing-cycle history. A `CostPlan` references a continuous `taxProfiles[]` timeline, and `CostPlanCompiler` resolves those immutable resources into `BillingDefinition.taxRuleSets[]`. The calculator only consumes the executable rules.
+Tax law is independent of tariff and billing-cycle history. Tariff/offer presets declare a `TaxContext` (`jurisdiction` + `customerClass`) and source `taxTreatment`, but they do not contain tax rates. `TaxProfileAssignmentCatalog` stores the dated mapping from a context to immutable `TaxProfile` IDs. After preset/plan periods have been compiled, `CostPlanCompiler` resolves one consistent context and the effective date coverage, then `TaxProfileResolver` produces the profile assignments used to build `BillingDefinition.taxRuleSets[]`. The calculator only consumes those executable rules.
+
+`CostPlan.taxContext` is optional: it must agree with every selected preset when present, and it is required when a plan contains only inline components. The compiler never infers jurisdiction from currency, timezone, or preset-ID prefixes.
 
 Each component carries a `kind` and explicit `taxTreatment.included`. For each charge, the engine removes included taxes in reverse declaration order, yielding canonical `net`; it then applies all applicable rules in order, yielding a canonical tax breakdown and `gross`. `PER_QUANTITY` rules use the charge quantity, while `PERCENTAGE` with `CURRENT_SUBTOTAL` uses the base plus all preceding taxes. A tax boundary must not cut a usage charge or periodic effective period.
 

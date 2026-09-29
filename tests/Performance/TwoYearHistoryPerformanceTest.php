@@ -94,11 +94,6 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'version' => 2,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
-            'taxProfiles' => [[
-                'validFrom' => '2026-01-01T00:00:00+01:00',
-                'validTo' => '2027-01-01T00:00:00+01:00',
-                'profileId' => 'PL.HOUSEHOLD.2026',
-            ]],
             'billingCycles' => [[
                 'validFrom' => '2026-01-01T00:00:00+01:00',
                 'validTo' => '2027-01-01T00:00:00+01:00',

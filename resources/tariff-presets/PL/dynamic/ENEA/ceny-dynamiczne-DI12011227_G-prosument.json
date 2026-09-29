@@ -23,6 +23,10 @@
   "validTo": "2026-10-01T00:00:00+02:00",
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
+  "taxContext": {
+    "jurisdiction": "PL",
+    "customerClass": "HOUSEHOLD"
+  },
   "inputs": [
     {
       "id": "energy.add",

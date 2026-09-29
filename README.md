@@ -103,7 +103,7 @@ A component is defined by three independent concerns:
 2. **selector** — which zone/rule applies at the timestamp,
 3. **rate** — the actual rate, possibly from an external time series.
 
-Tariff presets define source pricing and the explicit taxes already included in that source price. A CostPlan independently selects a continuous `taxProfiles[]` history. `CostPlanCompiler` combines both axes into executable `taxRuleSets[]`; the calculator normalizes every source amount as canonical `net`, individual `taxes`, and `gross`. `pricing.rate` remains the source rate and can include the taxes listed in `pricing.includedTaxes`; `amounts.net` removes every tax modeled by the profile. There is no global net/gross or price-basis switch.
+Tariff presets define a `taxContext` (for example `PL` + `HOUSEHOLD`), source pricing, and the explicit taxes already included in that source price. `CostPlanCompiler` resolves the applicable immutable `TaxProfile` history for the compiled date range and emits executable `taxRuleSets[]`; callers do not select profile IDs or tax rates. The calculator normalizes every source amount as canonical `net`, individual `taxes`, and `gross`. `pricing.rate` remains the source rate and can include the taxes listed in `pricing.includedTaxes`; `amounts.net` removes every tax modeled by the resolved profile. There is no global net/gross or price-basis switch.
 
 Temporal netting is declared directly on the quantity:
 
@@ -198,7 +198,7 @@ See `examples/definitions/` and `schema/billing-definition.schema.json`.
 
 ## Tariff presets
 
-`resources/tariff-presets/` contains component presets. Polish OSD tariffs expose distribution components, seller tariffs/offers expose supply components, and generic presets provide user-configurable building blocks. Catalogue metadata includes concrete `components` (`kind`, `componentId`, `label`) so a host can render one compatible selector per cost component without hard-coding component IDs.
+`resources/tariff-presets/` contains component presets. Polish OSD tariffs expose distribution components, seller tariffs/offers expose supply components, and generic presets provide user-configurable building blocks. Every bundled preset declares its tax jurisdiction/customer class in `taxContext`; tax rates themselves remain package-owned `TaxProfile` resources. Catalogue metadata includes concrete `components` (`kind`, `componentId`, `label`) so a host can render one compatible selector per cost component without hard-coding component IDs.
 
 `CostPlanStarterCatalog` provides the simple setup path: starters such as `TAURON Dystrybucja - G11` return only the matching default component recipe. They do not define billing cycles or period dates. The host inserts `CostPlanStarter::components` into a user-owned CostPlan period; for a first and only period, omitting `validFrom`/`validTo` makes it apply to the whole meter history. Persisted plans keep component preset IDs and explicit user overrides, not the starter ID.
 
@@ -232,11 +232,6 @@ $plan = [
     'version' => 2,
     'currency' => 'PLN',
     'timezone' => 'Europe/Warsaw',
-    'taxProfiles' => [[
-        'validFrom' => '2026-01-01T00:00:00+01:00',
-        'validTo' => '2027-01-01T00:00:00+01:00',
-        'profileId' => 'PL.HOUSEHOLD.2026',
-    ]],
     'billingCycles' => [[
         'validFrom' => '2026-01-01T00:00:00+01:00',
         'validTo' => '2027-01-01T00:00:00+01:00',
@@ -257,7 +252,7 @@ $plan = [
 $definition = (new CostPlanCompiler())->compile($plan);
 ```
 
-The cost-plan JSON stores stable preset IDs and user values/overrides, not a copied executable definition. Compiling later uses the current document for the same preset ID, so package-owned corrections automatically apply to existing plans. Omit preset-default values from `values` unless the user explicitly overrides them; this preserves inheritance of corrected defaults. `kind` is a compatibility role and `componentId` is the per-period identity, so repeated kinds require distinct IDs; inline periodic components may omit it to retain their legacy kind-derived ID. See `schema/cost-plan-v2.schema.json` and `docs/cost-plans.md`.
+The cost-plan JSON stores stable preset IDs and user values/overrides, not a copied executable definition or tax-profile IDs. Compiling later uses the current document for the same preset ID and resolves tax law from its `taxContext` plus the effective date range. A plan made only from inline components must provide an explicit top-level `taxContext`; a host may set it automatically. Omit preset-default values from `values` unless the user explicitly overrides them; this preserves inheritance of corrected defaults. `kind` is a compatibility role and `componentId` is the per-period identity, so repeated kinds require distinct IDs; inline periodic components may omit it to retain their legacy kind-derived ID. See `schema/cost-plan-v2.schema.json` and `docs/cost-plans.md`.
 
 Bundled presets are complete defaults: `TariffPresetCompiler::compileToArray()` resolves template inputs, while `CostPlanCompiler` owns executable BillingDefinition compilation. Every declared input targets a default template value and callers may override any of them when creating a plan. Billing-cycle settings belong to the cost plan.
 
