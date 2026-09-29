@@ -221,7 +221,9 @@ Cost plans use the component-based version 2 format described in `docs/cost-plan
 
 Plan periods are contiguous and ordered. The first may have an open `validFrom`, the last may have an open `validTo`, and a single period may leave both boundaries open.
 
-Preset validity dates bound the bundled tariff/offer edition. A cost-plan component must be continuously covered by its selected preset.
+Top-level preset `validFrom` / `validTo` describe catalogue availability of that tariff or offer edition and do not clip a user's CostPlan. Executable applicability belongs to `billingDefinitionTemplate.periods[]`: annual tariff editions can remain bounded there, while contract offers and generic presets may use open template periods. The CostPlan period records the user's actual effective range.
+
+Tax-profile assignments are deliberately finite. If the CostPlan range reaches a year for which the package does not yet contain a verified tax profile, compilation fails instead of projecting the latest known tax rules into the past or future.
 
 Use `CostPlanCompiler` for persisted user plans:
 

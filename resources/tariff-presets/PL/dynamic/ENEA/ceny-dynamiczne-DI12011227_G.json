@@ -62,8 +62,8 @@
     },
     "periods": [
       {
-        "validFrom": "2026-07-01T00:00:00+02:00",
-        "validTo": "2026-10-01T00:00:00+02:00",
+        "validFrom": null,
+        "validTo": null,
         "components": [
           {
             "id": "energy-purchase",

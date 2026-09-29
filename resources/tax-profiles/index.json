@@ -1,5 +1,6 @@
 {
   "profiles": [
+    {"id": "PL.HOUSEHOLD.2025", "path": "PL/household-2025.json"},
     {"id": "PL.HOUSEHOLD.2026", "path": "PL/household-2026.json"}
   ]
 }

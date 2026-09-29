@@ -17,7 +17,7 @@ All bundled distribution defaults are **net PLN/kWh** and can be overwritten by 
 1. Use `TariffPresetCatalog::presets()` and let the user choose OSD + tariff group.
 2. Load the selected preset with `TariffPresetCatalog::get()`.
 3. Render `inputs[]`. The current value at the first target is the initial form value and may be overridden by the user.
-4. Persist a cost-plan entry containing the stable `presetId`, optional user-specific effective-range constraints, and only user-specific values/explicit overrides. Omitted range boundaries inherit the preset validity.
+4. Persist a cost-plan entry containing the stable `presetId`, the user's actual effective range when known, and only user-specific values/explicit overrides. Top-level preset validity is catalogue metadata; executable bounds come from the preset template, while open contract/generic templates inherit the CostPlan range.
 5. Use `CostPlanCompiler` to turn the persisted cost plan into the executable `BillingDefinition`.
 
 Do not persist a copied preset template as the authoritative user plan. Compatible corrections to an existing preset ID are intentionally picked up the next time the plan is compiled. A real tariff change is published under a new preset ID and should become a new cost-plan entry.

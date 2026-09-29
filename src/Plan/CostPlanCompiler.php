@@ -124,17 +124,11 @@ final class CostPlanCompiler
                     foreach ($fragment['periods'] as $source) {
                         $from = $this->maxDate(
                             $this->documentDate($segment['validFrom'], 'plan period validFrom'),
-                            $this->maxDate(
-                                $this->documentDate($preset->document['validFrom'] ?? null, 'preset validFrom'),
-                                $this->documentDate($source['validFrom'] ?? null, 'preset period validFrom'),
-                            ),
+                            $this->documentDate($source['validFrom'] ?? null, 'preset period validFrom'),
                         );
                         $to = $this->minDate(
                             $this->documentDate($segment['validTo'], 'plan period validTo'),
-                            $this->minDate(
-                                $this->documentDate($preset->document['validTo'] ?? null, 'preset validTo'),
-                                $this->documentDate($source['validTo'] ?? null, 'preset period validTo'),
-                            ),
+                            $this->documentDate($source['validTo'] ?? null, 'preset period validTo'),
                         );
                         if ($from !== null && $to !== null && $from >= $to) {
                             continue;

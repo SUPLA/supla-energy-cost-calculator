@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "id": "PL.HOUSEHOLD.2025",
+  "label": "Polska - gospodarstwo domowe - 2025",
+  "currency": "PLN",
+  "source": {
+    "title": "Ustawa o podatku akcyzowym oraz ustawa o VAT - stan na 2025",
+    "url": "https://isap.sejm.gov.pl/",
+    "retrievedAt": "2026-09-29"
+  },
+  "rules": [
+    {"id": "EXCISE", "type": "PER_QUANTITY", "appliesToKinds": ["ENERGY_PURCHASE"], "rate": "0.005", "unit": "PLN/kWh"},
+    {"id": "VAT", "type": "PERCENTAGE", "appliesToKinds": ["ENERGY_PURCHASE", "DISTRIBUTION_VARIABLE", "DISTRIBUTION_FIXED", "SUPPLIER_FIXED"], "rate": "0.23", "base": "CURRENT_SUBTOTAL"}
+  ]
+}
