@@ -31,6 +31,8 @@ Each component carries a `kind` and explicit `taxTreatment.included`. For each c
 
 `charges[]` exposes `amounts.net`, `amounts.taxes`, `amounts.taxTotal`, and `amounts.gross`. Result-level `costs` uses the same names and never exposes an unqualified financial total.
 
+Materializing `charges[]` is controlled by `CalculationOptions.includeCharges` and is disabled by default. Aggregate costs are always calculated; `includeIntervals` independently controls the raw meter diagnostic view.
+
 Persisted cost-plan periods compile into the same billing-definition periods. Their boundaries may be open at either outer edge, so calculation can resolve logs before the first dated tariff change and after the last one.
 
 Within a cost-plan period, `CostComponentKind` describes compatibility while `componentId` identifies the resulting charge component. A kind may occur more than once when the IDs differ. Inline periodic components may omit `componentId` only for the legacy kind-derived ID.

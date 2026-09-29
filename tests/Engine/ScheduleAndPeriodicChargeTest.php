@@ -165,6 +165,7 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
                 new \DateTimeImmutable('2026-02-15T00:00:00+01:00'),
             ),
             $definition,
+            new CalculationOptions(includeCharges: true),
         );
         self::assertSame('0.5', $full->costs['gross']['usageBased']['total']);
         self::assertSame('10', $full->costs['gross']['periodic']['total']);

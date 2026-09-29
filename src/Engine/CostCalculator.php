@@ -224,7 +224,7 @@ final class CostCalculator
                     $this->addAmount($summary['usageBasedNetByZone'], (string)$chargePart['selection'], $taxCalculation->net);
                 }
 
-                {
+                if ($options->includeCharges) {
                     $quantity = [
                         'type' => $window['component']->quantity->type->value,
                         'strategy' => $window['component']->quantity->strategy?->value,
@@ -459,17 +459,19 @@ final class CostCalculator
                         'amounts' => $taxCalculation->jsonSerialize(),
                     ];
                 }
-                $charges[] = [
-                    'componentId' => $component->id,
+                if ($options->includeCharges) {
+                    $charges[] = [
+                        'componentId' => $component->id,
                         'kind' => $component->kind->value,
-                    'category' => $component->category,
-                    'from' => $delta->from->format(DATE_ATOM),
-                    'to' => $delta->to->format(DATE_ATOM),
-                    'quantity' => ['type' => $component->quantity->type->value, 'value' => $quantity],
-                    'selection' => $selection,
-                    'pricing' => ['rate' => $rate, 'unit' => $component->rate->config['unit'] ?? null, 'includedTaxes' => $component->taxTreatment->included],
-                    'amounts' => $taxCalculation->jsonSerialize(),
-                ];
+                        'category' => $component->category,
+                        'from' => $delta->from->format(DATE_ATOM),
+                        'to' => $delta->to->format(DATE_ATOM),
+                        'quantity' => ['type' => $component->quantity->type->value, 'value' => $quantity],
+                        'selection' => $selection,
+                        'pricing' => ['rate' => $rate, 'unit' => $component->rate->config['unit'] ?? null, 'includedTaxes' => $component->taxTreatment->included],
+                        'amounts' => $taxCalculation->jsonSerialize(),
+                    ];
+                }
             }
 
             if ($options->includeIntervals) {

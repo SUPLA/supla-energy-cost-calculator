@@ -33,12 +33,12 @@ $result = $calculator->calculate(
     meterId: (string)$channelId,
     range: new TimeRange($from, $to),
     definition: $jsonDefinition,
-    options: new CalculationOptions(includeIntervals: false),
+    options: new CalculationOptions(includeIntervals: false, includeCharges: false),
 );
 
-$usageBasedTotal = $result->usageBasedTotal;
-$usageBasedComponents = $result->usageBasedByComponent;
-$fullTotal = $result->total; // null when a partial billing period has periodic charges
+$usageBasedGross = $result->costs['gross']['usageBased']['total'];
+$usageBasedComponents = $result->costs['gross']['usageBased']['byComponent'];
+$fullGross = $result->costs['gross']['total']; // null when a partial billing period has periodic charges
 ```
 
 
@@ -91,7 +91,7 @@ Usage-based costs are calculated from their natural charge windows. Periodic cha
 
 When the requested range covers complete billing cycles, periodic charges are also calculated and `costs.gross.total` contains the full amount. When the range covers only part of a billing cycle and periodic charges exist, `costs.net.periodic.total`, `costs.gross.periodic.total`, `costs.taxes.total`, and both full totals are `null`; `periodicCharges[]` still contains the fee definitions so the UI can display e.g. `+ 12 PLN/month`.
 
-`charges[]` is always returned and is the authoritative cost-fact series. Each charge has its natural `[from,to)` window, resolved quantity, selector result, `pricing` and tax-qualified `amounts`. `includeIntervals` adds only the raw meter diagnostic `intervals[]`; a 60-minute netted component is intentionally absent from the four underlying 15-minute interval costs. The top-level `usage` is always the sum of the returned meter deltas.
+`charges[]` is the authoritative usage-based cost-fact series when requested with `CalculationOptions(includeCharges: true)`. Each charge has its natural `[from,to)` window, resolved quantity, selector result, `pricing` and tax-qualified `amounts`. Charge materialization is disabled by default so aggregate-only calculations do not retain tens of thousands of detailed facts. `includeIntervals` independently adds the raw meter diagnostic `intervals[]`; a 60-minute netted component is intentionally absent from the four underlying 15-minute interval costs. The top-level `usage` is always the sum of the returned meter deltas.
 
 ## JSON model
 
@@ -298,6 +298,7 @@ The default `NativeDecimalMath` keeps the package dependency-free and is appropr
 ```bash
 composer install
 composer test
+vendor/bin/phpunit --group performance
 ```
 
 The starter tests cover:

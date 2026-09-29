@@ -90,7 +90,7 @@ final class QuantityAllocationTest extends TestCase
                 'sourceUnit' => 'PLN/MWh',
                 'multiplier' => '0.001',
             ]),
-            new CalculationOptions(includeIntervals: true),
+            new CalculationOptions(includeIntervals: true, includeCharges: true),
         );
 
         self::assertSame('0.44', $result->costs['gross']['usageBased']['total']);

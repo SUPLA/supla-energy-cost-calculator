@@ -31,6 +31,8 @@ BillingDefinition
 
 Never reintroduce a global "static tariff vs dynamic tariff" distinction. Different components can simultaneously use different mechanisms, e.g. Fixing1 for energy and PDGSZ for distribution.
 
+Materialize `charges[]` only when `CalculationOptions.includeCharges` is enabled; it is off by default. `includeIntervals` is independent and controls only raw meter-interval diagnostics.
+
 ## Taxes
 
 Taxes are data-driven. A component declares `kind` and an explicit `taxTreatment.included` ordered prefix. `TaxProfile` resources are atomic, versioned rule sets; `CostPlan.taxProfiles[]` is the independent validity timeline compiled into executable `BillingDefinition.taxRuleSets[]`. The engine first reverses included taxes to canonical `net`, then applies all applicable rules in declaration order to produce `gross`. Do not introduce a global net/gross or price-basis flag.

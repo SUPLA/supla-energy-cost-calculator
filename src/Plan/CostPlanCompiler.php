@@ -155,16 +155,46 @@ final class CostPlanCompiler
                 throw new CostPlanDefinitionException('Cost plan periods must not overlap.');
             }
         }
+        $this->assertTaxProfileCoverage($plan);
+        $taxRuleSets = $this->compileTaxRuleSets($plan);
         $compiled = [
             'version' => 1,
             'currency' => $plan->currency,
             'timezone' => $plan->timezone,
             'billingCycles' => $plan->billingCycles,
-            'taxRuleSets' => $this->compileTaxRuleSets($plan),
+            'taxRuleSets' => $taxRuleSets,
             'periods' => $periods,
         ];
         $this->definitionParser->parse($compiled);
         return $compiled;
+    }
+
+    private function assertTaxProfileCoverage(CostPlanDefinition $plan): void
+    {
+        if ($plan->taxProfiles === []) {
+            throw new CostPlanDefinitionException('Version 2 plan requires a tax profile timeline.');
+        }
+
+        $first = $plan->taxProfiles[0];
+        $last = $plan->taxProfiles[array_key_last($plan->taxProfiles)];
+        if (!is_array($first) || !is_array($last)) {
+            throw new CostPlanDefinitionException('Invalid tax profile timeline.');
+        }
+
+        $coverageFrom = $this->documentDate($first['validFrom'] ?? null, 'tax profile validFrom');
+        $coverageTo = $this->documentDate($last['validTo'] ?? null, 'tax profile validTo');
+
+        foreach ($plan->periods as $index => $period) {
+            if (!$period instanceof CostPlanPeriod) {
+                throw new CostPlanDefinitionException("Period $index has an invalid definition.");
+            }
+            if ($period->validFrom !== null && $coverageFrom !== null && $coverageFrom > $period->validFrom) {
+                throw new CostPlanDefinitionException("Tax profile timeline does not cover the start of period $index.");
+            }
+            if ($period->validTo !== null && $coverageTo !== null && $coverageTo < $period->validTo) {
+                throw new CostPlanDefinitionException("Tax profile timeline does not cover the end of period $index.");
+            }
+        }
     }
 
     /** @return list<array<string, mixed>> */

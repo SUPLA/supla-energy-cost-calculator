@@ -61,6 +61,17 @@ final class ComponentCostPlanTest extends TestCase
         (new CostPlanCompiler())->compileToArray($plan);
     }
 
+    public function testRejectsTaxProfileTimelineThatDoesNotCoverBoundedPlanPeriod(): void
+    {
+        $plan = $this->plan();
+        $plan['taxProfiles'][0]['validTo'] = '2026-01-20T00:00:00+01:00';
+
+        $this->expectException(CostPlanDefinitionException::class);
+        $this->expectExceptionMessage('Tax profile timeline does not cover the end of period 1');
+
+        (new CostPlanCompiler())->compileToArray($plan);
+    }
+
     public function testCanAddFixedDistributionAsSeparateKind(): void
     {
         $plan = $this->plan();

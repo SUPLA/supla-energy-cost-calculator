@@ -65,7 +65,7 @@ final class TemporalNettingTest extends TestCase
             'meter',
             new TimeRange($deltas[0]->from, $deltas[array_key_last($deltas)]->to),
             $definition,
-            new CalculationOptions(includeIntervals: true),
+            new CalculationOptions(includeIntervals: true, includeCharges: true),
         );
 
         self::assertCount(2, $result->charges);

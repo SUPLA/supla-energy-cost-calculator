@@ -55,8 +55,8 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                 'unit' => 'MONTH',
             ],
             'periods' => [[
-                'validFrom' => '2026-01-01T00:00:00+01:00',
-                'validTo' => '2027-01-01T00:00:00+01:00',
+                'validFrom' => null,
+                'validTo' => null,
                 'components' => [[
                     'id' => 'energy',
                     'kind' => 'ENERGY_PURCHASE',
@@ -107,8 +107,8 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
             'taxProfiles' => [[
-                'validFrom' => null,
-                'validTo' => null,
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => '2027-01-01T00:00:00+01:00',
                 'profileId' => 'PL.HOUSEHOLD.2026',
             ]],
             'billingCycles' => [[
@@ -410,7 +410,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'meter',
             $range,
             $definition,
-            new CalculationOptions(includeIntervals: true),
+            new CalculationOptions(includeIntervals: true, includeCharges: true),
         );
         $elapsedSeconds = (hrtime(true) - $startedAt) / 1_000_000_000;
 

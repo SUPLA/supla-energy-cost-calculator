@@ -20,23 +20,7 @@
     },
     "rules": {
       "type": "array", "minItems": 1,
-      "items": {
-        "type": "object",
-        "required": ["id", "type", "appliesToKinds", "rate"],
-        "properties": {
-          "id": {"type": "string", "minLength": 1},
-          "type": {"enum": ["PER_QUANTITY", "PERCENTAGE"]},
-          "appliesToKinds": {"type": "array", "minItems": 1, "items": {"enum": ["ENERGY_PURCHASE", "DISTRIBUTION_VARIABLE", "DISTRIBUTION_FIXED", "SUPPLIER_FIXED"]}},
-          "rate": {"type": "string", "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$"},
-          "unit": {"type": "string"},
-          "base": {"const": "CURRENT_SUBTOTAL"}
-        },
-        "allOf": [
-          {"if": {"properties": {"type": {"const": "PER_QUANTITY"}}}, "then": {"required": ["unit"], "properties": {"base": false}}},
-          {"if": {"properties": {"type": {"const": "PERCENTAGE"}}}, "then": {"required": ["base"], "properties": {"unit": false}}}
-        ],
-        "additionalProperties": false
-      }
+      "items": {"$ref": "#/$defs/rule"}
     }
   },
   "additionalProperties": false,
@@ -44,7 +28,28 @@
     "rule": {
       "type": "object",
       "required": ["id", "type", "appliesToKinds", "rate"],
-      "properties": {"id": {"type": "string"}, "type": {"enum": ["PER_QUANTITY", "PERCENTAGE"]}, "appliesToKinds": {"type": "array", "items": {"enum": ["ENERGY_PURCHASE", "DISTRIBUTION_VARIABLE", "DISTRIBUTION_FIXED", "SUPPLIER_FIXED"]}}, "rate": {"type": "string"}, "unit": {"type": "string"}, "base": {"const": "CURRENT_SUBTOTAL"}},
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "type": {"enum": ["PER_QUANTITY", "PERCENTAGE"]},
+        "appliesToKinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"enum": ["ENERGY_PURCHASE", "DISTRIBUTION_VARIABLE", "DISTRIBUTION_FIXED", "SUPPLIER_FIXED"]}
+        },
+        "rate": {"type": "string", "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$"},
+        "unit": {"type": "string", "minLength": 1},
+        "base": {"const": "CURRENT_SUBTOTAL"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"type": {"const": "PER_QUANTITY"}}},
+          "then": {"required": ["unit"], "properties": {"base": false}}
+        },
+        {
+          "if": {"properties": {"type": {"const": "PERCENTAGE"}}},
+          "then": {"required": ["base"], "properties": {"unit": false}}
+        }
+      ],
       "additionalProperties": false
     }
   }

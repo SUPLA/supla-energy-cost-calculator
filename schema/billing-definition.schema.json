@@ -6,7 +6,8 @@
   "required": [
     "version",
     "currency",
-    "periods"
+    "periods",
+    "taxRuleSets"
   ],
   "properties": {
     "version": {
@@ -40,6 +41,7 @@
     },
     "taxRuleSets": {
       "type": "array",
+      "minItems": 1,
       "items": {"$ref": "#/$defs/taxRuleSet"}
     }
   },

@@ -50,6 +50,7 @@ final class CostCalculatorTest extends TestCase
         $includeIntervals = isset($expected['selections'])
             || isset($expected['result']['intervals'])
             || isset($expected['result']['charges']);
+        $includeCharges = isset($expected['result']['charges']);
         $calculator = new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource($references));
 
         if (isset($expected['exception'])) {
@@ -61,7 +62,7 @@ final class CostCalculatorTest extends TestCase
                 'meter',
                 $range,
                 $definition,
-                new CalculationOptions(includeIntervals: $includeIntervals),
+                new CalculationOptions(includeIntervals: $includeIntervals, includeCharges: $includeCharges),
             );
             return;
         }
@@ -70,7 +71,7 @@ final class CostCalculatorTest extends TestCase
             'meter',
             $range,
             $definition,
-            new CalculationOptions(includeIntervals: $includeIntervals),
+            new CalculationOptions(includeIntervals: $includeIntervals, includeCharges: $includeCharges),
         );
 
         if (isset($expected['result'])) {
@@ -202,6 +203,7 @@ final class CostCalculatorTest extends TestCase
             'meter',
             new TimeRange(new \DateTimeImmutable('2026-01-01T10:00:00Z'), new \DateTimeImmutable('2026-01-01T10:15:00Z')),
             $definition,
+            new CalculationOptions(includeCharges: true),
         );
 
         self::assertSame('1', $this->grossTotal($result));
@@ -213,6 +215,41 @@ final class CostCalculatorTest extends TestCase
         self::assertSame('1', $result->charges[0]['amounts']['gross']);
         self::assertArrayNotHasKey('rate', $result->charges[0]);
         self::assertArrayNotHasKey('cost', $result->charges[0]);
+    }
+
+    public function testUsageChargeFactsAreOptIn(): void
+    {
+        $deltas = [$this->delta('2026-01-01T10:00:00Z', '2026-01-01T10:15:00Z', '2')];
+        $definition = $this->singleComponentDefinition([
+            'id' => 'energy',
+            'kind' => 'ENERGY_PURCHASE',
+            'category' => 'ENERGY',
+            'taxTreatment' => ['included' => []],
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'rate' => ['type' => 'CONSTANT', 'value' => '0.5', 'unit' => 'PLN/kWh'],
+        ]);
+
+        $withoutCharges = (new CostCalculator(
+            new InMemoryEnergyDeltaSource($deltas),
+            new InMemoryReferenceDataSource(),
+        ))->calculate(
+            'meter',
+            new TimeRange($deltas[0]->from, $deltas[0]->to),
+            $definition,
+        );
+        self::assertSame('1', $this->grossTotal($withoutCharges));
+        self::assertSame([], $withoutCharges->charges);
+
+        $withCharges = (new CostCalculator(
+            new InMemoryEnergyDeltaSource($deltas),
+            new InMemoryReferenceDataSource(),
+        ))->calculate(
+            'meter',
+            new TimeRange($deltas[0]->from, $deltas[0]->to),
+            $definition,
+            new CalculationOptions(includeCharges: true),
+        );
+        self::assertCount(1, $withCharges->charges);
     }
 
     public function testReferenceRateRejectsMismatchedSourceUnit(): void
