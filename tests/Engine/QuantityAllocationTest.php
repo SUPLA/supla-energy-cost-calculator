@@ -93,13 +93,13 @@ final class QuantityAllocationTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('0.44', $result->usageBasedTotal);
+        self::assertSame('0.44', $result->costs['taxInclusive']['usageBased']['total']);
         self::assertSame('1.2', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
         self::assertSame('0.4', $result->usage[QuantityType::ACTIVE_ENERGY_EXPORT->value]);
         self::assertCount(4, $result->charges);
         self::assertSame(['0.2', '0.2', '0.2', '0.2'], array_column(array_column($result->charges, 'quantity'), 'value'));
-        self::assertSame(['0.4', '0.5', '0.6', '0.7'], array_column($result->charges, 'rate'));
-        self::assertSame(['0.08', '0.1', '0.12', '0.14'], array_column($result->charges, 'cost'));
+        self::assertSame(['0.4', '0.5', '0.6', '0.7'], array_column(array_column($result->charges, 'pricing'), 'rate'));
+        self::assertSame(['0.08', '0.1', '0.12', '0.14'], array_column(array_column($result->charges, 'amounts'), 'taxInclusive'));
 
         foreach ($result->charges as $index => $charge) {
             self::assertSame('0.8', $charge['quantity']['windowValue']);
@@ -114,7 +114,7 @@ final class QuantityAllocationTest extends TestCase
         }
 
         self::assertCount(1, $result->intervals);
-        self::assertSame('0', $result->intervals[0]['costs']['total']);
+        self::assertSame('0', $result->intervals[0]['costs']['taxInclusive']['total']);
         self::assertSame([], $result->intervals[0]['components']);
     }
 
@@ -128,7 +128,7 @@ final class QuantityAllocationTest extends TestCase
                 'validFrom' => null,
                 'validTo' => null,
                 'rules' => [[
-                    'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['UNUSED'],
+                    'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['SUPPLIER_FIXED'],
                     'rate' => '0.23', 'base' => 'CURRENT_SUBTOTAL',
                 ]],
             ]],

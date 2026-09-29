@@ -58,15 +58,15 @@
     },
     "periods": [
       {
-        "validFrom": null,
-        "validTo": null,
+        "validFrom": "2025-11-01T00:00:00+01:00",
+        "validTo": "2026-11-01T00:00:00+01:00",
         "components": [
           {
             "id": "energy-purchase",
             "kind": "ENERGY_PURCHASE",
             "category": "ENERGY",
             "taxTreatment": {
-              "included": []
+              "included": ["EXCISE"]
             },
             "quantity": {
               "type": "ACTIVE_ENERGY_IMPORT"
@@ -106,7 +106,6 @@
     ]
   },
   "warnings": [
-    "Podstawa akcyzy dla ceny energii wymaga weryfikacji; preset nie zakłada jej w taxTreatment.included.",
     "Cena energii: RDN Fixing I w naturalnej rozdzielczości publikacji TGE, przeliczony z PLN/MWh na PLN/kWh + 0,0878 PLN/kWh netto.",
     "Preset konsumencki nie narzuca 60-minutowego nettingu ani alokacji; rzeczywisty profil poboru jest wyceniany według ceny właściwej dla danego interwału.",
     "Domyślna opłata handlowa 8,12 PLN netto/mies. odpowiada 9,99 PLN brutto dla eFaktury przy VAT 23%; wariant papierowy 14,99 PLN brutto odpowiada 12,19 PLN netto/mies.",

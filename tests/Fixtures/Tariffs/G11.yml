@@ -11,13 +11,14 @@ cases:
         usage:
           ACTIVE_ENERGY_IMPORT: '2'
         costs:
-          usageBased:
-            total: '1.6'
-            byComponent: { energy-purchase: '1', distribution-variable: '0.6' }
-          periodic:
+          taxInclusive:
+            usageBased:
+              total: '1.6'
+              byComponent: { energy-purchase: '1', distribution-variable: '0.6' }
+            periodic:
+              total: null
+              byComponent: {}
             total: null
-            byComponent: {}
-          total: null
         billingContext:
           requestedRangeCoversWholePeriods: false
           periods:
@@ -37,17 +38,18 @@ cases:
     expected:
       result:
         costs:
-          usageBased:
-            total: '1.6'
-          periodic:
-            total: '1.2'
-            byComponent: { distribution-fixed: '1.2' }
-          total: '2.8'
+          taxInclusive:
+            usageBased:
+              total: '1.6'
+            periodic:
+              total: '1.2'
+              byComponent: { distribution-fixed: '1.2' }
+            total: '2.8'
         billingContext:
           requestedRangeCoversWholePeriods: true
         periodicCharges:
           - id: distribution-fixed
-            calculated: { units: '1', amount: '1.2' }
+            calculated: { units: '1', amounts: { taxInclusive: '1.2' } }
 
   two_full_billing_periods:
     query:
@@ -59,11 +61,12 @@ cases:
     expected:
       result:
         costs:
-          usageBased: { total: '1.6' }
-          periodic:
-            total: '2.4'
-            byComponent: { distribution-fixed: '2.4' }
-          total: '4'
+          taxInclusive:
+            usageBased: { total: '1.6' }
+            periodic:
+              total: '2.4'
+              byComponent: { distribution-fixed: '2.4' }
+            total: '4'
         billingContext:
           requestedRangeCoversWholePeriods: true
           periods:
@@ -71,4 +74,4 @@ cases:
             - { from: '2026-02-15T00:00:00+01:00', to: '2026-03-15T00:00:00+01:00', fullyCovered: true }
         periodicCharges:
           - id: distribution-fixed
-            calculated: { units: '2', amount: '2.4' }
+            calculated: { units: '2', amounts: { taxInclusive: '2.4' } }

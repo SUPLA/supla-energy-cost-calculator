@@ -9,7 +9,7 @@ Version 2 assigns a `CostComponentKind` compatibility role to each component of 
   "version": 2,
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
-  "taxProfiles": [{"validFrom": null, "validTo": null, "profileId": "PL.HOUSEHOLD.2026"}],
+  "taxProfiles": [{"validFrom": "2026-01-01T00:00:00+01:00", "validTo": "2027-01-01T00:00:00+01:00", "profileId": "PL.HOUSEHOLD.2026"}],
   "billingCycles": [{
     "validFrom": "2026-01-01T00:00:00+01:00",
     "validTo": "2027-01-01T00:00:00+01:00",
@@ -65,20 +65,20 @@ A real operator change (new validity period, changed tariff semantics, new produ
 
 ## Compilation
 
-`TariffPresetCompiler`:
+`TariffPresetCompiler::compileToArray()`:
 
 - validates submitted input IDs and input types;
 - applies trusted preset-declared JSON Pointer targets;
 - supports RFC 6901 `~0` and `~1` escaping;
+- supports choice targets that map a selected value to a structured template value;
 - rejects unknown input IDs, malformed pointers and unresolved required values;
-- delegates final executable-definition validation to `BillingDefinitionParser`.
 
 `CostPlanCompiler`:
 
 - resolves selected components through the current `TariffPresetCatalog`;
 - compiles each selected component with its own user overrides;
 - combines selected components into one `BillingDefinition`;
-- validates continuous billing-cycle coverage and component rule coverage;
+- validates continuous billing-cycle coverage and component rule coverage, including the selected preset's validity range;
 - delegates final validation to `BillingDefinitionParser`.
 
 ## Preset corrections

@@ -11,11 +11,12 @@ cases:
     expected:
       result:
         costs:
-          usageBased:
-            total: '-0.5'
+          taxInclusive:
+            usageBased:
+              total: '-0.5'
         charges:
           - quantity:
               import: '0.3'
               export: '0.8'
               value: '-0.5'
-            cost: '-0.5'
+            amounts: { taxInclusive: '-0.5' }

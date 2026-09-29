@@ -14,13 +14,14 @@ cases:
     expected:
       result:
         costs:
-          usageBased:
-            total: '0.25'
+          taxInclusive:
+            usageBased:
+              total: '0.25'
         charges:
           - quantity:
               value: '0.5'
-            rate: '0.5'
-            cost: '0.25'
+            pricing: { rate: '0.5' }
+            amounts: { taxInclusive: '0.25' }
 
   changing_rate_inside_hour_is_rejected:
     query:

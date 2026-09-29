@@ -12,7 +12,7 @@ use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Plan\CostPlanCompiler;
 use Supla\EnergyCostCalculator\Plan\CostPlanDefinition;
 use Supla\EnergyCostCalculator\Plan\CostPlanDefinitionParser;
-use Supla\EnergyCostCalculator\Plan\CostComponentKind;
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
 use Supla\EnergyCostCalculator\Plan\CostPlanPeriod;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryEnergyDeltaSource;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
@@ -43,12 +43,12 @@ final class ComponentCostPlanTest extends TestCase
             new \DateTimeImmutable('2026-01-01T00:00:00+01:00'),
             new \DateTimeImmutable('2026-02-01T00:00:00+01:00'),
         ), $this->periodicOnly($compiled));
-        self::assertSame('14.76', $result->periodicTotal);
-        self::assertSame('14.76', $result->total);
-        self::assertSame('14.76', $result->billingPeriods[0]['costs']['periodic']['total']);
+        self::assertSame('14.76', $result->costs['taxInclusive']['periodic']['total']);
+        self::assertSame('14.76', $result->costs['taxInclusive']['total']);
+        self::assertSame('14.76', $result->billingPeriods[0]['costs']['taxInclusive']['periodic']['total']);
     }
 
-    public function testPlanPeriodCanExtendBeyondPresetValidity(): void
+    public function testRejectsPlanPeriodOutsidePresetValidity(): void
     {
         $plan = $this->plan();
         $plan['periods'][0]['validFrom'] = null;
@@ -56,9 +56,9 @@ final class ComponentCostPlanTest extends TestCase
         $plan['billingCycles'][0]['validFrom'] = null;
         $plan['billingCycles'][0]['validTo'] = '2027-02-01T00:00:00+01:00';
 
-        $compiled = (new CostPlanCompiler())->compileToArray($plan);
-        self::assertNull($compiled['periods'][0]['validFrom']);
-        self::assertSame('2027-02-01T00:00:00+01:00', $compiled['periods'][1]['validTo']);
+        $this->expectException(CostPlanDefinitionException::class);
+        $this->expectExceptionMessage('Preset does not cover');
+        (new CostPlanCompiler())->compileToArray($plan);
     }
 
     public function testCanAddFixedDistributionAsSeparateKind(): void
@@ -82,8 +82,8 @@ final class ComponentCostPlanTest extends TestCase
         self::assertCount(2, $plan->periods);
         self::assertSame(CostComponentKind::ENERGY_PURCHASE, $plan->periods[0]->components[0]->kind);
         self::assertSame([[
-            'validFrom' => null,
-            'validTo' => null,
+            'validFrom' => '2026-01-01T00:00:00+01:00',
+            'validTo' => '2027-01-01T00:00:00+01:00',
             'profileId' => 'PL.HOUSEHOLD.2026',
         ]], $plan->taxProfiles);
     }
@@ -95,8 +95,8 @@ final class ComponentCostPlanTest extends TestCase
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
             'taxProfiles' => [[
-                'validFrom' => null,
-                'validTo' => null,
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => '2027-01-01T00:00:00+01:00',
                 'profileId' => 'PL.HOUSEHOLD.2026',
             ]],
             'billingCycles' => [[
@@ -126,7 +126,7 @@ final class ComponentCostPlanTest extends TestCase
             new \DateTimeImmutable('2026-02-01T00:00:00+01:00'),
         ), $compiled);
 
-        self::assertSame('14.76', $result->total);
+        self::assertSame('14.76', $result->costs['taxInclusive']['total']);
     }
 
     public function testAllowsOpenStartAndEndAroundContiguousPeriods(): void
@@ -271,8 +271,8 @@ final class ComponentCostPlanTest extends TestCase
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
             'taxProfiles' => [[
-                'validFrom' => null,
-                'validTo' => null,
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => '2027-01-01T00:00:00+01:00',
                 'profileId' => 'PL.HOUSEHOLD.2026',
             ]],
             'billingCycles' => [[

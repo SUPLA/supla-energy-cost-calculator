@@ -70,6 +70,8 @@ final class CostCalculator
 
         $usageBasedTotal = '0';
         $usageBasedTaxExclusiveTotal = '0';
+        $usageBasedTaxExclusiveByComponent = [];
+        $usageBasedTaxExclusiveByZone = [];
         $usageBasedTaxes = [];
         $usageBasedByComponent = [];
         $usageBasedByZone = [];
@@ -87,6 +89,10 @@ final class CostCalculator
                 'period' => $billingPeriod,
                 'usage' => [],
                 'usageBasedTotal' => '0',
+                'usageBasedTaxExclusiveTotal' => '0',
+                'usageBasedTaxExclusiveByComponent' => [],
+                'usageBasedTaxExclusiveByZone' => [],
+                'usageBasedTaxes' => [],
                 'usageBasedByComponent' => [],
                 'usageBasedByZone' => [],
             ];
@@ -98,6 +104,8 @@ final class CostCalculator
         $finalizeNettingWindow = function (array $window) use (
             &$usageBasedTotal,
             &$usageBasedTaxExclusiveTotal,
+            &$usageBasedTaxExclusiveByComponent,
+            &$usageBasedTaxExclusiveByZone,
             &$usageBasedTaxes,
             &$usageBasedByComponent,
             &$usageBasedByZone,
@@ -198,19 +206,25 @@ final class CostCalculator
                 $cost = $taxCalculation->taxInclusive;
                 $usageBasedTaxExclusiveTotal = $this->math->add($usageBasedTaxExclusiveTotal, $taxCalculation->taxExclusive);
                 $this->addTaxes($usageBasedTaxes, $taxCalculation);
+                $this->addTaxes($summary['usageBasedTaxes'], $taxCalculation);
+                $this->addAmount($usageBasedTaxExclusiveByComponent, $componentId, $taxCalculation->taxExclusive);
                 $usageBasedTotal = $this->math->add($usageBasedTotal, $cost);
                 $this->addAmount($usageBasedByComponent, $componentId, $cost);
                 if ($chargePart['selection'] !== null) {
                     $this->addAmount($usageBasedByZone, (string)$chargePart['selection'], $cost);
+                    $this->addAmount($usageBasedTaxExclusiveByZone, (string)$chargePart['selection'], $taxCalculation->taxExclusive);
                 }
 
                 $summary['usageBasedTotal'] = $this->math->add($summary['usageBasedTotal'], $cost);
+                $summary['usageBasedTaxExclusiveTotal'] = $this->math->add($summary['usageBasedTaxExclusiveTotal'], $taxCalculation->taxExclusive);
                 $this->addAmount($summary['usageBasedByComponent'], $componentId, $cost);
+                $this->addAmount($summary['usageBasedTaxExclusiveByComponent'], $componentId, $taxCalculation->taxExclusive);
                 if ($chargePart['selection'] !== null) {
                     $this->addAmount($summary['usageBasedByZone'], (string)$chargePart['selection'], $cost);
+                    $this->addAmount($summary['usageBasedTaxExclusiveByZone'], (string)$chargePart['selection'], $taxCalculation->taxExclusive);
                 }
 
-                if ($options->includeIntervals) {
+                {
                     $quantity = [
                         'type' => $window['component']->quantity->type->value,
                         'strategy' => $window['component']->quantity->strategy?->value,
@@ -235,16 +249,14 @@ final class CostCalculator
                     }
                     $charges[] = [
                         'componentId' => $componentId,
-                        'kind' => $window['component']->kind,
+                        'kind' => $window['component']->kind->value,
                         'category' => $window['component']->category,
                         'from' => $chargePart['range']->from->format(DATE_ATOM),
                         'to' => $chargePart['range']->to->format(DATE_ATOM),
                         'quantity' => $quantity,
                         'selection' => $chargePart['selection'],
-                        'pricing' => ['rate' => $chargePart['rate'], 'includedTaxes' => $window['component']->taxTreatment->included],
+                        'pricing' => ['rate' => $chargePart['rate'], 'unit' => $window['component']->rate->config['unit'] ?? null, 'includedTaxes' => $window['component']->taxTreatment->included],
                         'amounts' => $taxCalculation->jsonSerialize(),
-                        'rate' => $chargePart['rate'],
-                        'cost' => $cost,
                     ];
                 }
             }
@@ -407,20 +419,26 @@ final class CostCalculator
                 $cost = $taxCalculation->taxInclusive;
                 $usageBasedTaxExclusiveTotal = $this->math->add($usageBasedTaxExclusiveTotal, $taxCalculation->taxExclusive);
                 $this->addTaxes($usageBasedTaxes, $taxCalculation);
+                $this->addTaxes($billingSummaryState[$summaryKey]['usageBasedTaxes'], $taxCalculation);
+                $this->addAmount($usageBasedTaxExclusiveByComponent, $component->id, $taxCalculation->taxExclusive);
 
                 $usageBasedTotal = $this->math->add($usageBasedTotal, $cost);
                 $this->addAmount($usageBasedByComponent, $component->id, $cost);
                 if ($selection !== null) {
                     $this->addAmount($usageBasedByZone, $selection, $cost);
+                    $this->addAmount($usageBasedTaxExclusiveByZone, $selection, $taxCalculation->taxExclusive);
                 }
 
                 $billingSummaryState[$summaryKey]['usageBasedTotal'] = $this->math->add(
                     $billingSummaryState[$summaryKey]['usageBasedTotal'],
                     $cost,
                 );
+                $billingSummaryState[$summaryKey]['usageBasedTaxExclusiveTotal'] = $this->math->add($billingSummaryState[$summaryKey]['usageBasedTaxExclusiveTotal'], $taxCalculation->taxExclusive);
                 $this->addAmount($billingSummaryState[$summaryKey]['usageBasedByComponent'], $component->id, $cost);
+                $this->addAmount($billingSummaryState[$summaryKey]['usageBasedTaxExclusiveByComponent'], $component->id, $taxCalculation->taxExclusive);
                 if ($selection !== null) {
                     $this->addAmount($billingSummaryState[$summaryKey]['usageBasedByZone'], $selection, $cost);
+                    $this->addAmount($billingSummaryState[$summaryKey]['usageBasedTaxExclusiveByZone'], $selection, $taxCalculation->taxExclusive);
                 }
 
                 $intervalTotal = $this->math->add($intervalTotal, $cost);
@@ -432,30 +450,26 @@ final class CostCalculator
                 if ($options->includeIntervals) {
                     $intervalComponents[] = [
                         'id' => $component->id,
-                        'kind' => $component->kind,
+                        'kind' => $component->kind->value,
                         'category' => $component->category,
                         'quantityType' => $component->quantity->type->value,
                         'quantity' => $quantity,
                         'selection' => $selection,
-                        'pricing' => ['rate' => $rate, 'includedTaxes' => $component->taxTreatment->included],
+                        'pricing' => ['rate' => $rate, 'unit' => $component->rate->config['unit'] ?? null, 'includedTaxes' => $component->taxTreatment->included],
                         'amounts' => $taxCalculation->jsonSerialize(),
-                        'rate' => $rate,
-                        'cost' => $cost,
-                    ];
-                    $charges[] = [
-                        'componentId' => $component->id,
-                        'category' => $component->category,
-                        'from' => $delta->from->format(DATE_ATOM),
-                        'to' => $delta->to->format(DATE_ATOM),
-                        'quantity' => [
-                            'type' => $component->quantity->type->value,
-                            'value' => $quantity,
-                        ],
-                        'selection' => $selection,
-                        'rate' => $rate,
-                        'cost' => $cost,
                     ];
                 }
+                $charges[] = [
+                    'componentId' => $component->id,
+                        'kind' => $component->kind->value,
+                    'category' => $component->category,
+                    'from' => $delta->from->format(DATE_ATOM),
+                    'to' => $delta->to->format(DATE_ATOM),
+                    'quantity' => ['type' => $component->quantity->type->value, 'value' => $quantity],
+                    'selection' => $selection,
+                    'pricing' => ['rate' => $rate, 'unit' => $component->rate->config['unit'] ?? null, 'includedTaxes' => $component->taxTreatment->included],
+                    'amounts' => $taxCalculation->jsonSerialize(),
+                ];
             }
 
             if ($options->includeIntervals) {
@@ -468,9 +482,11 @@ final class CostCalculator
                     'to' => $delta->to->format(DATE_ATOM),
                     'usage' => $intervalUsage,
                     'costs' => [
-                        'total' => $intervalTotal,
-                        'byComponent' => $intervalByComponent,
-                        'byZone' => $intervalByZone,
+                        'taxInclusive' => [
+                            'total' => $intervalTotal,
+                            'byComponent' => $intervalByComponent,
+                            'byZone' => $intervalByZone,
+                        ],
                     ],
                     'components' => $intervalComponents,
                 ];
@@ -493,6 +509,8 @@ final class CostCalculator
         ksort($usage);
         ksort($usageBasedByComponent);
         ksort($usageBasedByZone);
+        ksort($usageBasedTaxExclusiveByComponent);
+        ksort($usageBasedTaxExclusiveByZone);
 
         [$periodicCharges, $periodicTotal, $periodicByComponent, $periodicAmounts] = $this->periodicCharges(
             $definition,
@@ -538,12 +556,13 @@ final class CostCalculator
             $legacyBillingCycle,
             $definition->billingCycles,
             $usage,
-            $usageBasedTotal,
-            $usageBasedByComponent,
-            $usageBasedByZone,
-            $periodicTotal,
-            $periodicByComponent,
-            $total,
+            $this->costSummary(
+                $this->usageCosts($usageBasedTaxExclusiveTotal, $usageBasedTaxExclusiveByComponent, $usageBasedTaxExclusiveByZone),
+                $usageBasedTaxes,
+                $this->usageCosts($usageBasedTotal, $usageBasedByComponent, $usageBasedByZone),
+                $periodicAmounts,
+                $hasPeriodicCharges && !$coversWholeBillingPeriods,
+            ),
             $periodicCharges,
             [
                 'requestedRangeCoversWholePeriods' => $coversWholeBillingPeriods,
@@ -553,19 +572,12 @@ final class CostCalculator
             $processed,
             $intervals,
             $charges,
-            $this->costSummary(
-                $usageBasedTaxExclusiveTotal,
-                $usageBasedTaxes,
-                $usageBasedTotal,
-                $periodicAmounts,
-                $hasPeriodicCharges && !$coversWholeBillingPeriods,
-            ),
         );
     }
 
     /**
      * @param list<ResolvedBillingPeriod> $billingPeriods
-     * @return array{0: list<array<string, mixed>>, 1: ?string, 2: array<string, string>, 3: array{taxExclusive:?string,taxes:array<string,string>,taxInclusive:?string}}
+     * @return array{0: list<array<string, mixed>>, 1: ?string, 2: array<string, string>, 3: array<string, array<string, mixed>>}
      */
     private function periodicCharges(
         BillingDefinition $definition,
@@ -577,7 +589,11 @@ final class CostCalculator
         $charges = [];
         $total = $calculate ? '0' : null;
         $byComponent = [];
-        $amounts = ['taxExclusive' => $calculate ? '0' : null, 'taxes' => [], 'taxInclusive' => $calculate ? '0' : null];
+        $amounts = [
+            'taxExclusive' => ['total' => $calculate ? '0' : null, 'byComponent' => []],
+            'taxes' => ['total' => $calculate ? '0' : null, 'byTax' => []],
+            'taxInclusive' => ['total' => $calculate ? '0' : null, 'byComponent' => []],
+        ];
 
         foreach ($definition->periods as $period) {
             $periodRange = $this->periodRange($period, $range);
@@ -592,28 +608,32 @@ final class CostCalculator
                 $calculated = null;
                 if ($calculate) {
                     $calculation = $periodicCalculator->calculate($component, $periodRange, $billingPeriods);
-                    $taxCalculation = $this->taxCalculation(
-                        $definition,
-                        $component,
-                        $periodRange,
-                        $calculation->amount,
-                        (string)$calculation->units,
-                    );
-                    $calculated = [
-                        'units' => $calculation->units,
-                        'amounts' => $taxCalculation->jsonSerialize(),
-                        'amount' => $taxCalculation->taxInclusive,
-                    ];
-                    $total = $this->math->add($total ?? '0', $taxCalculation->taxInclusive);
-                    $amounts['taxExclusive'] = $this->math->add($amounts['taxExclusive'] ?? '0', $taxCalculation->taxExclusive);
-                    $amounts['taxInclusive'] = $this->math->add($amounts['taxInclusive'] ?? '0', $taxCalculation->taxInclusive);
-                    $this->addTaxes($amounts['taxes'], $taxCalculation);
-                    $this->addAmount($byComponent, $component->id, $taxCalculation->taxInclusive);
+                    $calculated = $this->periodicCalculationSummary($calculation);
+                    foreach ($calculation->buckets as $bucket) {
+                        // A periodic fee is taxed as one invoice/nominal-unit fact, never as a tariff-period slice.
+                        $taxCalculation = $this->taxCalculation(
+                            $definition,
+                            $component,
+                            $bucket['range'],
+                            $bucket['amount'],
+                            $bucket['units'],
+                        );
+                        $this->addPeriodicTaxCalculation($calculated, $taxCalculation);
+                        $total = $this->math->add($total ?? '0', $taxCalculation->taxInclusive);
+                        $taxAmount = $this->taxAmount($taxCalculation);
+                        $amounts['taxExclusive']['total'] = $this->math->add($amounts['taxExclusive']['total'] ?? '0', $taxCalculation->taxExclusive);
+                        $amounts['taxes']['total'] = $this->math->add($amounts['taxes']['total'] ?? '0', $taxAmount);
+                        $this->addTaxes($amounts['taxes']['byTax'], $taxCalculation);
+                        $amounts['taxInclusive']['total'] = $this->math->add($amounts['taxInclusive']['total'] ?? '0', $taxCalculation->taxInclusive);
+                        $this->addAmount($amounts['taxExclusive']['byComponent'], $component->id, $taxCalculation->taxExclusive);
+                        $this->addAmount($amounts['taxInclusive']['byComponent'], $component->id, $taxCalculation->taxInclusive);
+                        $this->addAmount($byComponent, $component->id, $taxCalculation->taxInclusive);
+                    }
                 }
 
                 $charges[] = [
                     'id' => $component->id,
-                    'kind' => $component->kind,
+                        'kind' => $component->kind->value,
                     'category' => $component->category,
                     'appliesFrom' => $periodRange->from->format(DATE_ATOM),
                     'appliesTo' => $periodRange->to->format(DATE_ATOM),
@@ -630,7 +650,11 @@ final class CostCalculator
         }
 
         if ($charges === []) {
-            return [[], '0', [], ['taxExclusive' => '0', 'taxes' => [], 'taxInclusive' => '0']];
+            return [[], '0', [], [
+                'taxExclusive' => ['total' => '0', 'byComponent' => []],
+                'taxes' => ['total' => '0', 'byTax' => []],
+                'taxInclusive' => ['total' => '0', 'byComponent' => []],
+            ]];
         }
         ksort($byComponent);
         return [$charges, $total, $byComponent, $amounts];
@@ -653,26 +677,16 @@ final class CostCalculator
             $state = $summaryState[$key];
             $fullyCovered = $this->rangeContains($requestedRange, $billingPeriod->range);
 
-            [$periodicCharges, $periodicTotal, $periodicByComponent] = $this->periodicCharges(
+            [$periodicCharges, , , $periodicCosts] = $this->periodicCharges(
                 $definition,
                 $billingPeriod->range,
                 [$billingPeriod],
                 $fullyCovered,
             );
             $hasPeriodicCharges = $periodicCharges !== [];
-            $periodTotal = match (true) {
-                !$hasPeriodicCharges => $state['usageBasedTotal'],
-                $fullyCovered => $this->math->add($state['usageBasedTotal'], $periodicTotal ?? '0'),
-                default => null,
-            };
 
             $periodUsage = $state['usage'];
-            $byComponent = $state['usageBasedByComponent'];
-            $byZone = $state['usageBasedByZone'];
             ksort($periodUsage);
-            ksort($byComponent);
-            ksort($byZone);
-            ksort($periodicByComponent);
 
             $summaries[] = [
                 'from' => $billingPeriod->range->from->format(DATE_ATOM),
@@ -681,18 +695,13 @@ final class CostCalculator
                 'transitional' => $billingPeriod->isTransitional(),
                 'billingCycle' => $billingPeriod->definition->cycle->jsonSerialize(),
                 'usage' => $periodUsage,
-                'costs' => [
-                    'usageBased' => [
-                        'total' => $state['usageBasedTotal'],
-                        'byComponent' => $byComponent,
-                        'byZone' => $byZone,
-                    ],
-                    'periodic' => [
-                        'total' => $periodicTotal,
-                        'byComponent' => $periodicByComponent,
-                    ],
-                    'total' => $periodTotal,
-                ],
+                'costs' => $this->costSummary(
+                    $this->usageCosts($state['usageBasedTaxExclusiveTotal'], $state['usageBasedTaxExclusiveByComponent'], $state['usageBasedTaxExclusiveByZone']),
+                    $state['usageBasedTaxes'],
+                    $this->usageCosts($state['usageBasedTotal'], $state['usageBasedByComponent'], $state['usageBasedByZone']),
+                    $periodicCosts,
+                    $hasPeriodicCharges && !$fullyCovered,
+                ),
             ];
         }
         return $summaries;
@@ -790,7 +799,7 @@ final class CostCalculator
         $ruleSet = $definition->taxRuleSetAt($range->from);
         if ($ruleSet === null) {
             if ($definition->taxRuleSets === []) {
-                return $this->taxCalculator->calculate($sourceAmount, $quantity, $component->kind, $component->taxTreatment, []);
+                return $this->taxCalculator->calculate($sourceAmount, $quantity, $component->kind->value, $component->taxTreatment, []);
             }
             throw new CalculationException('Tax rule-set history does not cover charge at ' . $range->from->format(DATE_ATOM));
         }
@@ -803,7 +812,46 @@ final class CostCalculator
                 $component->id,
             ));
         }
-        return $this->taxCalculator->calculate($sourceAmount, $quantity, $component->kind, $component->taxTreatment, $ruleSet->rules);
+        return $this->taxCalculator->calculate($sourceAmount, $quantity, $component->kind->value, $component->taxTreatment, $ruleSet->rules);
+    }
+
+    /** @return array{units: string, amounts: array<string, mixed>} */
+    private function periodicCalculationSummary(PeriodicChargeCalculation $calculation): array
+    {
+        return [
+            'units' => $calculation->units,
+            'amounts' => [
+                'taxExclusive' => '0',
+                'taxes' => [],
+                'taxTotal' => '0',
+                'taxInclusive' => '0',
+            ],
+        ];
+    }
+
+    /** @param array{units: string, amounts: array<string, mixed>} $summary */
+    private function addPeriodicTaxCalculation(array &$summary, TaxCalculation $calculation): void
+    {
+        $summary['amounts']['taxExclusive'] = $this->math->add($summary['amounts']['taxExclusive'], $calculation->taxExclusive);
+        $summary['amounts']['taxTotal'] = $this->math->add($summary['amounts']['taxTotal'], $calculation->taxTotal);
+        $summary['amounts']['taxInclusive'] = $this->math->add($summary['amounts']['taxInclusive'], $calculation->taxInclusive);
+        foreach ($calculation->taxes as $id => $tax) {
+            if (!isset($summary['amounts']['taxes'][$id])) {
+                $summary['amounts']['taxes'][$id] = $tax;
+                continue;
+            }
+            $summary['amounts']['taxes'][$id]['amount'] = $this->math->add(
+                $summary['amounts']['taxes'][$id]['amount'],
+                $tax['amount'],
+            );
+            if ($tax['taxableBase'] !== null && $summary['amounts']['taxes'][$id]['taxableBase'] !== null) {
+                $summary['amounts']['taxes'][$id]['taxableBase'] = $this->math->add(
+                    $summary['amounts']['taxes'][$id]['taxableBase'],
+                    $tax['taxableBase'],
+                );
+            }
+        }
+        ksort($summary['amounts']['taxes']);
     }
 
     /** @param array<string, string> $target */
@@ -820,24 +868,54 @@ final class CostCalculator
         }
     }
 
-    /** @param array{taxExclusive:?string,taxes:array<string,string>,taxInclusive:?string} $periodic */
-    private function costSummary(string $usageExclusive, array $usageTaxes, string $usageInclusive, array $periodic, bool $periodicUnknown): array
+    private function taxAmount(TaxCalculation $calculation): string
     {
-        $periodicExclusive = $periodicUnknown ? null : $periodic['taxExclusive'];
-        $periodicInclusive = $periodicUnknown ? null : $periodic['taxInclusive'];
+        return array_reduce(
+            $calculation->taxes,
+            fn(string $total, array $tax): string => $this->math->add($total, $tax['amount']),
+            '0',
+        );
+    }
+
+    /** @param array<string, string> $byComponent @param array<string, string> $byZone */
+    private function usageCosts(string $total, array $byComponent, array $byZone): array
+    {
+        ksort($byComponent);
+        ksort($byZone);
+        return [
+            'total' => $total,
+            'byComponent' => $byComponent,
+            'byZone' => $byZone,
+        ];
+    }
+
+    /** @param array<string, string> $usageTaxes @param array<string, array<string, mixed>> $periodic */
+    private function costSummary(array $usageExclusive, array $usageTaxes, array $usageInclusive, array $periodic, bool $periodicUnknown): array
+    {
+        $result = [];
+        foreach (['taxExclusive' => $usageExclusive, 'taxInclusive' => $usageInclusive] as $basis => $usage) {
+            $periodicCosts = $periodicUnknown
+                ? ['total' => null, 'byComponent' => []]
+                : $periodic[$basis];
+            ksort($periodicCosts['byComponent']);
+            $result[$basis] = [
+                'usageBased' => $usage,
+                'periodic' => $periodicCosts,
+                'total' => $periodicUnknown ? null : $this->math->add($usage['total'], $periodicCosts['total'] ?? '0'),
+            ];
+        }
         $taxes = $usageTaxes;
         if (!$periodicUnknown) {
-            foreach ($periodic['taxes'] as $id => $amount) {
+            foreach ($periodic['taxes']['byTax'] as $id => $amount) {
                 $this->addAmount($taxes, $id, $amount);
             }
         }
         ksort($taxes);
-        $taxTotal = $periodicUnknown ? null : array_reduce($taxes, fn(string $sum, string $amount) => $this->math->add($sum, $amount), '0');
-        return [
-            'taxExclusive' => ['usageBased' => $usageExclusive, 'periodic' => $periodicExclusive, 'total' => $periodicUnknown ? null : $this->math->add($usageExclusive, $periodicExclusive ?? '0')],
-            'taxes' => ['byTax' => $taxes, 'total' => $taxTotal],
-            'taxInclusive' => ['usageBased' => $usageInclusive, 'periodic' => $periodicInclusive, 'total' => $periodicUnknown ? null : $this->math->add($usageInclusive, $periodicInclusive ?? '0')],
+        $result['taxes'] = [
+            'byTax' => $taxes,
+            'total' => $periodicUnknown ? null : array_reduce($taxes, fn(string $total, string $amount): string => $this->math->add($total, $amount), '0'),
         ];
+        return $result;
     }
 
     private function billingPeriodKey(ResolvedBillingPeriod $period): string

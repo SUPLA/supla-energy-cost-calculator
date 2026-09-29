@@ -4,24 +4,13 @@ declare(strict_types=1);
 
 namespace Supla\EnergyCostCalculator\Preset;
 
-use Supla\EnergyCostCalculator\Definition\BillingDefinition;
-use Supla\EnergyCostCalculator\Definition\BillingDefinitionParser;
 use Supla\EnergyCostCalculator\Exception\TariffPresetCompilationException;
 
 final class TariffPresetCompiler
 {
     public function __construct(
         private readonly TariffPresetCatalog $catalog = new TariffPresetCatalog(),
-        private readonly BillingDefinitionParser $definitionParser = new BillingDefinitionParser(),
     ) {
-    }
-
-    /**
-     * @param array<string, mixed> $values
-     */
-    public function compile(string|TariffPreset $preset, array $values): BillingDefinition
-    {
-        return $this->definitionParser->parse($this->compileToArray($preset, $values));
     }
 
     /**
@@ -74,11 +63,9 @@ final class TariffPresetCompiler
                 if (!is_array($targets) || !array_is_list($targets)) {
                     throw new TariffPresetCompilationException("Tariff preset '{$preset->id}' input '$id' must contain targets array.");
                 }
-                $input['targets'] = array_values(array_filter($targets, function (mixed $target) use ($template, $componentId): bool {
-                    if (!is_string($target)) {
-                        return false;
-                    }
-                    if (!preg_match('~^/periods/(\d+)/components/(\d+)/~', $target, $matches)) {
+                $input['targets'] = array_values(array_filter($targets, function (mixed $target) use ($template, $componentId, $preset, $id): bool {
+                    $pointer = $this->targetPointer($target, $preset->id, $id);
+                    if (!preg_match('~^/periods/(\d+)/components/(\d+)/~', $pointer, $matches)) {
                         return false;
                     }
                     $component = $template['periods'][(int)$matches[1]]['components'][(int)$matches[2]] ?? null;
@@ -108,21 +95,24 @@ final class TariffPresetCompiler
             if (array_key_exists($id, $values)) {
                 $value = $this->normalizeValue($values[$id], $input, $preset->id, $id);
                 foreach ($targets as $target) {
-                    if (!is_string($target)) {
-                        throw new TariffPresetCompilationException("Tariff preset '{$preset->id}' input '$id' contains a non-string target.");
-                    }
-                    $this->replacePointer($compiled, $target, $value, $preset->id, $id);
+                    $pointer = $this->targetPointer($target, $preset->id, $id);
+                    $this->replacePointer($compiled, $pointer, $this->targetValue($target, $value, $preset->id, $id), $preset->id, $id);
                 }
             }
 
             if (($input['required'] ?? false) === true) {
                 foreach ($targets as $target) {
-                    if (!is_string($target)) {
-                        continue;
-                    }
-                    $resolved = $this->readPointer($compiled, $target, $preset->id, $id);
+                    $pointer = $this->targetPointer($target, $preset->id, $id);
+                    $resolved = $this->readPointer($compiled, $pointer, $preset->id, $id);
                     if ($resolved === null || $resolved === '') {
                         throw new TariffPresetCompilationException("Required input '$id' for tariff preset '{$preset->id}' is unresolved.");
+                    }
+                    if (is_array($target)) {
+                        $mappedValues = $target['values'] ?? [];
+                        if (!in_array($resolved, $mappedValues, true)) {
+                            throw new TariffPresetCompilationException("Required input '$id' for tariff preset '{$preset->id}' is unresolved.");
+                        }
+                        continue;
                     }
                     // Validate preset defaults too, not only submitted values.
                     $this->normalizeValue($resolved, $input, $preset->id, $id);
@@ -144,6 +134,29 @@ final class TariffPresetCompiler
         }
 
         return $compiled;
+    }
+
+    private function targetPointer(mixed $target, string $presetId, string $inputId): string
+    {
+        if (is_string($target)) {
+            return $target;
+        }
+        if (is_array($target) && !array_is_list($target) && isset($target['pointer']) && is_string($target['pointer'])) {
+            return $target['pointer'];
+        }
+        throw new TariffPresetCompilationException("Tariff preset '$presetId' input '$inputId' contains an invalid target.");
+    }
+
+    private function targetValue(mixed $target, mixed $value, string $presetId, string $inputId): mixed
+    {
+        if (is_string($target)) {
+            return $value;
+        }
+        $values = $target['values'] ?? null;
+        if (!is_array($values) || array_is_list($values) || !is_string($value) || !array_key_exists($value, $values)) {
+            throw new TariffPresetCompilationException("Tariff preset '$presetId' input '$inputId' target must map the selected value.");
+        }
+        return $values[$value];
     }
 
     /** @param array<string, mixed> $input */

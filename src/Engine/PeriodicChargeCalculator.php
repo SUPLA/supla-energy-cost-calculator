@@ -33,6 +33,7 @@ final class PeriodicChargeCalculator
         $prorate = (bool)($component->quantity->options['prorate'] ?? false);
         $rate = (string)$component->rate->config['value'];
         $totalUnits = '0';
+        $buckets = [];
 
         foreach ($billingPeriods as $billingPeriod) {
             $effective = $billingPeriod->range->intersection($applicableRange);
@@ -45,6 +46,9 @@ final class PeriodicChargeCalculator
                     ? $this->fraction($effective, $billingPeriod->nominalRange)
                     : $this->once($component, $period, $billingPeriod->range->from->getTimestamp(), $billingPeriod->range->from->getTimestamp());
                 $totalUnits = $this->math->add($totalUnits, $units);
+                if ($units !== '0') {
+                    $buckets[] = ['range' => $billingPeriod->range, 'units' => $units, 'amount' => $this->math->multiply($units, $rate)];
+                }
                 continue;
             }
 
@@ -61,6 +65,9 @@ final class PeriodicChargeCalculator
                     $units = $prorate ? $this->fraction($overlap, $bucket)
                         : $this->once($component, $period, $billingPeriod->range->from->getTimestamp(), $bucket->from->getTimestamp());
                     $totalUnits = $this->math->add($totalUnits, $units);
+                    if ($units !== '0') {
+                        $buckets[] = ['range' => $bucket, 'units' => $units, 'amount' => $this->math->multiply($units, $rate)];
+                    }
                 }
                 $cursor = $next;
             }
@@ -69,13 +76,20 @@ final class PeriodicChargeCalculator
         return new PeriodicChargeCalculation(
             $totalUnits,
             $this->math->multiply($totalUnits, $rate),
+            $buckets,
         );
     }
 
     private function once(ComponentDefinition $component, string $period, int $cycleStart, int $bucketStart): string
     {
         $key = $component->id . ':' . $cycleStart . ':' . $bucketStart;
-        $signature = json_encode([$component->category, $period, $component->rate->config], JSON_THROW_ON_ERROR);
+        $signature = json_encode([
+            $component->kind->value,
+            $component->category,
+            $period,
+            $component->rate->config,
+            $component->taxTreatment->included,
+        ], JSON_THROW_ON_ERROR);
         if (isset($this->chargedBuckets[$key])) {
             if ($this->chargedBuckets[$key] !== $signature) {
                 throw new CalculationException("Periodic component '{$component->id}' changes within one charge period without proration.");

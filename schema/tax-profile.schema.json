@@ -9,6 +9,15 @@
     "id": {"type": "string", "minLength": 1},
     "label": {"type": "string", "minLength": 1},
     "currency": {"type": "string", "minLength": 3, "maxLength": 3},
+    "source": {
+      "type": "object",
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "url": {"type": "string", "minLength": 1},
+        "retrievedAt": {"type": "string", "format": "date"}
+      },
+      "additionalProperties": false
+    },
     "rules": {
       "type": "array", "minItems": 1,
       "items": {
@@ -17,21 +26,26 @@
         "properties": {
           "id": {"type": "string", "minLength": 1},
           "type": {"enum": ["PER_QUANTITY", "PERCENTAGE"]},
-          "appliesToKinds": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "appliesToKinds": {"type": "array", "minItems": 1, "items": {"enum": ["ENERGY_PURCHASE", "DISTRIBUTION_VARIABLE", "DISTRIBUTION_FIXED", "SUPPLIER_FIXED"]}},
           "rate": {"type": "string", "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$"},
           "unit": {"type": "string"},
           "base": {"const": "CURRENT_SUBTOTAL"}
         },
-        "additionalProperties": true
+        "allOf": [
+          {"if": {"properties": {"type": {"const": "PER_QUANTITY"}}}, "then": {"required": ["unit"], "properties": {"base": false}}},
+          {"if": {"properties": {"type": {"const": "PERCENTAGE"}}}, "then": {"required": ["base"], "properties": {"unit": false}}}
+        ],
+        "additionalProperties": false
       }
     }
   },
-  "additionalProperties": true,
+  "additionalProperties": false,
   "$defs": {
     "rule": {
       "type": "object",
       "required": ["id", "type", "appliesToKinds", "rate"],
-      "properties": {"id": {"type": "string"}, "type": {"enum": ["PER_QUANTITY", "PERCENTAGE"]}, "appliesToKinds": {"type": "array"}, "rate": {"type": "string"}, "unit": {"type": "string"}, "base": {"const": "CURRENT_SUBTOTAL"}}
+      "properties": {"id": {"type": "string"}, "type": {"enum": ["PER_QUANTITY", "PERCENTAGE"]}, "appliesToKinds": {"type": "array", "items": {"enum": ["ENERGY_PURCHASE", "DISTRIBUTION_VARIABLE", "DISTRIBUTION_FIXED", "SUPPLIER_FIXED"]}}, "rate": {"type": "string"}, "unit": {"type": "string"}, "base": {"const": "CURRENT_SUBTOTAL"}},
+      "additionalProperties": false
     }
   }
 }

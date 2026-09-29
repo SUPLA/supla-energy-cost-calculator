@@ -2,7 +2,7 @@
   "version": 1,
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
-  "taxRuleSets": [{"validFrom": null, "validTo": null, "rules": [{"id": "VAT", "type": "PERCENTAGE", "appliesToKinds": ["UNUSED"], "rate": "0.23", "base": "CURRENT_SUBTOTAL"}]}],
+  "taxRuleSets": [{"validFrom": null, "validTo": null, "rules": [{"id": "VAT", "type": "PERCENTAGE", "appliesToKinds": ["ENERGY_PURCHASE"], "rate": "0", "base": "CURRENT_SUBTOTAL"}]}],
   "periods": [
     {
       "validFrom": "2026-01-01T00:00:00+01:00",

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Supla\EnergyCostCalculator\Plan;
 
 use Supla\EnergyCostCalculator\Exception\CostPlanDefinitionException;
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
 
 final class CostPlanDefinitionParser
 {

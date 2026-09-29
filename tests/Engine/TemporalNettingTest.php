@@ -127,7 +127,7 @@ final class TemporalNettingTest extends TestCase
                 'validFrom' => null,
                 'validTo' => null,
                 'rules' => [[
-                    'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['UNUSED'],
+                    'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['SUPPLIER_FIXED'],
                     'rate' => '0.23', 'base' => 'CURRENT_SUBTOTAL',
                 ]],
             ]],

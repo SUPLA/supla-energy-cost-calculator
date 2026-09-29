@@ -78,8 +78,8 @@ final class CostPlanComponentMultiplicityTest extends TestCase
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
             'taxProfiles' => [[
-                'validFrom' => null,
-                'validTo' => null,
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => '2027-01-01T00:00:00+01:00',
                 'profileId' => 'PL.HOUSEHOLD.2026',
             ]],
             'billingCycles' => [['anchor' => '2026-01-01', 'length' => 1, 'unit' => 'MONTH']],

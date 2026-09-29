@@ -14,10 +14,11 @@ cases:
           ACTIVE_ENERGY_IMPORT: '1.2'
           ACTIVE_ENERGY_EXPORT: '0.7'
         costs:
-          usageBased:
-            total: '0.5'
-            byComponent:
-              energy: '0.5'
+          taxInclusive:
+            usageBased:
+              total: '0.5'
+              byComponent:
+                energy: '0.5'
         charges:
           - componentId: energy
             from: '2026-01-02T10:00:00+01:00'
@@ -29,8 +30,8 @@ cases:
               import: '1.2'
               export: '0.7'
               value: '0.5'
-            rate: '1.00'
-            cost: '0.5'
+            pricing: { rate: '1.00' }
+            amounts: { taxInclusive: '0.5' }
 
   export_dominates:
     query:
@@ -44,14 +45,15 @@ cases:
     expected:
       result:
         costs:
-          usageBased:
-            total: '0'
+          taxInclusive:
+            usageBased:
+              total: '0'
         charges:
           - quantity:
               import: '0.3'
               export: '0.6'
               value: '0'
-            cost: '0'
+            amounts: { taxInclusive: '0' }
 
   partial_window_rejected:
     query:

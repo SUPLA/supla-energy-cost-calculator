@@ -7,6 +7,7 @@ namespace Supla\EnergyCostCalculator\Tests\Engine;
 use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Engine\CalculationOptions;
 use Supla\EnergyCostCalculator\Engine\CostCalculator;
+use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
 use Supla\EnergyCostCalculator\Model\QuantityType;
 use Supla\EnergyCostCalculator\Model\TimeRange;
@@ -49,7 +50,7 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('0.2', $result->usageBasedTotal);
+        self::assertSame('0.2', $result->costs['taxInclusive']['usageBased']['total']);
         self::assertSame('NIGHT', $result->intervals[0]['components'][0]['selection']);
         self::assertSame('NIGHT', $result->intervals[1]['components'][0]['selection']);
     }
@@ -105,7 +106,7 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             new CalculationOptions(includeIntervals: true),
         );
 
-        self::assertSame('0.3', $result->usageBasedTotal);
+        self::assertSame('0.3', $result->costs['taxInclusive']['usageBased']['total']);
         self::assertSame('WINTER', $result->intervals[0]['components'][0]['selection']);
         self::assertSame('SUMMER', $result->intervals[1]['components'][0]['selection']);
     }
@@ -151,9 +152,9 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             ),
             $definition,
         );
-        self::assertSame('0.5', $partial->usageBasedTotal);
-        self::assertNull($partial->periodicTotal);
-        self::assertNull($partial->total);
+        self::assertSame('0.5', $partial->costs['taxInclusive']['usageBased']['total']);
+        self::assertNull($partial->costs['taxInclusive']['periodic']['total']);
+        self::assertNull($partial->costs['taxInclusive']['total']);
         self::assertNull($partial->periodicCharges[0]['calculated']);
 
         $full = $calculator->calculate(
@@ -164,11 +165,11 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             ),
             $definition,
         );
-        self::assertSame('0.5', $full->usageBasedTotal);
-        self::assertSame('10', $full->periodicTotal);
-        self::assertSame('10.5', $full->total);
+        self::assertSame('0.5', $full->costs['taxInclusive']['usageBased']['total']);
+        self::assertSame('10', $full->costs['taxInclusive']['periodic']['total']);
+        self::assertSame('10.5', $full->costs['taxInclusive']['total']);
         self::assertSame('1', $full->periodicCharges[0]['calculated']['units']);
-        self::assertSame('10', $full->periodicCharges[0]['calculated']['amount']);
+        self::assertSame('10', $full->periodicCharges[0]['calculated']['amounts']['taxInclusive']);
     }
 
     public function testBillingPeriodFixedCostIsChargedOncePerBillingCycle(): void
@@ -198,9 +199,86 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             $definition,
         );
 
-        self::assertSame('7', $result->periodicTotal);
-        self::assertSame('7', $result->total);
+        self::assertSame('7', $result->costs['taxInclusive']['periodic']['total']);
+        self::assertSame('7', $result->costs['taxInclusive']['total']);
         self::assertSame('1', $result->periodicCharges[0]['calculated']['units']);
+    }
+
+    public function testPeriodicFeeAddsVatWhenTaxExclusive(): void
+    {
+        $result = $this->periodicCalculator()->calculate('meter', $this->range('2026-01-15', '2026-02-15'), $this->periodicDefinition([]));
+
+        self::assertSame('10', $result->costs['taxExclusive']['periodic']['total']);
+        self::assertSame('2', $result->costs['taxes']['byTax']['VAT']);
+        self::assertSame('2', $result->costs['taxes']['total']);
+        self::assertSame('12', $result->costs['taxInclusive']['periodic']['total']);
+    }
+
+    public function testPeriodicFeeReversesIncludedVat(): void
+    {
+        $result = $this->periodicCalculator()->calculate(
+            'meter',
+            $this->range('2026-01-15', '2026-02-15'),
+            $this->periodicDefinition(['VAT']),
+        );
+
+        self::assertSame('10', $result->costs['taxExclusive']['periodic']['total']);
+        self::assertSame('2', $result->costs['taxes']['byTax']['VAT']);
+        self::assertSame('2', $result->costs['taxes']['total']);
+        self::assertSame('12', $result->costs['taxInclusive']['periodic']['total']);
+    }
+
+    public function testPartialPeriodicFeeOutcomeRemainsUnknown(): void
+    {
+        $result = $this->periodicCalculator()->calculate('meter', $this->range('2026-01-20', '2026-01-27'), $this->periodicDefinition([]));
+
+        self::assertNull($result->costs['taxExclusive']['periodic']['total']);
+        self::assertNull($result->costs['taxes']['total']);
+        self::assertNull($result->costs['taxInclusive']['total']);
+    }
+
+    public function testTaxBoundaryInsidePeriodicBucketThrows(): void
+    {
+        $definition = $this->periodicDefinition([], [[
+            'validFrom' => null,
+            'validTo' => '2026-01-20T00:00:00+01:00',
+            'rules' => [$this->vatRule()],
+        ], [
+            'validFrom' => '2026-01-20T00:00:00+01:00',
+            'validTo' => null,
+            'rules' => [$this->vatRule()],
+        ]]);
+
+        $this->expectException(CalculationException::class);
+        $this->periodicCalculator()->calculate('meter', $this->range('2026-01-15', '2026-02-15'), $definition);
+    }
+
+    public function testTaxBoundaryBetweenPeriodicBucketsSucceeds(): void
+    {
+        $definition = $this->periodicDefinition([], [[
+            'validFrom' => null,
+            'validTo' => '2026-02-15T00:00:00+01:00',
+            'rules' => [$this->vatRule()],
+        ], [
+            'validFrom' => '2026-02-15T00:00:00+01:00',
+            'validTo' => null,
+            'rules' => [$this->vatRule()],
+        ]]);
+
+        $result = $this->periodicCalculator()->calculate('meter', $this->range('2026-01-15', '2026-03-15'), $definition);
+
+        self::assertSame('24', $result->costs['taxInclusive']['periodic']['total']);
+    }
+
+    public function testTaxTreatmentChangeInsidePeriodicBucketThrows(): void
+    {
+        $definition = $this->periodicDefinition([], null, [
+            ['validFrom' => '2026-01-01T00:00:00+01:00', 'validTo' => '2026-01-20T00:00:00+01:00', 'included' => []],
+            ['validFrom' => '2026-01-20T00:00:00+01:00', 'validTo' => null, 'included' => ['VAT']],
+        ]);
+
+        $this->expectException(CalculationException::class);
+        $this->periodicCalculator()->calculate('meter', $this->range('2026-01-15', '2026-02-15'), $definition);
     }
 
     private function delta(string $from, string $to): EnergyDelta
@@ -223,8 +301,8 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
                 'rules' => [[
                     'id' => 'VAT',
                     'type' => 'PERCENTAGE',
-                    'appliesToKinds' => ['UNUSED'],
-                    'rate' => '0.23',
+                    'appliesToKinds' => ['ENERGY_PURCHASE'],
+                    'rate' => '0',
                     'base' => 'CURRENT_SUBTOTAL',
                 ]],
             ]],
@@ -238,5 +316,53 @@ final class ScheduleAndPeriodicChargeTest extends TestCase
             $definition['billingCycle'] = $billingCycle;
         }
         return $definition;
+    }
+
+    private function periodicCalculator(): CostCalculator
+    {
+        return new CostCalculator(new InMemoryEnergyDeltaSource([]), new InMemoryReferenceDataSource());
+    }
+
+    private function range(string $from, string $to): TimeRange
+    {
+        return new TimeRange(new \DateTimeImmutable($from . 'T00:00:00+01:00'), new \DateTimeImmutable($to . 'T00:00:00+01:00'));
+    }
+
+    /** @param list<string> $included @param ?list<array<string, mixed>> $taxRuleSets @param ?list<array<string, mixed>> $periods */
+    private function periodicDefinition(array $included, ?array $taxRuleSets = null, ?array $periods = null): array
+    {
+        $component = static fn(array $included): array => [
+            'id' => 'fixed',
+            'kind' => 'SUPPLIER_FIXED',
+            'category' => 'SERVICE',
+            'taxTreatment' => ['included' => $included],
+            'quantity' => ['type' => 'PERIOD', 'period' => 'MONTH', 'prorate' => false],
+            'rate' => ['type' => 'CONSTANT', 'value' => $included === [] ? '10' : '12', 'unit' => 'PLN/month'],
+        ];
+        $periods ??= [[
+            'validFrom' => '2026-01-01T00:00:00+01:00',
+            'validTo' => null,
+            'components' => [$component($included)],
+        ]];
+        foreach ($periods as &$period) {
+            $period['components'] ??= [$component($period['included'])];
+            unset($period['included']);
+        }
+        unset($period);
+
+        return [
+            'version' => 1,
+            'currency' => 'PLN',
+            'timezone' => 'Europe/Warsaw',
+            'billingCycle' => ['anchor' => '2026-01-15', 'length' => 1, 'unit' => 'MONTH'],
+            'taxRuleSets' => $taxRuleSets ?? [['validFrom' => null, 'validTo' => null, 'rules' => [$this->vatRule()]]],
+            'periods' => $periods,
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private function vatRule(): array
+    {
+        return ['id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['SUPPLIER_FIXED'], 'rate' => '0.2', 'base' => 'CURRENT_SUBTOTAL'];
     }
 }

@@ -204,8 +204,18 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string",
-            "pattern": "^/"
+            "oneOf": [
+              {"type": "string", "pattern": "^/"},
+              {
+                "type": "object",
+                "required": ["pointer", "values"],
+                "properties": {
+                  "pointer": {"type": "string", "pattern": "^/"},
+                  "values": {"type": "object"}
+                },
+                "additionalProperties": false
+              }
+            ]
           }
         },
         "unit": {

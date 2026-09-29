@@ -97,7 +97,7 @@
           "type": "string",
           "minLength": 1
         },
-        "kind": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["ENERGY_PURCHASE", "DISTRIBUTION_VARIABLE", "DISTRIBUTION_FIXED", "SUPPLIER_FIXED"]},
         "taxTreatment": {
           "type": "object",
           "required": ["included"],

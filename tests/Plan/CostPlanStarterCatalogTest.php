@@ -29,7 +29,7 @@ final class CostPlanStarterCatalogTest extends TestCase
         self::assertArrayNotHasKey('plan', $starters[0]);
     }
 
-    public function testEveryBundledStarterCanPopulateAnOpenEndedUserPlan(): void
+    public function testEveryBundledStarterCanPopulateA2026UserPlan(): void
     {
         $catalog = new CostPlanStarterCatalog();
         $compiler = new CostPlanCompiler();
@@ -39,8 +39,8 @@ final class CostPlanStarterCatalogTest extends TestCase
             $compiled = $compiler->compileToArray($this->userPlan($starter));
 
             self::assertCount(1, $compiled['periods'], $metadata['id']);
-            self::assertNull($compiled['periods'][0]['validFrom'], $metadata['id']);
-            self::assertNull($compiled['periods'][0]['validTo'], $metadata['id']);
+            self::assertSame('2026-01-01T00:00:00+01:00', $compiled['periods'][0]['validFrom'], $metadata['id']);
+            self::assertSame('2027-01-01T00:00:00+01:00', $compiled['periods'][0]['validTo'], $metadata['id']);
             self::assertNotEmpty($compiled['periods'][0]['components'], $metadata['id']);
         }
     }
@@ -82,7 +82,7 @@ final class CostPlanStarterCatalogTest extends TestCase
             $definition,
         );
 
-        self::assertSame('0', $result->usageBasedTotal);
+        self::assertSame('0', $result->costs['taxInclusive']['usageBased']['total']);
     }
 
     private function delta(string $from, string $to, string $import, string $export): EnergyDelta
@@ -101,15 +101,20 @@ final class CostPlanStarterCatalogTest extends TestCase
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
             'taxProfiles' => [[
-                'validFrom' => null,
-                'validTo' => null,
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => '2027-01-01T00:00:00+01:00',
                 'profileId' => 'PL.HOUSEHOLD.2026',
             ]],
             'billingCycles' => [[
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => '2027-01-01T00:00:00+01:00',
+                'anchor' => '2026-01-01',
                 'length' => 1,
                 'unit' => 'MONTH',
             ]],
             'periods' => [[
+                'validFrom' => '2026-01-01T00:00:00+01:00',
+                'validTo' => '2027-01-01T00:00:00+01:00',
                 'components' => $starter->components,
             ]],
         ];

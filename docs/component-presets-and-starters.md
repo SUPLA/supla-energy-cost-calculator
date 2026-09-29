@@ -40,6 +40,8 @@ The package ships two generic `ENERGY_PURCHASE` presets:
 - `PL.GENERIC.ENERGY_PURCHASE.CONSTANT.V1` - editable constant PLN/kWh price with 60-minute import/export netting;
 - `PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1` - one configurable `REFERENCE` rate for Fixing I, hourly Fixing I, Fixing II, hourly Fixing II or RCE, with editable multiplier and additive term.
 
+Both generic energy presets require a tax-source choice: `WITHOUT_TAXES`, `WITH_EXCISE`, or `WITH_EXCISE_AND_VAT`. The choice replaces only `taxTreatment.included`; rate arithmetic is unchanged.
+
 The generic dynamic preset deliberately does not impose temporal netting or allocation. `_HOURLY` references are ordinary selectable sources whose value stays constant across the four 15-minute SUPLA price slots; they do not need a separate preset. The engine supports explicit contract-defined `EQUAL` allocation, but generic users are not offered `strategy`, `periodInMinutes` or `allocation` knobs because those choices change settlement semantics and belong in named presets.
 
 Generic presets use the same `inputs`, defaults and overrides as real tariff presets. They are not a second configuration language.

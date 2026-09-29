@@ -13,15 +13,12 @@ final readonly class CalculationResult implements \JsonSerializable
     /**
      * @param list<BillingCyclePeriodDefinition> $billingCycles
      * @param array<string, string> $usage
-     * @param array<string, string> $usageBasedByComponent
-     * @param array<string, string> $usageBasedByZone
-     * @param array<string, string> $periodicByComponent
      * @param list<array<string, mixed>> $periodicCharges
      * @param array<string, mixed> $billingContext
      * @param list<array<string, mixed>> $billingPeriods
      * @param list<array<string, mixed>> $intervals
      * @param list<array<string, mixed>> $charges
-     * @param array<string, mixed> $taxCostSummary
+     * @param array<string, mixed> $costs
      */
     public function __construct(
         public string $currency,
@@ -29,19 +26,13 @@ final readonly class CalculationResult implements \JsonSerializable
         public ?BillingCycleDefinition $billingCycle,
         public array $billingCycles,
         public array $usage,
-        public string $usageBasedTotal,
-        public array $usageBasedByComponent,
-        public array $usageBasedByZone,
-        public ?string $periodicTotal,
-        public array $periodicByComponent,
-        public ?string $total,
+        public array $costs,
         public array $periodicCharges,
         public array $billingContext,
         public array $billingPeriods,
         public int $processedDeltaCount,
         public array $intervals = [],
         public array $charges = [],
-        public array $taxCostSummary = [],
     ) {
     }
 
@@ -61,7 +52,7 @@ final readonly class CalculationResult implements \JsonSerializable
             'billingContext' => $this->billingContext,
             'billingPeriods' => $this->billingPeriods,
             'usage' => $this->usage,
-            'costs' => $this->taxCostSummary,
+            'costs' => $this->costs,
             'periodicCharges' => $this->periodicCharges,
             'processedDeltaCount' => $this->processedDeltaCount,
             'intervals' => $this->intervals,

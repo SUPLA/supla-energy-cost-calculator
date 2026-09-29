@@ -21,6 +21,7 @@ final class DynamicOfferPresetTest extends TestCase
         )['periods'][0]['components'][0];
         self::assertSame('PL.TGE.FIXING1', $consumer['rate']['source']);
         self::assertSame('0.0878', $consumer['rate']['add']);
+        self::assertSame(['EXCISE'], $consumer['taxTreatment']['included']);
         self::assertArrayNotHasKey('strategy', $consumer['quantity']);
 
         $prosumer = $compiler->compileComponentToArray(
@@ -29,6 +30,7 @@ final class DynamicOfferPresetTest extends TestCase
             [],
         )['periods'][0]['components'][0];
         self::assertSame('PL.TGE.FIXING1', $prosumer['rate']['source']);
+        self::assertSame(['EXCISE'], $prosumer['taxTreatment']['included']);
         self::assertSame('IMPORT_MINUS_EXPORT_CAP_ZERO', $prosumer['quantity']['strategy']);
         self::assertSame(60, $prosumer['quantity']['periodInMinutes']);
         self::assertSame(['strategy' => 'EQUAL', 'periodInMinutes' => 15], $prosumer['quantity']['allocation']);

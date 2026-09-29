@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Supla\EnergyCostCalculator\Definition;
 
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
+
 final readonly class ComponentDefinition
 {
     public function __construct(
         public string $id,
-        public string $kind,
+        public CostComponentKind $kind,
         public string $category,
         public QuantityDefinition $quantity,
         public SelectorDefinition $selector,

@@ -22,7 +22,11 @@ final class TariffPresetDefaultsTest extends TestCase
                 if (($input['required'] ?? false) !== true) {
                     continue;
                 }
-                $templateValue = $this->readPointer($preset->document['billingDefinitionTemplate'], $input['targets'][0]);
+                $target = $input['targets'][0];
+                $templateValue = $this->readPointer(
+                    $preset->document['billingDefinitionTemplate'],
+                    is_array($target) ? $target['pointer'] : $target,
+                );
                 self::assertNotTrue(
                     $templateValue === null || $templateValue === '',
                     "$preset->id required input '{$input['id']}' is unresolved",

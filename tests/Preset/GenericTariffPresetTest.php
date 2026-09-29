@@ -70,6 +70,17 @@ final class GenericTariffPresetTest extends TestCase
         self::assertSame(60, $quantity['periodInMinutes']);
     }
 
+    public function testGenericEnergyTaxChoiceReplacesTheIncludedTaxPrefix(): void
+    {
+        $compiled = (new TariffPresetCompiler())->compileComponentToArray(
+            'PL.GENERIC.ENERGY_PURCHASE.MARKET_REFERENCE.V1',
+            'energy-purchase',
+            ['energy.taxTreatment' => 'WITH_EXCISE_AND_VAT'],
+        );
+
+        self::assertSame(['EXCISE', 'VAT'], $compiled['periods'][0]['components'][0]['taxTreatment']['included']);
+    }
+
     public function testRejectsUnknownChoiceValue(): void
     {
         $this->expectException(TariffPresetCompilationException::class);

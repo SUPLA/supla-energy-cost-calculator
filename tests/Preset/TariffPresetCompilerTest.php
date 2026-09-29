@@ -50,7 +50,7 @@ final class TariffPresetCompilerTest extends TestCase
         $this->expectException(TariffPresetCompilationException::class);
         $this->expectExceptionMessage("Unknown input 'unknown'");
 
-        (new TariffPresetCompiler())->compile('PL.TAURON_DYSTRYBUCJA.G11.2026', [
+        (new TariffPresetCompiler())->compileToArray('PL.TAURON_DYSTRYBUCJA.G11.2026', [
             'unknown' => 'x',
         ]);
     }
@@ -78,7 +78,7 @@ final class TariffPresetCompilerTest extends TestCase
         $this->expectException(TariffPresetCompilationException::class);
         $this->expectExceptionMessage("Required input 'rate'");
 
-        (new TariffPresetCompiler())->compile($this->customPreset('/periods/0/components/0/rate/rates/A~1B'), []);
+        (new TariffPresetCompiler())->compileToArray($this->customPreset('/periods/0/components/0/rate/rates/A~1B'), []);
     }
 
     public function testRejectsIntegerBelowPresetMinimum(): void
@@ -91,7 +91,7 @@ final class TariffPresetCompilerTest extends TestCase
 
         $this->expectException(TariffPresetCompilationException::class);
         $this->expectExceptionMessage('must be at least 1');
-        (new TariffPresetCompiler())->compile($preset, ['rate' => 0]);
+        (new TariffPresetCompiler())->compileToArray($preset, ['rate' => 0]);
     }
 
     public function testSupportsEscapedJsonPointerTokens(): void
@@ -132,7 +132,7 @@ final class TariffPresetCompilerTest extends TestCase
                     'validFrom' => null,
                     'validTo' => null,
                     'rules' => [[
-                        'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['UNUSED'],
+                        'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['SUPPLIER_FIXED'],
                         'rate' => '0.23', 'base' => 'CURRENT_SUBTOTAL',
                     ]],
                 ]],

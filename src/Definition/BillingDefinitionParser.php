@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Supla\EnergyCostCalculator\Definition;
 
 use Supla\EnergyCostCalculator\Exception\DefinitionException;
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
 use Supla\EnergyCostCalculator\Model\QuantityAllocationStrategy;
 use Supla\EnergyCostCalculator\Model\QuantityStrategy;
 use Supla\EnergyCostCalculator\Model\QuantityType;
@@ -23,7 +24,7 @@ final class BillingDefinitionParser
         $timezone = (string)($data['timezone'] ?? 'UTC');
         $this->assertTimezone($timezone);
         $billingCycles = $this->parseBillingCycles($data, $timezone);
-        $taxRuleSets = $this->parseTaxRuleSets($data);
+        $taxRuleSets = $this->parseTaxRuleSets($data, $currency);
 
         $rawPeriods = $data['periods'] ?? null;
         if (!is_array($rawPeriods) || $rawPeriods === []) {
@@ -73,7 +74,9 @@ final class BillingDefinitionParser
     {
         $id = $this->requiredString($data, 'id', $path);
         $category = $this->requiredString($data, 'category', $path);
-        $kind = $this->requiredString($data, 'kind', $path);
+        $kindRaw = $this->requiredString($data, 'kind', $path);
+        $kind = CostComponentKind::tryFrom($kindRaw)
+            ?? throw new DefinitionException("Unsupported component kind '$kindRaw' at $path.kind.");
         $taxTreatmentData = $data['taxTreatment'] ?? null;
         if (!is_array($taxTreatmentData) || !array_key_exists('included', $taxTreatmentData)
             || !is_array($taxTreatmentData['included']) || !array_is_list($taxTreatmentData['included'])) {
@@ -199,7 +202,7 @@ final class BillingDefinitionParser
     }
 
     /** @return list<TaxRuleSetDefinition> */
-    private function parseTaxRuleSets(array $data): array
+    private function parseTaxRuleSets(array $data, string $currency): array
     {
         $rawSets = $data['taxRuleSets'] ?? null;
         if (!is_array($rawSets) || !array_is_list($rawSets) || $rawSets === []) {
@@ -219,7 +222,7 @@ final class BillingDefinitionParser
                 throw new DefinitionException("taxRuleSets[$i].rules must be a non-empty array.");
             }
             $rules = (new \Supla\EnergyCostCalculator\Tax\TaxProfileParser())->parse([
-                'version' => 1, 'id' => 'inline', 'label' => 'inline', 'currency' => 'inline', 'rules' => $rawSet['rules'],
+                'version' => 1, 'id' => 'inline', 'label' => 'inline', 'currency' => $currency, 'rules' => $rawSet['rules'],
             ])->rules;
             $sets[] = new TaxRuleSetDefinition($from, $to, $rules);
         }

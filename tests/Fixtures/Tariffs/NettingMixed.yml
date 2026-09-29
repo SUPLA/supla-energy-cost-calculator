@@ -11,28 +11,33 @@ cases:
     expected:
       result:
         costs:
-          usageBased:
-            total: '1.7'
-            byComponent:
-              distribution-variable: '1.2'
-              energy: '0.5'
+          taxInclusive:
+            usageBased:
+              total: '1.7'
+              byComponent:
+                distribution-variable: '1.2'
+                energy: '0.5'
         intervals:
           - costs:
-              total: '1'
-              byComponent:
-                distribution-variable: '1'
+              taxInclusive:
+                total: '1'
+                byComponent:
+                  distribution-variable: '1'
           - costs:
-              total: '0'
-              byComponent:
-                distribution-variable: '0'
+              taxInclusive:
+                total: '0'
+                byComponent:
+                  distribution-variable: '0'
           - costs:
-              total: '0.2'
-              byComponent:
-                distribution-variable: '0.2'
+              taxInclusive:
+                total: '0.2'
+                byComponent:
+                  distribution-variable: '0.2'
           - costs:
-              total: '0'
-              byComponent:
-                distribution-variable: '0'
+              taxInclusive:
+                total: '0'
+                byComponent:
+                  distribution-variable: '0'
         charges:
           - componentId: distribution-variable
             from: '2026-01-02T10:00:00+01:00'

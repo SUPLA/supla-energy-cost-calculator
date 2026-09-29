@@ -40,6 +40,34 @@ final class DefaultTaxCalculatorTest extends TestCase
         (new DefaultTaxCalculator())->calculate('0.5', '1', 'ENERGY_PURCHASE', new TaxTreatment(['VAT']), $this->rules());
     }
 
+    public function testCalculatesVatOnlyComponentFromExclusiveSourceAmount(): void
+    {
+        $rules = [new TaxRuleDefinition('VAT', 'PERCENTAGE', ['DISTRIBUTION_VARIABLE'], '0.23', null, 'CURRENT_SUBTOTAL')];
+        $result = (new DefaultTaxCalculator())->calculate('0.500', '1', 'DISTRIBUTION_VARIABLE', new TaxTreatment([]), $rules);
+
+        self::assertSame('0.500', $result->taxExclusive);
+        self::assertSame('0.500', $result->taxes['VAT']['taxableBase']);
+        self::assertSame('0.115', $result->taxes['VAT']['amount']);
+        self::assertSame('0.615', $result->taxInclusive);
+    }
+
+    public function testReversesVatOnlyComponentFromInclusiveSourceAmount(): void
+    {
+        $rules = [new TaxRuleDefinition('VAT', 'PERCENTAGE', ['DISTRIBUTION_VARIABLE'], '0.23', null, 'CURRENT_SUBTOTAL')];
+        $result = (new DefaultTaxCalculator())->calculate('0.615', '1', 'DISTRIBUTION_VARIABLE', new TaxTreatment(['VAT']), $rules);
+
+        self::assertSame('0.5', $result->taxExclusive);
+        self::assertSame('0.115', $result->taxes['VAT']['amount']);
+        self::assertSame('0.615', $result->taxInclusive);
+    }
+
+    public function testRejectsUnknownIncludedTax(): void
+    {
+        $this->expectException(CalculationException::class);
+        $this->expectExceptionMessage('prefix');
+        (new DefaultTaxCalculator())->calculate('0.5', '1', 'ENERGY_PURCHASE', new TaxTreatment(['UNKNOWN']), $this->rules());
+    }
+
     public function testRejectsTaxRuleSetGap(): void
     {
         $this->expectException(DefinitionException::class);

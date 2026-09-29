@@ -20,7 +20,7 @@ final class CostPlanCompiler
         private readonly TaxProfileCatalog $taxProfileCatalog = new TaxProfileCatalog(),
         ?TariffPresetCompiler $presetCompiler = null,
     ) {
-        $this->presetCompiler = $presetCompiler ?? new TariffPresetCompiler($this->catalog, $this->definitionParser);
+        $this->presetCompiler = $presetCompiler ?? new TariffPresetCompiler($this->catalog);
     }
 
     private readonly TariffPresetCompiler $presetCompiler;
@@ -111,17 +111,20 @@ final class CostPlanCompiler
                 }
                 $next = [];
                 foreach ($segments as $segment) {
-                    foreach ($fragment['periods'] as $sourceIndex => $source) {
+                    foreach ($fragment['periods'] as $source) {
                         $from = $this->maxDate(
                             $this->documentDate($segment['validFrom'], 'plan period validFrom'),
-                            // The outer preset range is descriptive. Plan periods control when a selected tariff applies.
-                            $sourceIndex === 0 ? null : $this->documentDate($source['validFrom'] ?? null, 'preset period validFrom'),
+                            $this->maxDate(
+                                $this->documentDate($preset->document['validFrom'] ?? null, 'preset validFrom'),
+                                $this->documentDate($source['validFrom'] ?? null, 'preset period validFrom'),
+                            ),
                         );
                         $to = $this->minDate(
                             $this->documentDate($segment['validTo'], 'plan period validTo'),
-                            $sourceIndex === array_key_last($fragment['periods'])
-                                ? null
-                                : $this->documentDate($source['validTo'] ?? null, 'preset period validTo'),
+                            $this->minDate(
+                                $this->documentDate($preset->document['validTo'] ?? null, 'preset validTo'),
+                                $this->documentDate($source['validTo'] ?? null, 'preset period validTo'),
+                            ),
                         );
                         if ($from !== null && $to !== null && $from >= $to) {
                             continue;

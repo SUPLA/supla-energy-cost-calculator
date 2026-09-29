@@ -89,9 +89,9 @@ The result exposes `billingPeriods[]` summaries with usage, usage-based costs, p
 
 Usage-based costs are calculated from their natural charge windows. Periodic charges are deliberately kept out of time-series charge facts. Use `charges[]` for cost charts: ordinary components produce charges at meter-delta resolution, temporally netted components without allocation produce one charge per complete netting window, and allocated netting components produce one charge per allocation slot. `intervals[]` remains a meter-interval diagnostic view and never receives an artificial share of a wider netting-window cost.
 
-When the requested range covers complete billing cycles, periodic charges are also calculated and `costs.total` contains the full amount. When the range covers only part of a billing cycle and periodic charges exist, `costs.periodic.total` and `costs.total` are `null`; `periodicCharges[]` still contains the fee definitions so the UI can display e.g. `+ 12 PLN/month`.
+When the requested range covers complete billing cycles, periodic charges are also calculated and `costs.taxInclusive.total` contains the full amount. When the range covers only part of a billing cycle and periodic charges exist, `costs.taxExclusive.periodic.total`, `costs.taxInclusive.periodic.total`, `costs.taxes.total`, and both full totals are `null`; `periodicCharges[]` still contains the fee definitions so the UI can display e.g. `+ 12 PLN/month`.
 
-With `includeIntervals`, the result also returns `charges[]`. Each charge has its natural `[from,to)` window, resolved quantity, selector result, rate and cost. `intervals[]` still contains raw meter `usage` and costs that are genuinely resolvable at that meter interval; a 60-minute netted component is intentionally absent from the four underlying 15-minute interval costs. The top-level `usage` is always the sum of the returned meter deltas.
+`charges[]` is always returned and is the authoritative cost-fact series. Each charge has its natural `[from,to)` window, resolved quantity, selector result, `pricing` and tax-qualified `amounts`. `includeIntervals` adds only the raw meter diagnostic `intervals[]`; a 60-minute netted component is intentionally absent from the four underlying 15-minute interval costs. The top-level `usage` is always the sum of the returned meter deltas.
 
 ## JSON model
 
@@ -102,6 +102,8 @@ A component is defined by three independent concerns:
 1. **quantity** — what is charged and, optionally, how meter deltas are netted in time,
 2. **selector** — which zone/rule applies at the timestamp,
 3. **rate** — the actual rate, possibly from an external time series.
+
+Tariff presets define source pricing and the explicit taxes already included in that source price. A CostPlan independently selects a continuous `taxProfiles[]` history. `CostPlanCompiler` combines both axes into executable `taxRuleSets[]`; the calculator normalizes every source amount as `taxExclusive`, individual `taxes`, and `taxInclusive`. There is no global net/gross or price-basis switch.
 
 Temporal netting is declared directly on the quantity:
 
@@ -139,6 +141,17 @@ Example: dynamic energy (`Fixing1`) plus dynamic network zones (`PDGSZ`) plus a 
   "version": 1,
   "currency": "PLN",
   "timezone": "Europe/Warsaw",
+  "taxRuleSets": [{
+    "validFrom": null,
+    "validTo": null,
+    "rules": [{
+      "id": "VAT",
+      "type": "PERCENTAGE",
+      "appliesToKinds": ["ENERGY_PURCHASE", "DISTRIBUTION_VARIABLE"],
+      "rate": "0.23",
+      "base": "CURRENT_SUBTOTAL"
+    }]
+  }],
   "periods": [
     {
       "validFrom": "2026-01-01T00:00:00+01:00",
@@ -146,8 +159,10 @@ Example: dynamic energy (`Fixing1`) plus dynamic network zones (`PDGSZ`) plus a 
       "components": [
         {
           "id": "energy",
+          "kind": "ENERGY_PURCHASE",
           "category": "ENERGY",
           "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
+          "taxTreatment": {"included": []},
           "rate": {
             "type": "REFERENCE",
             "source": "PL.TGE.FIXING1",
@@ -158,8 +173,10 @@ Example: dynamic energy (`Fixing1`) plus dynamic network zones (`PDGSZ`) plus a 
         },
         {
           "id": "network",
+          "kind": "DISTRIBUTION_VARIABLE",
           "category": "NETWORK",
           "quantity": {"type": "ACTIVE_ENERGY_IMPORT"},
+          "taxTreatment": {"included": []},
           "selector": {
             "type": "REFERENCE",
             "source": "PL.PSE.PDGSZ",
@@ -204,9 +221,9 @@ Cost plans use the component-based version 2 format described in `docs/cost-plan
 
 Plan periods are contiguous and ordered. The first may have an open `validFrom`, the last may have an open `validTo`, and a single period may leave both boundaries open.
 
-Preset validity dates describe the bundled tariff/offer edition; the cost-plan period determines when a user applies the selected component.
+Preset validity dates bound the bundled tariff/offer edition. A cost-plan component must be continuously covered by its selected preset.
 
-Use `TariffPresetCompiler` when compiling one preset and `CostPlanCompiler` for persisted user plans:
+Use `CostPlanCompiler` for persisted user plans:
 
 ```php
 use Supla\EnergyCostCalculator\Plan\CostPlanCompiler;
@@ -216,8 +233,8 @@ $plan = [
     'currency' => 'PLN',
     'timezone' => 'Europe/Warsaw',
     'taxProfiles' => [[
-        'validFrom' => null,
-        'validTo' => null,
+        'validFrom' => '2026-01-01T00:00:00+01:00',
+        'validTo' => '2027-01-01T00:00:00+01:00',
         'profileId' => 'PL.HOUSEHOLD.2026',
     ]],
     'billingCycles' => [[
@@ -242,7 +259,7 @@ $definition = (new CostPlanCompiler())->compile($plan);
 
 The cost-plan JSON stores stable preset IDs and user values/overrides, not a copied executable definition. Compiling later uses the current document for the same preset ID, so package-owned corrections automatically apply to existing plans. Omit preset-default values from `values` unless the user explicitly overrides them; this preserves inheritance of corrected defaults. `kind` is a compatibility role and `componentId` is the per-period identity, so repeated kinds require distinct IDs; inline periodic components may omit it to retain their legacy kind-derived ID. See `schema/cost-plan-v2.schema.json` and `docs/cost-plans.md`.
 
-Bundled presets are complete defaults: `TariffPresetCompiler` can compile them with no input values. Every declared input targets a default template value and callers may override any of them when creating a plan. Billing-cycle settings belong to the cost plan; a preset's internal cycle exists only so that the preset can also compile independently.
+Bundled presets are complete defaults: `TariffPresetCompiler::compileToArray()` resolves template inputs, while `CostPlanCompiler` owns executable BillingDefinition compilation. Every declared input targets a default template value and callers may override any of them when creating a plan. Billing-cycle settings belong to the cost plan.
 
 Standard supply presets preserve the provenance of the energy-price defaults originally bundled with the OSD examples. Named dynamic offers are separate `OFFER` presets and may expose several components, for example `ENERGY_PURCHASE` plus `SUPPLIER_FIXED`. The package also provides generic constant and market-reference energy presets. See `docs/component-presets-and-starters.md`.
 

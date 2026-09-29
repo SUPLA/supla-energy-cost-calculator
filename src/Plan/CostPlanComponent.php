@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Supla\EnergyCostCalculator\Plan;
 
+use Supla\EnergyCostCalculator\Model\CostComponentKind;
+
 final readonly class CostPlanComponent
 {
     /** @param array<string, mixed> $values */
