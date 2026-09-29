@@ -89,19 +89,7 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             new \DateTimeImmutable('2025-12-31T23:00:00Z'),
             new \DateTimeImmutable('2026-12-31T23:00:00Z'),
         );
-        $deltaSource = new class implements EnergyDeltaSource {
-            public function getDeltas(string $meterId, TimeRange $range): iterable
-            {
-                $from = $range->from;
-                while ($from < $range->to) {
-                    $to = $from->add(new \DateInterval('PT15M'));
-                    yield new EnergyDelta($from, $to, [
-                        QuantityType::ACTIVE_ENERGY_IMPORT->value => '0.25',
-                    ]);
-                    $from = $to;
-                }
-            }
-        };
+        $deltaSource = $this->quarterHourDeltaSource();
         $definition = (new CostPlanCompiler())->compile([
             'version' => 2,
             'currency' => 'PLN',
@@ -753,8 +741,16 @@ final class TwoYearHistoryPerformanceTest extends TestCase
             'validFrom' => null,
             'validTo' => null,
             'rules' => [[
-                'id' => 'VAT', 'type' => 'PERCENTAGE', 'appliesToKinds' => ['SUPPLIER_FIXED'],
-                'rate' => '0.23', 'base' => 'CURRENT_SUBTOTAL',
+                'id' => 'VAT',
+                'type' => 'PERCENTAGE',
+                'appliesToKinds' => [
+                    'ENERGY_PURCHASE',
+                    'DISTRIBUTION_VARIABLE',
+                    'DISTRIBUTION_FIXED',
+                    'SUPPLIER_FIXED',
+                ],
+                'rate' => '0',
+                'base' => 'CURRENT_SUBTOTAL',
             ]],
         ]];
     }
