@@ -311,10 +311,12 @@ final class CostCalculator
                 );
             }
 
-            $intervalComponents = [];
-            $intervalTotal = '0';
-            $intervalByComponent = [];
-            $intervalByZone = [];
+            if ($options->includeIntervals) {
+                $intervalComponents = [];
+                $intervalTotal = '0';
+                $intervalByComponent = [];
+                $intervalByZone = [];
+            }
             foreach ($definitionPeriod->components as $component) {
                 if ($component->isPeriodic()) {
                     continue;
@@ -441,13 +443,12 @@ final class CostCalculator
                     $this->addAmount($billingSummaryState[$summaryKey]['usageBasedNetByZone'], $selection, $taxCalculation->net);
                 }
 
-                $intervalTotal = $this->math->add($intervalTotal, $cost);
-                $this->addAmount($intervalByComponent, $component->id, $cost);
-                if ($selection !== null) {
-                    $this->addAmount($intervalByZone, $selection, $cost);
-                }
-
                 if ($options->includeIntervals) {
+                    $intervalTotal = $this->math->add($intervalTotal, $cost);
+                    $this->addAmount($intervalByComponent, $component->id, $cost);
+                    if ($selection !== null) {
+                        $this->addAmount($intervalByZone, $selection, $cost);
+                    }
                     $intervalComponents[] = [
                         'id' => $component->id,
                         'kind' => $component->kind->value,

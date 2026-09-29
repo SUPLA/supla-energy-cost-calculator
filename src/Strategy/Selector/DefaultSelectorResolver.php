@@ -15,20 +15,65 @@ use Supla\EnergyCostCalculator\Reference\ReferenceDataCache;
 final class DefaultSelectorResolver implements SelectorResolver, TimeRangeSelectorResolver
 {
     private const DEFAULT_RULE_PRIORITY = 500;
+    private const DATED_SCHEDULE_CACHE_LIMIT = 4;
 
-    private const DAY_NAMES = [
-        1 => 'MON',
-        2 => 'TUE',
-        3 => 'WED',
-        4 => 'THU',
-        5 => 'FRI',
-        6 => 'SAT',
-        7 => 'SUN',
+    private const DAY_BITS = [
+        'MON' => 1 << 0,
+        'TUE' => 1 << 1,
+        'WED' => 1 << 2,
+        'THU' => 1 << 3,
+        'FRI' => 1 << 4,
+        'SAT' => 1 << 5,
+        'SUN' => 1 << 6,
     ];
+
+    /**
+     * @var \WeakMap<SelectorDefinition, array{
+     *     timezone: \DateTimeZone,
+     *     calendarId: string,
+     *     seasons: list<array{id: string, from: int, to: int}>,
+     *     rules: list<array{
+     *         zone: string,
+     *         priority: int,
+     *         ruleOrder: int,
+     *         season: ?string,
+     *         weekdayMask: int,
+     *         holiday: bool,
+     *         fromHour: int,
+     *         fromMinute: int,
+     *         fromNextDay: bool,
+     *         toHour: int,
+     *         toMinute: int,
+     *         toNextDay: bool
+     *     }>
+     * }>
+     */
+    private \WeakMap $compiledWeeklySchedules;
+
+    /**
+     * @var \WeakMap<SelectorDefinition, array<string, array{
+     *     anchorDay: \DateTimeImmutable,
+     *     seasonId: ?string,
+     *     weekdayBit: int,
+     *     intervals: list<array{
+     *         zone: string,
+     *         priority: int,
+     *         ruleOrder: int,
+     *         season: ?string,
+     *         weekdayMask: int,
+     *         holiday: bool,
+     *         start: \DateTimeImmutable,
+     *         end: \DateTimeImmutable
+     *     }>
+     * }>>
+     */
+    private \WeakMap $datedWeeklySchedules;
 
     public function __construct(
         private readonly HolidayCalendarProvider $holidayCalendarProvider = new BundledHolidayCalendarProvider(),
     ) {
+        $this->compiledWeeklySchedules = new \WeakMap();
+        $this->datedWeeklySchedules = new \WeakMap();
     }
 
     public function resolve(EnergyDelta $delta, SelectorDefinition $definition, ReferenceDataCache $references): ?string
@@ -46,11 +91,8 @@ final class DefaultSelectorResolver implements SelectorResolver, TimeRangeSelect
             return $selection;
         }
 
-        // WEEKLY_SCHEDULE clocks have minute resolution. Check every minute in
-        // the half-open pricing range so an allocation slot cannot hide a zone
-        // transition in its interior.
-        for ($cursor = $range->from->modify('+1 minute'); $cursor < $range->to; $cursor = $cursor->modify('+1 minute')) {
-            if ($this->resolveWeeklySchedule($cursor, $definition) !== $selection) {
+        foreach ($this->weeklyScheduleBoundaries($range, $definition) as $boundary) {
+            if ($this->resolveWeeklySchedule($boundary, $definition) !== $selection) {
                 throw new CalculationException(sprintf(
                     'Selector result changes inside pricing interval %s..%s.',
                     $range->from->format(DATE_ATOM),
@@ -105,44 +147,39 @@ final class DefaultSelectorResolver implements SelectorResolver, TimeRangeSelect
 
     private function resolveWeeklySchedule(\DateTimeImmutable $timestamp, SelectorDefinition $definition): string
     {
-        $timezone = new \DateTimeZone((string)($definition->config['timezone'] ?? 'UTC'));
-        $local = $timestamp->setTimezone($timezone);
+        $schedule = $this->compiledWeeklySchedule($definition);
+        $local = $timestamp->setTimezone($schedule['timezone']);
         $localDay = $local->setTime(0, 0, 0);
-        $rules = $definition->config['rules'];
-        $seasons = $definition->config['seasons'] ?? [];
-        $calendarId = (string)($definition->config['calendar'] ?? '');
+        $datedSchedules = [
+            $this->datedWeeklySchedule($definition, $localDay),
+            $this->datedWeeklySchedule($definition, $localDay->modify('-1 day')),
+        ];
+        $holidayByDate = [];
 
         $winner = null;
-        foreach (array_values($rules) as $ruleOrder => $rule) {
-            foreach ($this->timeRanges($rule) as $timeRange) {
-                // A range may cross midnight. Checking the current and previous local
-                // day preserves the semantics from supla-cloud issue-307: the rule's
-                // day/holiday/season is determined by the day on which the range starts.
-                foreach ([$localDay, $localDay->modify('-1 day')] as $anchorDay) {
-                    [$start, $end] = $this->buildLocalInterval($anchorDay, $timeRange);
-                    if ($local < $start || $local >= $end) {
-                        continue;
-                    }
+        foreach ($datedSchedules as $datedSchedule) {
+            foreach ($datedSchedule['intervals'] as $rule) {
+                if ($local < $rule['start'] || $local >= $rule['end']) {
+                    continue;
+                }
+                if (!$this->matchesSeason($rule['season'], $datedSchedule['seasonId'])) {
+                    continue;
+                }
+                if (!$this->matchesCompiledDay($rule, $datedSchedule, $schedule['calendarId'], $holidayByDate)) {
+                    continue;
+                }
 
-                    if (!$this->matchesSeason($rule['season'] ?? null, $this->resolveSeasonId($seasons, $anchorDay))) {
-                        continue;
-                    }
-                    if (!$this->matchesDay($rule['days'], $anchorDay, $calendarId)) {
-                        continue;
-                    }
-
-                    $candidate = [
-                        'zone' => (string)$rule['zone'],
-                        'priority' => (int)($rule['priority'] ?? self::DEFAULT_RULE_PRIORITY),
-                        'ruleOrder' => $ruleOrder,
-                    ];
-                    if (
-                        $winner === null
-                        || $candidate['priority'] < $winner['priority']
-                        || ($candidate['priority'] === $winner['priority'] && $candidate['ruleOrder'] < $winner['ruleOrder'])
-                    ) {
-                        $winner = $candidate;
-                    }
+                $candidate = [
+                    'zone' => $rule['zone'],
+                    'priority' => $rule['priority'],
+                    'ruleOrder' => $rule['ruleOrder'],
+                ];
+                if (
+                    $winner === null
+                    || $candidate['priority'] < $winner['priority']
+                    || ($candidate['priority'] === $winner['priority'] && $candidate['ruleOrder'] < $winner['ruleOrder'])
+                ) {
+                    $winner = $candidate;
                 }
             }
         }
@@ -155,6 +192,188 @@ final class DefaultSelectorResolver implements SelectorResolver, TimeRangeSelect
             'No WEEKLY_SCHEDULE rule matched %s.',
             $local->format(DATE_ATOM),
         ));
+    }
+
+    /**
+     * @return array{
+     *     timezone: \DateTimeZone,
+     *     calendarId: string,
+     *     seasons: list<array{id: string, from: int, to: int}>,
+     *     rules: list<array{
+     *         zone: string,
+     *         priority: int,
+     *         ruleOrder: int,
+     *         season: ?string,
+     *         weekdayMask: int,
+     *         holiday: bool,
+     *         fromHour: int,
+     *         fromMinute: int,
+     *         fromNextDay: bool,
+     *         toHour: int,
+     *         toMinute: int,
+     *         toNextDay: bool
+     *     }>
+     * }
+     */
+    private function compiledWeeklySchedule(SelectorDefinition $definition): array
+    {
+        if (isset($this->compiledWeeklySchedules[$definition])) {
+            return $this->compiledWeeklySchedules[$definition];
+        }
+
+        $seasons = [];
+        foreach ($definition->config['seasons'] ?? [] as $season) {
+            $seasons[] = [
+                'id' => (string)$season['id'],
+                'from' => $this->monthDayNumber((string)$season['from']),
+                'to' => $this->monthDayNumber((string)$season['to']),
+            ];
+        }
+
+        $rules = [];
+        foreach (array_values($definition->config['rules']) as $ruleOrder => $rule) {
+            $weekdayMask = 0;
+            $holiday = false;
+            foreach ($rule['days'] as $day) {
+                $day = strtoupper((string)$day);
+                if ($day === 'HOLIDAY') {
+                    $holiday = true;
+                    continue;
+                }
+                $weekdayMask |= self::DAY_BITS[$day] ?? 0;
+            }
+
+            foreach ($this->timeRanges($rule) as $timeRange) {
+                [$fromHour, $fromMinute, $fromNextDay] = $this->parseTime((string)$timeRange['from']);
+                [$toHour, $toMinute, $toNextDay] = $this->parseTime((string)$timeRange['to']);
+                $rules[] = [
+                    'zone' => (string)$rule['zone'],
+                    'priority' => (int)($rule['priority'] ?? self::DEFAULT_RULE_PRIORITY),
+                    'ruleOrder' => $ruleOrder,
+                    'season' => isset($rule['season']) ? (string)$rule['season'] : null,
+                    'weekdayMask' => $weekdayMask,
+                    'holiday' => $holiday,
+                    'fromHour' => $fromHour,
+                    'fromMinute' => $fromMinute,
+                    'fromNextDay' => $fromNextDay,
+                    'toHour' => $toHour,
+                    'toMinute' => $toMinute,
+                    'toNextDay' => $toNextDay,
+                ];
+            }
+        }
+
+        $compiled = [
+            'timezone' => new \DateTimeZone((string)($definition->config['timezone'] ?? 'UTC')),
+            'calendarId' => (string)($definition->config['calendar'] ?? ''),
+            'seasons' => $seasons,
+            'rules' => $rules,
+        ];
+        $this->compiledWeeklySchedules[$definition] = $compiled;
+        return $compiled;
+    }
+
+    /**
+     * @return array{
+     *     anchorDay: \DateTimeImmutable,
+     *     seasonId: ?string,
+     *     weekdayBit: int,
+     *     intervals: list<array{
+     *         zone: string,
+     *         priority: int,
+     *         ruleOrder: int,
+     *         season: ?string,
+     *         weekdayMask: int,
+     *         holiday: bool,
+     *         start: \DateTimeImmutable,
+     *         end: \DateTimeImmutable
+     *     }>
+     * }
+     */
+    private function datedWeeklySchedule(SelectorDefinition $definition, \DateTimeImmutable $anchorDay): array
+    {
+        $schedule = $this->compiledWeeklySchedule($definition);
+        $anchorDay = $anchorDay->setTimezone($schedule['timezone'])->setTime(0, 0, 0);
+        $date = $anchorDay->format('Y-m-d');
+        $cache = $this->datedWeeklySchedules[$definition] ?? [];
+        if (isset($cache[$date])) {
+            return $cache[$date];
+        }
+
+        $intervals = [];
+        foreach ($schedule['rules'] as $rule) {
+            $start = $anchorDay->setTime($rule['fromHour'], $rule['fromMinute'], 0);
+            if ($rule['fromNextDay']) {
+                $start = $start->modify('+1 day');
+            }
+
+            $end = $anchorDay->setTime($rule['toHour'], $rule['toMinute'], 0);
+            if ($rule['toNextDay']) {
+                $end = $end->modify('+1 day');
+            }
+            if ($end <= $start) {
+                $end = $end->modify('+1 day');
+            }
+
+            $intervals[] = [
+                'zone' => $rule['zone'],
+                'priority' => $rule['priority'],
+                'ruleOrder' => $rule['ruleOrder'],
+                'season' => $rule['season'],
+                'weekdayMask' => $rule['weekdayMask'],
+                'holiday' => $rule['holiday'],
+                'start' => $start,
+                'end' => $end,
+            ];
+        }
+
+        $dated = [
+            'anchorDay' => $anchorDay,
+            'seasonId' => $this->resolveCompiledSeasonId($schedule['seasons'], $anchorDay),
+            'weekdayBit' => 1 << ((int)$anchorDay->format('N') - 1),
+            'intervals' => $intervals,
+        ];
+        $cache[$date] = $dated;
+        while (count($cache) > self::DATED_SCHEDULE_CACHE_LIMIT) {
+            unset($cache[array_key_first($cache)]);
+        }
+        $this->datedWeeklySchedules[$definition] = $cache;
+        return $dated;
+    }
+
+    /** @return list<\DateTimeImmutable> */
+    private function weeklyScheduleBoundaries(TimeRange $range, SelectorDefinition $definition): array
+    {
+        $schedule = $this->compiledWeeklySchedule($definition);
+        $fromTimestamp = $range->from->getTimestamp();
+        $toTimestamp = $range->to->getTimestamp();
+        $boundaries = [];
+
+        $firstAnchorDay = $range->from->setTimezone($schedule['timezone'])->setTime(0, 0, 0)->modify('-1 day');
+        $lastAnchorDay = $range->to->setTimezone($schedule['timezone'])->setTime(0, 0, 0);
+        for ($day = $firstAnchorDay; $day <= $lastAnchorDay; $day = $day->modify('+1 day')) {
+            foreach ($this->datedWeeklySchedule($definition, $day)['intervals'] as $rule) {
+                foreach ([$rule['start'], $rule['end']] as $boundary) {
+                    $timestamp = $boundary->getTimestamp();
+                    if ($timestamp > $fromTimestamp && $timestamp < $toTimestamp) {
+                        $boundaries[$timestamp] = $boundary;
+                    }
+                }
+            }
+        }
+
+        $transitions = $schedule['timezone']->getTransitions($fromTimestamp, $toTimestamp);
+        if (is_array($transitions)) {
+            foreach ($transitions as $transition) {
+                $timestamp = (int)$transition['ts'];
+                if ($timestamp > $fromTimestamp && $timestamp < $toTimestamp) {
+                    $boundaries[$timestamp] = (new \DateTimeImmutable('@' . $timestamp))->setTimezone($schedule['timezone']);
+                }
+            }
+        }
+
+        ksort($boundaries, SORT_NUMERIC);
+        return array_values($boundaries);
     }
 
     /** @return list<array{from: string, to: string}> */
@@ -171,43 +390,26 @@ final class DefaultSelectorResolver implements SelectorResolver, TimeRangeSelect
         ]];
     }
 
-    /** @return array{0: \DateTimeImmutable, 1: \DateTimeImmutable} */
-    private function buildLocalInterval(\DateTimeImmutable $anchorDay, array $timeRange): array
+    /**
+     * @param array{weekdayMask: int, holiday: bool} $rule
+     * @param array{anchorDay: \DateTimeImmutable, weekdayBit: int} $datedSchedule
+     * @param array<string, bool> $holidayByDate
+     */
+    private function matchesCompiledDay(array $rule, array $datedSchedule, string $calendarId, array &$holidayByDate): bool
     {
-        [$fromHour, $fromMinute, $fromNextDay] = $this->parseTime((string)$timeRange['from']);
-        [$toHour, $toMinute, $toNextDay] = $this->parseTime((string)$timeRange['to']);
-
-        $start = $anchorDay->setTime($fromHour, $fromMinute, 0);
-        if ($fromNextDay) {
-            $start = $start->modify('+1 day');
-        }
-
-        $end = $anchorDay->setTime($toHour, $toMinute, 0);
-        if ($toNextDay) {
-            $end = $end->modify('+1 day');
-        }
-        if ($end <= $start) {
-            $end = $end->modify('+1 day');
-        }
-
-        return [$start, $end];
-    }
-
-    private function matchesDay(array $ruleDays, \DateTimeImmutable $anchorDay, string $calendarId): bool
-    {
-        $days = array_map('strtoupper', $ruleDays);
-        $dayName = self::DAY_NAMES[(int)$anchorDay->format('N')];
-        if (in_array($dayName, $days, true)) {
+        if (($rule['weekdayMask'] & $datedSchedule['weekdayBit']) !== 0) {
             return true;
         }
-        if (!in_array('HOLIDAY', $days, true)) {
+        if (!$rule['holiday']) {
             return false;
         }
         if ($calendarId === '') {
             throw new CalculationException('WEEKLY_SCHEDULE with HOLIDAY rules requires a calendar.');
         }
 
-        return $this->holidayCalendarProvider->isHoliday($calendarId, $anchorDay);
+        $anchorDay = $datedSchedule['anchorDay'];
+        $date = $anchorDay->format('Y-m-d');
+        return $holidayByDate[$date] ??= $this->holidayCalendarProvider->isHoliday($calendarId, $anchorDay);
     }
 
     private function matchesSeason(?string $seasonRule, ?string $seasonId): bool
@@ -215,31 +417,31 @@ final class DefaultSelectorResolver implements SelectorResolver, TimeRangeSelect
         return $seasonRule === null || $seasonRule === '*' || $seasonRule === $seasonId;
     }
 
-    private function resolveSeasonId(array $seasons, \DateTimeImmutable $localDay): ?string
+    /** @param list<array{id: string, from: int, to: int}> $seasons */
+    private function resolveCompiledSeasonId(array $seasons, \DateTimeImmutable $localDay): ?string
     {
+        $day = ((int)$localDay->format('n') * 100) + (int)$localDay->format('j');
         foreach ($seasons as $season) {
-            if ($this->isWithinSeason($localDay, (string)$season['from'], (string)$season['to'])) {
-                return (string)$season['id'];
+            if ($season['from'] === $season['to']) {
+                return $season['id'];
+            }
+            if ($season['from'] < $season['to']) {
+                if ($day >= $season['from'] && $day < $season['to']) {
+                    return $season['id'];
+                }
+                continue;
+            }
+            if ($day >= $season['from'] || $day < $season['to']) {
+                return $season['id'];
             }
         }
 
         return null;
     }
 
-    private function isWithinSeason(\DateTimeImmutable $localDay, string $from, string $to): bool
+    private function monthDayNumber(string $value): int
     {
-        $dayMd = $localDay->format('m-d');
-        $fromMd = substr($from, 2);
-        $toMd = substr($to, 2);
-
-        if ($fromMd === $toMd) {
-            return true;
-        }
-        if ($fromMd < $toMd) {
-            return $dayMd >= $fromMd && $dayMd < $toMd;
-        }
-
-        return $dayMd >= $fromMd || $dayMd < $toMd;
+        return ((int)substr($value, 2, 2) * 100) + (int)substr($value, 5, 2);
     }
 
     /** @return array{0: int, 1: int, 2: bool} */
