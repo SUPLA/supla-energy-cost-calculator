@@ -48,7 +48,7 @@ final class ComponentCostPlanTest extends TestCase
         self::assertSame('14.76', $result->billingPeriods[0]['costs']['gross']['periodic']['total']);
     }
 
-    public function testRejectsPlanPeriodOutsidePresetValidity(): void
+    public function testAllowsOpenEndedPlanPeriodAroundPresetValidity(): void
     {
         $plan = $this->plan();
         $plan['periods'][0]['validFrom'] = null;
@@ -56,9 +56,10 @@ final class ComponentCostPlanTest extends TestCase
         $plan['billingCycles'][0]['validFrom'] = null;
         $plan['billingCycles'][0]['validTo'] = '2027-02-01T00:00:00+01:00';
 
-        $this->expectException(CostPlanDefinitionException::class);
-        $this->expectExceptionMessage('Preset does not cover');
-        (new CostPlanCompiler())->compileToArray($plan);
+        $compiled = (new CostPlanCompiler())->compileToArray($plan);
+
+        self::assertNull($compiled['periods'][0]['validFrom']);
+        self::assertSame('2027-02-01T00:00:00+01:00', $compiled['periods'][array_key_last($compiled['periods'])]['validTo']);
     }
 
     public function testCompilerResolvesTaxRulesAutomaticallyFromPresetContext(): void

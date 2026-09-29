@@ -121,15 +121,20 @@ final class CostPlanCompiler
                 }
                 $next = [];
                 foreach ($segments as $segment) {
-                    foreach ($fragment['periods'] as $source) {
-                        $from = $this->maxDate(
-                            $this->documentDate($segment['validFrom'], 'plan period validFrom'),
-                            $this->documentDate($source['validFrom'] ?? null, 'preset period validFrom'),
-                        );
-                        $to = $this->minDate(
-                            $this->documentDate($segment['validTo'], 'plan period validTo'),
-                            $this->documentDate($source['validTo'] ?? null, 'preset period validTo'),
-                        );
+                    $sourcePeriods = $fragment['periods'];
+                    foreach ($sourcePeriods as $sourceIndex => $source) {
+                        $from = $sourceIndex === 0
+                            ? $this->documentDate($segment['validFrom'], 'plan period validFrom')
+                            : $this->maxDate(
+                                $this->documentDate($segment['validFrom'], 'plan period validFrom'),
+                                $this->documentDate($source['validFrom'] ?? null, 'preset period validFrom'),
+                            );
+                        $to = $sourceIndex === array_key_last($sourcePeriods)
+                            ? $this->documentDate($segment['validTo'], 'plan period validTo')
+                            : $this->minDate(
+                                $this->documentDate($segment['validTo'], 'plan period validTo'),
+                                $this->documentDate($source['validTo'] ?? null, 'preset period validTo'),
+                            );
                         if ($from !== null && $to !== null && $from >= $to) {
                             continue;
                         }
@@ -147,7 +152,6 @@ final class CostPlanCompiler
                     }
                 }
                 $segments = $next;
-                $this->assertCoverage($segments, $entry->validFrom, $entry->validTo, "period $index component {$selected->kind->value}");
             }
             array_push($periods, ...$segments);
         }
