@@ -38,7 +38,7 @@ Version 2 assigns a `CostComponentKind` compatibility role to each component of 
 }
 ```
 
-Preset input targets are applied only to the selected component. Every preset declares a `taxContext`; the compiler verifies that all selected presets (and an optional top-level `CostPlan.taxContext`) agree, then resolves the applicable tax-profile assignments for the effective compiled date range. Callers do not persist `TaxProfile` IDs or tax rates. The compiler also verifies component category and quantity compatibility, compatible currency/timezone, full billing-cycle coverage, and unique `componentId` values per plan period. Preset `validFrom` and `validTo` values are informative; the cost-plan period controls when a selected tariff or offer applies. The compiler preserves internal template rule changes while extending its outer rules to the configured plan period. Bundled presets compile from their template defaults; a cost plan's `values` override those defaults explicitly. Distribution tariffs and supply offers are separate presets. `CostPlanStarterCatalog` composes the usual OSD + incumbent-supplier combinations for the simple setup path, while advanced UIs can replace each component independently.
+Preset input targets are applied only to the selected component. Every preset declares a `taxContext`; the compiler verifies that all selected presets (and an optional top-level `CostPlan.taxContext`) agree, then embeds the complete known tax-profile timeline for that context. CostPlan validity is independent of tax-history validity: an open plan can start before the first known profile or remain open indefinitely. Callers do not persist `TaxProfile` IDs or tax rates, and calculation fails explicitly only if an actual charge falls outside the compiled tax timeline. The compiler also verifies component category and quantity compatibility, compatible currency/timezone, full billing-cycle coverage, and unique `componentId` values per plan period. Preset `validFrom` and `validTo` values are informative; the cost-plan period controls when a selected tariff or offer applies. The compiler preserves internal template rule changes while extending its outer rules to the configured plan period. Bundled presets compile from their template defaults; a cost plan's `values` override those defaults explicitly. Distribution tariffs and supply offers are separate presets. `CostPlanStarterCatalog` composes the usual OSD + incumbent-supplier combinations for the simple setup path, while advanced UIs can replace each component independently.
 
 When a plan contains only inline components and therefore has no preset from which to infer tax context, it must include `"taxContext": {"jurisdiction": "PL", "customerClass": "HOUSEHOLD"}` (or the appropriate host-provided context). Context is never inferred from `currency`, `timezone`, or an ID prefix.
 
@@ -79,9 +79,9 @@ A real operator change (new validity period, changed tariff semantics, new produ
 - resolves selected components through the current `TariffPresetCatalog`;
 - compiles each selected component with its own user overrides;
 - resolves exactly one `TaxContext` from the optional plan context and all selected presets;
-- resolves the dated tax-profile assignments only after the effective compiled coverage is known;
+- resolves the complete known dated tax-profile timeline for that context, independently of CostPlan outer boundaries;
 - combines selected components into one `BillingDefinition`;
-- validates continuous billing-cycle coverage and component rule coverage, including the selected preset's validity range;
+- validates continuous billing-cycle coverage and component template rule coverage;
 - delegates final validation to `BillingDefinitionParser`.
 
 ## Preset corrections

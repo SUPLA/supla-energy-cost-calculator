@@ -31,8 +31,8 @@ final class CostPlanTaxContextTest extends TestCase
 
         $compiled = (new CostPlanCompiler())->compileToArray($plan);
 
-        self::assertCount(1, $compiled['taxRuleSets']);
-        self::assertSame(['EXCISE', 'VAT'], array_column($compiled['taxRuleSets'][0]['rules'], 'id'));
+        self::assertCount(3, $compiled['taxRuleSets']);
+        self::assertSame(['EXCISE', 'VAT'], array_column($compiled['taxRuleSets'][2]['rules'], 'id'));
     }
 
     public function testRejectsConflictingContextsFromSupplyAndDistributionPresets(): void
@@ -79,7 +79,7 @@ final class CostPlanTaxContextTest extends TestCase
             'customerClass' => 'HOUSEHOLD',
         ]));
 
-        self::assertCount(1, $compiled['taxRuleSets']);
+        self::assertCount(3, $compiled['taxRuleSets']);
         self::assertSame('supplier-fixed', $compiled['periods'][0]['components'][0]['id']);
     }
 

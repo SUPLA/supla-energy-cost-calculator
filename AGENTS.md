@@ -35,7 +35,7 @@ Materialize `charges[]` only when `CalculationOptions.includeCharges` is enabled
 
 ## Taxes
 
-Taxes are data-driven. A component declares `kind` and an explicit `taxTreatment.included` ordered prefix. `TaxProfile` resources are atomic, immutable rule sets. Presets declare `taxContext`; `TaxProfileAssignmentCatalog` maps context + date ranges to profile IDs, and `CostPlanCompiler` resolves those assignments into executable `BillingDefinition.taxRuleSets[]`. `CostPlan.taxContext` is optional and is used for inline-only plans or to constrain preset-derived context; normal callers do not select profile IDs or tax rates. The engine first reverses included taxes to canonical `net`, then applies all applicable rules in declaration order to produce `gross`. Do not introduce a global net/gross or price-basis flag.
+Taxes are data-driven. A component declares `kind` and an explicit `taxTreatment.included` ordered prefix. `TaxProfile` resources are atomic, immutable rule sets. Presets declare `taxContext`; `TaxProfileAssignmentCatalog` maps context + date ranges to profile IDs, and `CostPlanCompiler` embeds the complete known assignment timeline into executable `BillingDefinition.taxRuleSets[]` without constraining open CostPlan boundaries. Missing tax coverage is a calculation-time error for the affected charge. `CostPlan.taxContext` is optional and is used for inline-only plans or to constrain preset-derived context; normal callers do not select profile IDs or tax rates. The engine first reverses included taxes to canonical `net`, then applies all applicable rules in declaration order to produce `gross`. Do not introduce a global net/gross or price-basis flag.
 
 ## Data access
 

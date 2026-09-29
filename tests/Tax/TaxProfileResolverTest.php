@@ -62,6 +62,27 @@ final class TaxProfileResolverTest extends TestCase
         self::assertSame(['TEST.A', 'TEST.B'], array_column($resolved, 'profileId'));
     }
 
+    public function testResolvesWholeKnownTimelineWithoutRequiringOpenOuterBoundaries(): void
+    {
+        $this->writeProfile('TEST.A', 'PLN');
+        $this->writeProfile('TEST.B', 'PLN');
+        $this->writeAssignments([
+            $this->assignment('2020-01-01T00:00:00+01:00', '2021-01-01T00:00:00+01:00', 'TEST.A'),
+            $this->assignment('2021-01-01T00:00:00+01:00', null, 'TEST.B'),
+        ]);
+
+        $resolved = $this->resolver()->resolveTimeline(
+            new TaxContext('TEST', 'HOUSEHOLD'),
+            'PLN',
+        );
+
+        self::assertSame(['TEST.A', 'TEST.B'], array_column($resolved, 'profileId'));
+        self::assertSame('2020-01-01T00:00:00+01:00', $resolved[0]['validFrom']?->format(DATE_ATOM));
+        self::assertSame('2021-01-01T00:00:00+01:00', $resolved[0]['validTo']?->format(DATE_ATOM));
+        self::assertSame('2021-01-01T00:00:00+01:00', $resolved[1]['validFrom']?->format(DATE_ATOM));
+        self::assertNull($resolved[1]['validTo']);
+    }
+
     public function testRejectsGap(): void
     {
         $this->writeProfile('TEST.A', 'PLN');
@@ -173,7 +194,7 @@ final class TaxProfileResolverTest extends TestCase
     }
 
     /** @return array<string, mixed> */
-    private function assignment(string $from, string $to, string $profileId): array
+    private function assignment(?string $from, ?string $to, string $profileId): array
     {
         return [
             'taxContext' => ['jurisdiction' => 'TEST', 'customerClass' => 'HOUSEHOLD'],

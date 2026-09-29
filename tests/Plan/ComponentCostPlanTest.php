@@ -65,10 +65,10 @@ final class ComponentCostPlanTest extends TestCase
     {
         $compiled = (new CostPlanCompiler())->compileToArray($this->plan());
 
-        self::assertCount(1, $compiled['taxRuleSets']);
-        self::assertSame('2026-01-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validFrom']);
-        self::assertSame('2026-02-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validTo']);
-        self::assertSame(['EXCISE', 'VAT'], array_column($compiled['taxRuleSets'][0]['rules'], 'id'));
+        self::assertCount(3, $compiled['taxRuleSets']);
+        self::assertSame('2019-01-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validFrom']);
+        self::assertSame('2022-01-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validTo']);
+        self::assertSame(['EXCISE', 'VAT'], array_column($compiled['taxRuleSets'][2]['rules'], 'id'));
     }
 
     public function testCanAddFixedDistributionAsSeparateKind(): void

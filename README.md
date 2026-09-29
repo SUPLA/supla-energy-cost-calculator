@@ -103,7 +103,7 @@ A component is defined by three independent concerns:
 2. **selector** — which zone/rule applies at the timestamp,
 3. **rate** — the actual rate, possibly from an external time series.
 
-Tariff presets define a `taxContext` (for example `PL` + `HOUSEHOLD`), source pricing, and the explicit taxes already included in that source price. `CostPlanCompiler` resolves the applicable immutable `TaxProfile` history for the compiled date range and emits executable `taxRuleSets[]`; callers do not select profile IDs or tax rates. The calculator normalizes every source amount as canonical `net`, individual `taxes`, and `gross`. `pricing.rate` remains the source rate and can include the taxes listed in `pricing.includedTaxes`; `amounts.net` removes every tax modeled by the resolved profile. There is no global net/gross or price-basis switch.
+Tariff presets define a `taxContext` (for example `PL` + `HOUSEHOLD`), source pricing, and the explicit taxes already included in that source price. `CostPlanCompiler` resolves the complete known immutable `TaxProfile` timeline for that context and emits it as executable `taxRuleSets[]`; callers do not select profile IDs or tax rates. CostPlan boundaries are independent of tax-history boundaries, so a plan may be open before the first known tax profile or indefinitely into the future. `CostCalculator` fails only when an actual charge falls outside the known tax timeline. The calculator normalizes every covered source amount as canonical `net`, individual `taxes`, and `gross`. `pricing.rate` remains the source rate and can include the taxes listed in `pricing.includedTaxes`; `amounts.net` removes every tax modeled by the resolved profile. There is no global net/gross or price-basis switch.
 
 Temporal netting is declared directly on the quantity:
 
@@ -224,6 +224,8 @@ Plan periods are contiguous and ordered. The first may have an open `validFrom`,
 Top-level preset `validFrom` / `validTo` describe catalogue availability of that tariff or offer edition and do not clip a user's CostPlan. Executable applicability belongs to `billingDefinitionTemplate.periods[]`: annual tariff editions can remain bounded there, while contract offers and generic presets may use open template periods. The CostPlan period records the user's actual effective range.
 
 Tax profiles describe immutable tax regimes rather than calendar years. For Polish households the `VAT23_EXCISE5` profile is reused from 2019 through 2021 and again from 2023 onward, while the 2022 anti-inflation shield uses a dedicated `VAT5_EXCISE0` profile. The current assignment remains open-ended until tax law changes; when it does, close that assignment at the legal boundary and add a new immutable profile instead of publishing annual copies.
+
+A persisted CostPlan may use `validFrom: null` and/or `validTo: null` independently of that tax timeline. This is useful for the normal UI meaning "apply this plan to all meter history I have". Compilation still succeeds; if calculation reaches a date not covered by `taxRuleSets[]`, it raises an explicit calculation error instead of guessing tax rules.
 
 Use `CostPlanCompiler` for persisted user plans:
 

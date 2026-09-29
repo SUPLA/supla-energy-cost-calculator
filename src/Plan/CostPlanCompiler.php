@@ -160,9 +160,8 @@ final class CostPlanCompiler
         }
 
         $taxContext = $this->resolveTaxContext($plan->taxContext, $presetContexts);
-        [$coverageFrom, $coverageTo] = $this->compiledCoverage($periods, $plan->billingCycles);
         try {
-            $assignments = $this->taxProfileResolver->resolve($taxContext, $coverageFrom, $coverageTo, $plan->currency);
+            $assignments = $this->taxProfileResolver->resolveTimeline($taxContext, $plan->currency);
         } catch (DefinitionException $e) {
             throw new CostPlanDefinitionException($e->getMessage(), previous: $e);
         }
@@ -218,38 +217,6 @@ final class CostPlanCompiler
             }
         }
         return new TaxContext($context['jurisdiction'], $context['customerClass']);
-    }
-
-    /**
-     * @param list<array<string, mixed>> $periods
-     * @param list<array<string, mixed>> $billingCycles
-     * @return array{0: \DateTimeImmutable, 1: \DateTimeImmutable}
-     */
-    private function compiledCoverage(array $periods, array $billingCycles): array
-    {
-        $from = $periods === [] ? null : $this->documentDate($periods[0]['validFrom'] ?? null, 'compiled period validFrom');
-        $to = $periods === [] ? null : $this->documentDate($periods[array_key_last($periods)]['validTo'] ?? null, 'compiled period validTo');
-
-        if ($from === null) {
-            foreach ($billingCycles as $cycle) {
-                $candidate = $this->documentDate($cycle['validFrom'] ?? null, 'billing cycle validFrom');
-                if ($candidate !== null && ($from === null || $candidate < $from)) {
-                    $from = $candidate;
-                }
-            }
-        }
-        if ($to === null) {
-            foreach ($billingCycles as $cycle) {
-                $candidate = $this->documentDate($cycle['validTo'] ?? null, 'billing cycle validTo');
-                if ($candidate !== null && ($to === null || $candidate > $to)) {
-                    $to = $candidate;
-                }
-            }
-        }
-        if ($from === null || $to === null || $from >= $to) {
-            throw new CostPlanDefinitionException('Unable to determine tax profile coverage for CostPlan.');
-        }
-        return [$from, $to];
     }
 
     /**

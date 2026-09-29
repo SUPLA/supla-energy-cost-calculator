@@ -15,6 +15,47 @@ final class TaxProfileResolver
     }
 
     /**
+     * Resolve the complete known tax-profile timeline for a context.
+     *
+     * The outer boundaries do not need to be open. A missing period before the
+     * first known assignment or after a finite last assignment is a calculation
+     * concern, not a CostPlan compilation concern.
+     *
+     * @return list<array{validFrom: ?\DateTimeImmutable, validTo: ?\DateTimeImmutable, profileId: string, profile: TaxProfile}>
+     */
+    public function resolveTimeline(TaxContext $context, ?string $currency = null): array
+    {
+        $matches = $this->assignmentsFor($context);
+        $resolved = [];
+
+        foreach ($matches as $assignment) {
+            $profile = $this->profileCatalog->get($assignment->profileId);
+            if ($currency !== null && $profile->currency !== $currency) {
+                throw new DefinitionException("Tax profile '{$profile->id}' has incompatible currency '$profile->currency'; expected '$currency'.");
+            }
+            $resolved[] = [
+                'validFrom' => $assignment->validFrom,
+                'validTo' => $assignment->validTo,
+                'profileId' => $assignment->profileId,
+                'profile' => $profile,
+            ];
+        }
+
+        for ($index = 1, $count = count($resolved); $index < $count; $index++) {
+            $previousTo = $resolved[$index - 1]['validTo'];
+            $currentFrom = $resolved[$index]['validFrom'];
+            if ($previousTo === null || $currentFrom === null || $currentFrom < $previousTo) {
+                throw new DefinitionException("Tax profile assignment overlap at timeline segment $index.");
+            }
+            if ($currentFrom != $previousTo) {
+                throw new DefinitionException("Tax profile assignment gap at timeline segment $index.");
+            }
+        }
+
+        return $resolved;
+    }
+
+    /**
      * @return list<array{validFrom: ?\DateTimeImmutable, validTo: ?\DateTimeImmutable, profileId: string, profile: TaxProfile}>
      */
     public function resolve(
@@ -27,20 +68,7 @@ final class TaxProfileResolver
             throw new DefinitionException('Tax profile resolution range must be ordered.');
         }
 
-        $matches = array_values(array_filter(
-            $this->assignmentCatalog->assignments(),
-            static fn(TaxProfileAssignment $assignment): bool => $assignment->taxContext->equals($context),
-        ));
-        usort($matches, static fn(TaxProfileAssignment $a, TaxProfileAssignment $b): int =>
-            ($a->validFrom?->getTimestamp() ?? PHP_INT_MIN) <=> ($b->validFrom?->getTimestamp() ?? PHP_INT_MIN));
-
-        if ($matches === []) {
-            throw new DefinitionException(sprintf(
-                'Unknown tax context %s/%s.',
-                $context->jurisdiction,
-                $context->customerClass,
-            ));
-        }
+        $matches = $this->assignmentsFor($context);
 
         $resolved = [];
         foreach ($matches as $assignment) {
@@ -85,6 +113,26 @@ final class TaxProfileResolver
         }
 
         return $resolved;
+    }
+
+    /** @return list<TaxProfileAssignment> */
+    private function assignmentsFor(TaxContext $context): array
+    {
+        $matches = array_values(array_filter(
+            $this->assignmentCatalog->assignments(),
+            static fn(TaxProfileAssignment $assignment): bool => $assignment->taxContext->equals($context),
+        ));
+        usort($matches, static fn(TaxProfileAssignment $a, TaxProfileAssignment $b): int =>
+            ($a->validFrom?->getTimestamp() ?? PHP_INT_MIN) <=> ($b->validFrom?->getTimestamp() ?? PHP_INT_MIN));
+
+        if ($matches === []) {
+            throw new DefinitionException(sprintf(
+                'Unknown tax context %s/%s.',
+                $context->jurisdiction,
+                $context->customerClass,
+            ));
+        }
+        return $matches;
     }
 
     private function sameBoundary(?\DateTimeImmutable $left, ?\DateTimeImmutable $right): bool

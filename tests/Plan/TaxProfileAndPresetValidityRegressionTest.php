@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace Supla\EnergyCostCalculator\Tests\Plan;
 
 use PHPUnit\Framework\TestCase;
+use Supla\EnergyCostCalculator\Engine\CostCalculator;
+use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Exception\DefinitionException;
+use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Plan\CostPlanCompiler;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCompiler;
 use Supla\EnergyCostCalculator\Tax\TaxContext;
 use Supla\EnergyCostCalculator\Tax\TaxProfileResolver;
+use Supla\EnergyCostCalculator\Tests\Support\InMemoryEnergyDeltaSource;
+use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
 
 final class TaxProfileAndPresetValidityRegressionTest extends TestCase
 {
@@ -94,15 +99,15 @@ final class TaxProfileAndPresetValidityRegressionTest extends TestCase
         self::assertSame('2026-12-15T00:00:00+01:00', $compiled['periods'][0]['validTo']);
     }
 
-    public function testOpenGenericPlanUsesBillingCoverageForTaxResolution(): void
+    public function testFullyOpenGenericPlanCompilesWithWholeKnownTaxTimeline(): void
     {
         $compiled = (new CostPlanCompiler())->compileToArray([
             'version' => 2,
             'currency' => 'PLN',
             'timezone' => 'Europe/Warsaw',
             'billingCycles' => [[
-                'validFrom' => '2026-01-01T00:00:00+01:00',
-                'validTo' => '2027-01-01T00:00:00+01:00',
+                'validFrom' => null,
+                'validTo' => null,
                 'anchor' => '2026-01-01',
                 'length' => 1,
                 'unit' => 'MONTH',
@@ -122,8 +127,57 @@ final class TaxProfileAndPresetValidityRegressionTest extends TestCase
 
         self::assertNull($compiled['periods'][0]['validFrom']);
         self::assertNull($compiled['periods'][0]['validTo']);
-        self::assertSame('2026-01-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validFrom']);
-        self::assertSame('2027-01-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validTo']);
+        self::assertCount(3, $compiled['taxRuleSets']);
+        self::assertSame('2019-01-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validFrom']);
+        self::assertSame('2022-01-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validTo']);
+        self::assertSame('2022-01-01T00:00:00+01:00', $compiled['taxRuleSets'][1]['validFrom']);
+        self::assertSame('2023-01-01T00:00:00+01:00', $compiled['taxRuleSets'][1]['validTo']);
+        self::assertSame('2023-01-01T00:00:00+01:00', $compiled['taxRuleSets'][2]['validFrom']);
+        self::assertNull($compiled['taxRuleSets'][2]['validTo']);
+    }
+
+    public function testCalculationBeforeKnownTaxTimelineFailsAtCalculationTime(): void
+    {
+        $compiled = (new CostPlanCompiler())->compileToArray([
+            'version' => 2,
+            'currency' => 'PLN',
+            'timezone' => 'Europe/Warsaw',
+            'taxContext' => ['jurisdiction' => 'PL', 'customerClass' => 'HOUSEHOLD'],
+            'billingCycles' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'anchor' => '2018-01-01',
+                'length' => 1,
+                'unit' => 'MONTH',
+            ]],
+            'periods' => [[
+                'validFrom' => null,
+                'validTo' => null,
+                'components' => [[
+                    'kind' => 'SUPPLIER_FIXED',
+                    'rate' => '12.00',
+                    'per' => 'BILLING_PERIOD',
+                    'taxTreatment' => ['included' => []],
+                ]],
+            ]],
+        ]);
+
+        self::assertSame('2019-01-01T00:00:00+01:00', $compiled['taxRuleSets'][0]['validFrom']);
+
+        $this->expectException(CalculationException::class);
+        $this->expectExceptionMessage('Tax rule-set history does not cover charge');
+
+        (new CostCalculator(
+            new InMemoryEnergyDeltaSource([]),
+            new InMemoryReferenceDataSource(),
+        ))->calculate(
+            'meter',
+            new TimeRange(
+                new \DateTimeImmutable('2018-01-01T00:00:00+01:00'),
+                new \DateTimeImmutable('2018-02-01T00:00:00+01:00'),
+            ),
+            $compiled,
+        );
     }
 
     public function testContractOfferTemplatesSeparateAvailabilityFromExecutableApplicability(): void
