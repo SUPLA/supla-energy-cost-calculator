@@ -47,6 +47,6 @@ final class ReferenceSeries
             'No reference data for %s at %s.',
             $this->id->value,
             $timestamp->format(DATE_ATOM),
-        ));
+        ), $this->id->value, $timestamp);
     }
 }

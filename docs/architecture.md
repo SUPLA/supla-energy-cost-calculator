@@ -35,6 +35,8 @@ Each component carries a `kind` and explicit `taxTreatment.included`. For each c
 
 Materializing `charges[]` is controlled by `CalculationOptions.includeCharges` and is disabled by default. Aggregate costs are always calculated; `includeIntervals` independently controls the raw meter diagnostic view.
 
+Missing reference data fails the calculation by default. Callers may explicitly select `MissingReferencePolicy::SKIP_AFFECTED` to skip an otherwise unpriceable whole meter interval or temporal-netting window. Such results expose `incomplete: true` and structured `warnings[]`; skipped units are excluded from usage, costs, intervals, and charges.
+
 Persisted cost-plan periods compile into the same billing-definition periods. Their boundaries may be open at either outer edge, so calculation can resolve logs before the first dated tariff change and after the last one.
 
 Within a cost-plan period, `CostComponentKind` describes compatibility while `componentId` identifies the resulting charge component. A kind may occur more than once when the IDs differ. Inline periodic components may omit `componentId` only for the legacy kind-derived ID.
@@ -59,7 +61,7 @@ This is an initial package skeleton. Before production billing use, consider add
 - configurable behavior for definition boundaries that cut through meter intervals,
 - richer component compatibility and unit-conversion semantics,
 - billing-period effective-rate adjustments (weighted-average min/max/floor/cap),
-- reference-series fallback policies for missing market data,
+- reference-series fallback policies for missing market data beyond skipping affected logs,
 - history-dependent quantity baselines such as G12as previous-year thresholds,
 - export-side prosumer settlement/revenue,
 - result/cost caching outside the library if large fleet-wide reports need it.

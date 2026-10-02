@@ -9,6 +9,7 @@ final readonly class CalculationOptions
     public function __construct(
         public bool $includeIntervals = false,
         public bool $includeCharges = false,
+        public MissingReferencePolicy $missingReferencePolicy = MissingReferencePolicy::STRICT,
     ) {
     }
 }

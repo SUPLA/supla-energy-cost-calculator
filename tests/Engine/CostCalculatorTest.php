@@ -8,6 +8,8 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Engine\CalculationOptions;
 use Supla\EnergyCostCalculator\Engine\CostCalculator;
+use Supla\EnergyCostCalculator\Engine\MissingReferencePolicy;
+use Supla\EnergyCostCalculator\Exception\MissingReferenceDataException;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
 use Supla\EnergyCostCalculator\Model\QuantityType;
 use Supla\EnergyCostCalculator\Model\ReferenceInterval;
@@ -215,6 +217,89 @@ final class CostCalculatorTest extends TestCase
         self::assertSame('1', $result->charges[0]['amounts']['gross']);
         self::assertArrayNotHasKey('rate', $result->charges[0]);
         self::assertArrayNotHasKey('cost', $result->charges[0]);
+    }
+
+    public function testTolerantMissingReferencePolicySkipsOrdinaryIntervalAndKeepsLaterData(): void
+    {
+        $deltas = [
+            $this->delta('2026-01-01T10:00:00Z', '2026-01-01T10:15:00Z', '2'),
+            $this->delta('2026-01-01T10:15:00Z', '2026-01-01T10:30:00Z', '3'),
+        ];
+        $definition = $this->singleComponentDefinition([
+            'id' => 'energy',
+            'kind' => 'ENERGY_PURCHASE',
+            'category' => 'ENERGY',
+            'taxTreatment' => ['included' => []],
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'rate' => [
+                'type' => 'REFERENCE',
+                'source' => 'PL.TGE.FIXING1',
+                'sourceUnit' => 'PLN/MWh',
+                'multiplier' => '0.001',
+            ],
+        ]);
+        $references = [
+            'PL.TGE.FIXING1' => [new ReferenceInterval(
+                new \DateTimeImmutable('2026-01-01T10:15:00Z'),
+                new \DateTimeImmutable('2026-01-01T11:00:00Z'),
+                '1000',
+                'PLN/MWh',
+            )],
+        ];
+        $range = new TimeRange($deltas[0]->from, $deltas[1]->to);
+
+        $this->expectException(MissingReferenceDataException::class);
+        (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource($references)))
+            ->calculate('meter', $range, $definition);
+    }
+
+    public function testTolerantMissingReferencePolicySerializesSkippedOrdinaryInterval(): void
+    {
+        $deltas = [
+            $this->delta('2026-01-01T10:00:00Z', '2026-01-01T10:15:00Z', '2'),
+            $this->delta('2026-01-01T10:15:00Z', '2026-01-01T10:30:00Z', '3'),
+        ];
+        $definition = $this->singleComponentDefinition([
+            'id' => 'energy',
+            'kind' => 'ENERGY_PURCHASE',
+            'category' => 'ENERGY',
+            'taxTreatment' => ['included' => []],
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'rate' => [
+                'type' => 'REFERENCE',
+                'source' => 'PL.TGE.FIXING1',
+                'sourceUnit' => 'PLN/MWh',
+                'multiplier' => '0.001',
+            ],
+        ]);
+        $references = new InMemoryReferenceDataSource([
+            'PL.TGE.FIXING1' => [new ReferenceInterval(
+                new \DateTimeImmutable('2026-01-01T10:15:00Z'),
+                new \DateTimeImmutable('2026-01-01T11:00:00Z'),
+                '1000',
+                'PLN/MWh',
+            )],
+        ]);
+
+        $result = (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), $references))->calculate(
+            'meter',
+            new TimeRange($deltas[0]->from, $deltas[1]->to),
+            $definition,
+            new CalculationOptions(
+                includeIntervals: true,
+                includeCharges: true,
+                missingReferencePolicy: MissingReferencePolicy::SKIP_AFFECTED,
+            ),
+        );
+
+        self::assertSame('3', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
+        self::assertSame('3', $result->costs['gross']['usageBased']['total']);
+        self::assertSame(1, $result->processedDeltaCount);
+        self::assertCount(1, $result->intervals);
+        self::assertCount(1, $result->charges);
+        self::assertSame('METER_INTERVAL', $result->warnings[0]['scope']);
+        self::assertSame('PL.TGE.FIXING1', $result->warnings[0]['referenceDataId']);
+        self::assertTrue($result->jsonSerialize()['incomplete']);
     }
 
     public function testUsageChargeFactsAreOptIn(): void

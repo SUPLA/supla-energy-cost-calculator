@@ -8,9 +8,11 @@ use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Definition\BillingDefinitionParser;
 use Supla\EnergyCostCalculator\Engine\CalculationOptions;
 use Supla\EnergyCostCalculator\Engine\CostCalculator;
+use Supla\EnergyCostCalculator\Engine\MissingReferencePolicy;
 use Supla\EnergyCostCalculator\Exception\DefinitionException;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
 use Supla\EnergyCostCalculator\Model\QuantityType;
+use Supla\EnergyCostCalculator\Model\ReferenceInterval;
 use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryEnergyDeltaSource;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
@@ -115,6 +117,57 @@ final class TemporalNettingTest extends TestCase
             new TimeRange($deltas[0]->from, $deltas[array_key_last($deltas)]->to),
             $definition,
         );
+    }
+
+    public function testTolerantMissingReferencePolicySkipsWholeNettingWindowAndContinues(): void
+    {
+        $definition = $this->definition([
+            'type' => 'ACTIVE_ENERGY_IMPORT',
+            'strategy' => 'IMPORT_MINUS_EXPORT_CAP_ZERO',
+            'periodInMinutes' => 60,
+        ]);
+        $definition['periods'][0]['components'][0]['rate'] = [
+            'type' => 'REFERENCE',
+            'source' => 'PL.TGE.FIXING1_HOURLY',
+            'sourceUnit' => 'PLN/MWh',
+            'multiplier' => '0.001',
+        ];
+        $from = new \DateTimeImmutable('2026-01-02T10:00:00+01:00');
+        $deltas = [];
+        for ($i = 0; $i < 8; $i++) {
+            $deltaFrom = $from->modify(sprintf('+%d minutes', $i * 15));
+            $deltas[] = $this->delta($deltaFrom, $deltaFrom->modify('+15 minutes'), '1', '0');
+        }
+
+        $result = (new CostCalculator(
+            new InMemoryEnergyDeltaSource($deltas),
+            new InMemoryReferenceDataSource([
+                'PL.TGE.FIXING1_HOURLY' => [new ReferenceInterval(
+                    $from->modify('+1 hour'),
+                    $from->modify('+2 hours'),
+                    '1000',
+                    'PLN/MWh',
+                )],
+            ]),
+        ))->calculate(
+            'meter',
+            new TimeRange($from, $from->modify('+2 hours')),
+            $definition,
+            new CalculationOptions(
+                includeIntervals: true,
+                includeCharges: true,
+                missingReferencePolicy: MissingReferencePolicy::SKIP_AFFECTED,
+            ),
+        );
+
+        self::assertTrue($result->jsonSerialize()['incomplete']);
+        self::assertSame('TEMPORAL_NETTING_WINDOW', $result->warnings[0]['scope']);
+        self::assertSame($from->format(DATE_ATOM), $result->warnings[0]['from']);
+        self::assertSame('4', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
+        self::assertSame('4', $result->costs['gross']['usageBased']['total']);
+        self::assertCount(4, $result->intervals);
+        self::assertCount(1, $result->charges);
+        self::assertSame($from->modify('+1 hour')->format(DATE_ATOM), $result->charges[0]['from']);
     }
 
     private function definition(array $quantity): array

@@ -19,6 +19,7 @@ final readonly class CalculationResult implements \JsonSerializable
      * @param list<array<string, mixed>> $intervals
      * @param list<array<string, mixed>> $charges
      * @param array<string, mixed> $costs
+     * @param list<array<string, mixed>> $warnings
      */
     public function __construct(
         public string $currency,
@@ -33,6 +34,7 @@ final readonly class CalculationResult implements \JsonSerializable
         public int $processedDeltaCount,
         public array $intervals = [],
         public array $charges = [],
+        public array $warnings = [],
     ) {
     }
 
@@ -57,6 +59,8 @@ final readonly class CalculationResult implements \JsonSerializable
             'processedDeltaCount' => $this->processedDeltaCount,
             'intervals' => $this->intervals,
             'charges' => $this->charges,
+            'incomplete' => $this->warnings !== [],
+            'warnings' => $this->warnings,
         ];
     }
 }

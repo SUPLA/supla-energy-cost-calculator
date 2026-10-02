@@ -144,7 +144,7 @@ DST-sensitive schedule behavior must be tested.
 
 ## Errors
 
-Missing or ambiguous data should fail explicitly. Relevant exceptions include missing reference data, missing billing periods, unsupported rules, and holiday calendar coverage errors.
+Missing or ambiguous data should fail explicitly by default. `CalculationOptions` may explicitly opt into `MissingReferencePolicy::SKIP_AFFECTED`, which skips whole unpriceable meter intervals or temporal-netting windows and reports incomplete results through warnings. Relevant exceptions include missing reference data, missing billing periods, unsupported rules, and holiday calendar coverage errors.
 
 Do not default missing prices or holiday coverage to zero/false unless an explicit future fallback policy says so.
 

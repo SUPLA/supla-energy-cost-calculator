@@ -93,6 +93,8 @@ When the requested range covers complete billing cycles, periodic charges are al
 
 `charges[]` is the authoritative usage-based cost-fact series when requested with `CalculationOptions(includeCharges: true)`. Each charge has its natural `[from,to)` window, resolved quantity, selector result, `pricing` and tax-qualified `amounts`. Charge materialization is disabled by default so aggregate-only calculations do not retain tens of thousands of detailed facts. `includeIntervals` independently adds the raw meter diagnostic `intervals[]`; a 60-minute netted component is intentionally absent from the four underlying 15-minute interval costs. The top-level `usage` is always the sum of the returned meter deltas.
 
+Missing reference data is strict by default. Opt into partial results with `new CalculationOptions(missingReferencePolicy: MissingReferencePolicy::SKIP_AFFECTED)`. The calculator then skips an affected ordinary meter interval or complete temporal-netting window and returns `incomplete: true` plus structured `warnings[]`; skipped units are absent from usage, costs, intervals, and charges.
+
 ## JSON model
 
 The top-level `periods[]` model allows rules for one meter to change over time without modifying historical measurements.
