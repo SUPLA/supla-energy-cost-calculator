@@ -919,6 +919,678 @@
       },
       "tariffGroup": "G12w",
       "path": "PL/2026/supply/ENEA/G12w.json"
+    },
+    {
+      "id": "PL.TAURON_DYSTRYBUCJA.G11.FIXED.2026",
+      "label": "TAURON Dystrybucja - G11 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G11-fixed.json"
+    },
+    {
+      "id": "PL.TAURON_DYSTRYBUCJA.G12.FIXED.2026",
+      "label": "TAURON Dystrybucja - G12 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G12-fixed.json"
+    },
+    {
+      "id": "PL.TAURON_DYSTRYBUCJA.G12w.FIXED.2026",
+      "label": "TAURON Dystrybucja - G12w - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G12w",
+      "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G12w-fixed.json"
+    },
+    {
+      "id": "PL.TAURON_DYSTRYBUCJA.G13.FIXED.2026",
+      "label": "TAURON Dystrybucja - G13 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G13",
+      "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G13-fixed.json"
+    },
+    {
+      "id": "PL.TAURON_DYSTRYBUCJA.G14dynamic.FIXED.2026",
+      "label": "TAURON Dystrybucja - G14dynamic - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "operator": {
+        "id": "TAURON_DYSTRYBUCJA",
+        "label": "TAURON Dystrybucja"
+      },
+      "tariffGroup": "G14dynamic",
+      "path": "PL/2026/distribution/TAURON_DYSTRYBUCJA/G14dynamic-fixed.json"
+    },
+    {
+      "id": "PL.PGE_DYSTRYBUCJA.G11.FIXED.2026",
+      "label": "PGE Dystrybucja - G11 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "operator": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/distribution/PGE_DYSTRYBUCJA/G11-fixed.json"
+    },
+    {
+      "id": "PL.PGE_DYSTRYBUCJA.G12.FIXED.2026",
+      "label": "PGE Dystrybucja - G12 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "operator": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/distribution/PGE_DYSTRYBUCJA/G12-fixed.json"
+    },
+    {
+      "id": "PL.PGE_DYSTRYBUCJA.G12w.FIXED.2026",
+      "label": "PGE Dystrybucja - G12w - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "operator": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "tariffGroup": "G12w",
+      "path": "PL/2026/distribution/PGE_DYSTRYBUCJA/G12w-fixed.json"
+    },
+    {
+      "id": "PL.PGE_DYSTRYBUCJA.G12n.FIXED.2026",
+      "label": "PGE Dystrybucja - G12n - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "operator": {
+        "id": "PGE_DYSTRYBUCJA",
+        "label": "PGE Dystrybucja"
+      },
+      "tariffGroup": "G12n",
+      "path": "PL/2026/distribution/PGE_DYSTRYBUCJA/G12n-fixed.json"
+    },
+    {
+      "id": "PL.ENEA_OPERATOR.G11.FIXED.2026",
+      "label": "ENEA Operator - G11 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/distribution/ENEA_OPERATOR/G11-fixed.json"
+    },
+    {
+      "id": "PL.ENEA_OPERATOR.G12.FIXED.2026",
+      "label": "ENEA Operator - G12 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/distribution/ENEA_OPERATOR/G12-fixed.json"
+    },
+    {
+      "id": "PL.ENEA_OPERATOR.G12w.FIXED.2026",
+      "label": "ENEA Operator - G12w - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G12w",
+      "path": "PL/2026/distribution/ENEA_OPERATOR/G12w-fixed.json"
+    },
+    {
+      "id": "PL.ENEA_OPERATOR.G12sezON.FIXED.2026",
+      "label": "ENEA Operator - G12sezON - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G12sezON",
+      "path": "PL/2026/distribution/ENEA_OPERATOR/G12sezON-fixed.json"
+    },
+    {
+      "id": "PL.ENEA_OPERATOR.G13active.FIXED.2026",
+      "label": "ENEA Operator - G13active - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "operator": {
+        "id": "ENEA_OPERATOR",
+        "label": "ENEA Operator"
+      },
+      "tariffGroup": "G13active",
+      "path": "PL/2026/distribution/ENEA_OPERATOR/G13active-fixed.json"
+    },
+    {
+      "id": "PL.ENERGA_OPERATOR.G11.FIXED.2026",
+      "label": "Energa-Operator - G11 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "operator": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/distribution/ENERGA_OPERATOR/G11-fixed.json"
+    },
+    {
+      "id": "PL.ENERGA_OPERATOR.G12.FIXED.2026",
+      "label": "Energa-Operator - G12 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "operator": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/distribution/ENERGA_OPERATOR/G12-fixed.json"
+    },
+    {
+      "id": "PL.ENERGA_OPERATOR.G12w.FIXED.2026",
+      "label": "Energa-Operator - G12w - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "operator": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "tariffGroup": "G12w",
+      "path": "PL/2026/distribution/ENERGA_OPERATOR/G12w-fixed.json"
+    },
+    {
+      "id": "PL.ENERGA_OPERATOR.G12r.FIXED.2026",
+      "label": "Energa-Operator - G12r - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "operator": {
+        "id": "ENERGA_OPERATOR",
+        "label": "Energa-Operator"
+      },
+      "tariffGroup": "G12r",
+      "path": "PL/2026/distribution/ENERGA_OPERATOR/G12r-fixed.json"
+    },
+    {
+      "id": "PL.STOEN_OPERATOR.G11.FIXED.2026",
+      "label": "Stoen Operator - G11 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "operator": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "tariffGroup": "G11",
+      "path": "PL/2026/distribution/STOEN_OPERATOR/G11-fixed.json"
+    },
+    {
+      "id": "PL.STOEN_OPERATOR.G12.FIXED.2026",
+      "label": "Stoen Operator - G12 - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "operator": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "tariffGroup": "G12",
+      "path": "PL/2026/distribution/STOEN_OPERATOR/G12-fixed.json"
+    },
+    {
+      "id": "PL.STOEN_OPERATOR.G12w.FIXED.2026",
+      "label": "Stoen Operator - G12w - opłaty stałe",
+      "presetType": "TARIFF",
+      "components": [
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-fixed-network",
+          "label": "Dystrybucja stała"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "capacity-fee",
+          "label": "Opłata mocowa"
+        },
+        {
+          "kind": "DISTRIBUTION_FIXED",
+          "componentId": "distribution-subscription",
+          "label": "Opłata abonamentowa"
+        }
+      ],
+      "provider": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "operator": {
+        "id": "STOEN_OPERATOR",
+        "label": "Stoen Operator"
+      },
+      "tariffGroup": "G12w",
+      "path": "PL/2026/distribution/STOEN_OPERATOR/G12w-fixed.json"
     }
   ]
 }

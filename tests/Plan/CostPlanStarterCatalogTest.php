@@ -38,10 +38,13 @@ final class CostPlanStarterCatalogTest extends TestCase
             $starter = $catalog->get($metadata['id']);
             $compiled = $compiler->compileToArray($this->userPlan($starter));
 
-            self::assertCount(1, $compiled['periods'], $metadata['id']);
+            self::assertCount(2, $compiled['periods'], $metadata['id']);
             self::assertSame('2026-01-01T00:00:00+01:00', $compiled['periods'][0]['validFrom'], $metadata['id']);
-            self::assertSame('2027-01-01T00:00:00+01:00', $compiled['periods'][0]['validTo'], $metadata['id']);
+            self::assertSame('2026-10-01T00:00:00+02:00', $compiled['periods'][0]['validTo'], $metadata['id']);
+            self::assertSame('2026-10-01T00:00:00+02:00', $compiled['periods'][1]['validFrom'], $metadata['id']);
+            self::assertSame('2027-01-01T00:00:00+01:00', $compiled['periods'][1]['validTo'], $metadata['id']);
             self::assertNotEmpty($compiled['periods'][0]['components'], $metadata['id']);
+            self::assertNotEmpty($compiled['periods'][1]['components'], $metadata['id']);
         }
     }
 
@@ -62,6 +65,9 @@ final class CostPlanStarterCatalogTest extends TestCase
         $definition = (new CostPlanCompiler())->compileToArray($this->userPlan($starter));
 
         foreach ($definition['periods'][0]['components'] as $component) {
+            if (($component['quantity']['type'] ?? null) !== 'ACTIVE_ENERGY_IMPORT') {
+                continue;
+            }
             self::assertSame('ACTIVE_ENERGY_IMPORT', $component['quantity']['type']);
             self::assertSame('IMPORT_MINUS_EXPORT_CAP_ZERO', $component['quantity']['strategy']);
             self::assertSame(60, $component['quantity']['periodInMinutes']);

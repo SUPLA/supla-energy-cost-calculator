@@ -262,7 +262,7 @@ Bundled presets are complete defaults: `TariffPresetCompiler::compileToArray()` 
 
 Standard supply presets preserve the provenance of the energy-price defaults originally bundled with the OSD examples. Named dynamic offers are separate `OFFER` presets and may expose several components, for example `ENERGY_PURCHASE` plus `SUPPLIER_FIXED`. The package also provides generic constant and market-reference energy presets. See `docs/component-presets-and-starters.md`.
 
-The current Polish OSD presets still cover variable distribution rather than a complete regulated invoice. Additional fixed/statutory components can be added as the catalogue grows without changing the CostPlan format.
+The bundled 2026 Polish OSD setup also includes versioned fixed-charge presets for the fixed network charge, capacity charge and distribution subscription fee. Starters select them with empty `values`, so published defaults remain preset-owned and can be overridden like other prices. Defaults assume a 1-phase installation, the 1200-2800 kWh/year capacity band and monthly billing; the distribution subscription is zero from 2026-10-01. Usage-based quality/OZE/cogeneration charges remain outside this fixed-charge set.
 
 ## SUPLA integration
 
