@@ -109,6 +109,19 @@
                 {
                   "zone": "NIGHT",
                   "days": [
+                    "MON"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "06:00"
+                    }
+                  ],
+                  "priority": 500
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
                     "MON",
                     "TUE",
                     "WED",

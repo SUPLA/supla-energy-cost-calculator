@@ -51,10 +51,10 @@ final class AdditionalHouseholdTariffPresetTest extends TestCase
         $component = $this->component('PL.PGE_DYSTRYBUCJA.G12w.2026', 'distribution-variable');
 
         self::assertSame(['DAY' => '0.4276', 'NIGHT' => '0.0845'], $component['rate']['rates']);
-        self::assertSame('SUMMER', $component['selector']['rules'][2]['season']);
-        self::assertSame('15:00', $component['selector']['rules'][2]['time_ranges'][1]['from']);
-        self::assertSame('WINTER', $component['selector']['rules'][4]['season']);
-        self::assertSame('13:00', $component['selector']['rules'][4]['time_ranges'][1]['from']);
+        self::assertSame('SUMMER', $component['selector']['rules'][3]['season']);
+        self::assertSame('15:00', $component['selector']['rules'][3]['time_ranges'][1]['from']);
+        self::assertSame('WINTER', $component['selector']['rules'][5]['season']);
+        self::assertSame('13:00', $component['selector']['rules'][5]['time_ranges'][1]['from']);
     }
 
     public function testPgeG12nMakesSundayAndHolidaysOffPeakAllDay(): void
