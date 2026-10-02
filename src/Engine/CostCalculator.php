@@ -284,8 +284,8 @@ final class CostCalculator
                 'usageBasedByComponent' => $usageBasedByComponent,
                 'usageBasedByZone' => $usageBasedByZone,
                 'usage' => $usage,
-                'intervals' => $intervals,
-                'charges' => $charges,
+                'intervalCount' => count($intervals),
+                'chargeCount' => count($charges),
                 'processed' => $processed,
                 'billingSummaryState' => $billingSummaryState,
                 'activeNettingWindows' => $activeNettingWindows,
@@ -600,8 +600,8 @@ final class CostCalculator
                 $usageBasedByComponent = $state['usageBasedByComponent'];
                 $usageBasedByZone = $state['usageBasedByZone'];
                 $usage = $state['usage'];
-                $intervals = $state['intervals'];
-                $charges = $state['charges'];
+                array_splice($intervals, $state['intervalCount']);
+                array_splice($charges, $state['chargeCount']);
                 $processed = $state['processed'];
                 $billingSummaryState = $state['billingSummaryState'];
                 $activeNettingWindows = $state['activeNettingWindows'];
@@ -635,8 +635,8 @@ final class CostCalculator
                 $usageBasedByComponent = $state['usageBasedByComponent'];
                 $usageBasedByZone = $state['usageBasedByZone'];
                 $usage = $state['usage'];
-                $intervals = $state['intervals'];
-                $charges = $state['charges'];
+                array_splice($intervals, $state['intervalCount']);
+                array_splice($charges, $state['chargeCount']);
                 $processed = $state['processed'];
                 $billingSummaryState = $state['billingSummaryState'];
                 $warnings[] = [
