@@ -560,7 +560,7 @@ final class CostCalculator
             }
             $processed++;
             } catch (MissingReferenceDataException $exception) {
-                if ($options->missingReferencePolicy === MissingReferencePolicy::STRICT) {
+                if ($options->calculationProblemPolicy === CalculationProblemPolicy::STRICT) {
                     throw $exception;
                 }
 
@@ -607,6 +607,51 @@ final class CostCalculator
                 $activeNettingWindows = $state['activeNettingWindows'];
                 $finalizingWindow = null;
                 continue;
+            } catch (CalculationException $exception) {
+                if ($options->calculationProblemPolicy === CalculationProblemPolicy::STRICT) {
+                    throw $exception;
+                }
+
+                $window = $finalizingWindow;
+                $window ??= $resolvingNettingWindow;
+                if ($window !== null) {
+                    $state = $window['state'];
+                    $windowKey = $window['component']->id . ':' . $window['from']->getTimestamp() . ':' . $window['to']->getTimestamp();
+                    $skippedNettingWindows[$windowKey] = true;
+                    $warnings[] = [
+                        'code' => 'CALCULATION_PROBLEM',
+                        'scope' => 'TEMPORAL_NETTING_WINDOW',
+                        'componentId' => $window['component']->id,
+                        'from' => $window['from']->format(DATE_ATOM),
+                        'to' => $window['to']->format(DATE_ATOM),
+                        'message' => $exception->getMessage(),
+                    ];
+                } else {
+                    $state = $deltaState;
+                    $warnings[] = [
+                        'code' => 'CALCULATION_PROBLEM',
+                        'scope' => 'METER_INTERVAL',
+                        'from' => $delta->from->format(DATE_ATOM),
+                        'to' => $delta->to->format(DATE_ATOM),
+                        'message' => $exception->getMessage(),
+                    ];
+                }
+
+                $usageBasedTotal = $state['usageBasedTotal'];
+                $usageBasedNetTotal = $state['usageBasedNetTotal'];
+                $usageBasedNetByComponent = $state['usageBasedNetByComponent'];
+                $usageBasedNetByZone = $state['usageBasedNetByZone'];
+                $usageBasedTaxes = $state['usageBasedTaxes'];
+                $usageBasedByComponent = $state['usageBasedByComponent'];
+                $usageBasedByZone = $state['usageBasedByZone'];
+                $usage = $state['usage'];
+                array_splice($intervals, $state['intervalCount']);
+                array_splice($charges, $state['chargeCount']);
+                $processed = $state['processed'];
+                $billingSummaryState = $state['billingSummaryState'];
+                $activeNettingWindows = $state['activeNettingWindows'];
+                $finalizingWindow = null;
+                continue;
             }
         }
 
@@ -622,7 +667,7 @@ final class CostCalculator
             try {
                 $finalizeNettingWindow($window);
             } catch (MissingReferenceDataException $exception) {
-                if ($options->missingReferencePolicy === MissingReferencePolicy::STRICT) {
+                if ($options->calculationProblemPolicy === CalculationProblemPolicy::STRICT) {
                     throw $exception;
                 }
 
@@ -646,6 +691,32 @@ final class CostCalculator
                     'from' => $window['from']->format(DATE_ATOM),
                     'to' => $window['to']->format(DATE_ATOM),
                     'referenceDataId' => $exception->referenceDataId,
+                    'message' => $exception->getMessage(),
+                ];
+            } catch (CalculationException $exception) {
+                if ($options->calculationProblemPolicy === CalculationProblemPolicy::STRICT) {
+                    throw $exception;
+                }
+
+                $state = $window['state'];
+                $usageBasedTotal = $state['usageBasedTotal'];
+                $usageBasedNetTotal = $state['usageBasedNetTotal'];
+                $usageBasedNetByComponent = $state['usageBasedNetByComponent'];
+                $usageBasedNetByZone = $state['usageBasedNetByZone'];
+                $usageBasedTaxes = $state['usageBasedTaxes'];
+                $usageBasedByComponent = $state['usageBasedByComponent'];
+                $usageBasedByZone = $state['usageBasedByZone'];
+                $usage = $state['usage'];
+                array_splice($intervals, $state['intervalCount']);
+                array_splice($charges, $state['chargeCount']);
+                $processed = $state['processed'];
+                $billingSummaryState = $state['billingSummaryState'];
+                $warnings[] = [
+                    'code' => 'CALCULATION_PROBLEM',
+                    'scope' => 'TEMPORAL_NETTING_WINDOW',
+                    'componentId' => $window['component']->id,
+                    'from' => $window['from']->format(DATE_ATOM),
+                    'to' => $window['to']->format(DATE_ATOM),
                     'message' => $exception->getMessage(),
                 ];
             }

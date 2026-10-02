@@ -7,8 +7,8 @@ namespace Supla\EnergyCostCalculator\Tests\Engine;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Engine\CalculationOptions;
+use Supla\EnergyCostCalculator\Engine\CalculationProblemPolicy;
 use Supla\EnergyCostCalculator\Engine\CostCalculator;
-use Supla\EnergyCostCalculator\Engine\MissingReferencePolicy;
 use Supla\EnergyCostCalculator\Exception\MissingReferenceDataException;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
 use Supla\EnergyCostCalculator\Model\QuantityType;
@@ -219,7 +219,7 @@ final class CostCalculatorTest extends TestCase
         self::assertArrayNotHasKey('cost', $result->charges[0]);
     }
 
-    public function testTolerantMissingReferencePolicySkipsOrdinaryIntervalAndKeepsLaterData(): void
+    public function testStrictPolicyThrowsForMissingReferenceData(): void
     {
         $deltas = [
             $this->delta('2026-01-01T10:00:00Z', '2026-01-01T10:15:00Z', '2'),
@@ -253,7 +253,7 @@ final class CostCalculatorTest extends TestCase
             ->calculate('meter', $range, $definition);
     }
 
-    public function testTolerantMissingReferencePolicySerializesSkippedOrdinaryInterval(): void
+    public function testSkipAffectedCalculationProblemPolicySerializesMissingReferenceWarning(): void
     {
         $deltas = [
             $this->delta('2026-01-01T10:00:00Z', '2026-01-01T10:15:00Z', '2'),
@@ -288,7 +288,7 @@ final class CostCalculatorTest extends TestCase
             new CalculationOptions(
                 includeIntervals: true,
                 includeCharges: true,
-                missingReferencePolicy: MissingReferencePolicy::SKIP_AFFECTED,
+                calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED,
             ),
         );
 
@@ -299,6 +299,47 @@ final class CostCalculatorTest extends TestCase
         self::assertCount(1, $result->charges);
         self::assertSame('METER_INTERVAL', $result->warnings[0]['scope']);
         self::assertSame('PL.TGE.FIXING1', $result->warnings[0]['referenceDataId']);
+        self::assertTrue($result->jsonSerialize()['incomplete']);
+    }
+
+    public function testSkipAffectedCalculationProblemPolicySerializesSkippedOrdinaryInterval(): void
+    {
+        $deltas = [
+            $this->delta('2026-01-05T09:00:00Z', '2026-01-05T09:15:00Z', '2'),
+            $this->delta('2026-01-05T10:00:00Z', '2026-01-05T10:15:00Z', '3'),
+        ];
+        $definition = $this->singleComponentDefinition([
+            'id' => 'energy',
+            'kind' => 'ENERGY_PURCHASE',
+            'category' => 'ENERGY',
+            'taxTreatment' => ['included' => []],
+            'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+            'selector' => [
+                'type' => 'WEEKLY_SCHEDULE',
+                'timezone' => 'UTC',
+                'rules' => [['zone' => 'DAY', 'days' => ['MON'], 'from' => '10:00', 'to' => '11:00']],
+            ],
+            'rate' => ['type' => 'ZONED', 'rates' => ['DAY' => '1'], 'unit' => 'PLN/kWh'],
+        ]);
+
+        $result = (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource()))->calculate(
+            'meter',
+            new TimeRange($deltas[0]->from, $deltas[1]->to),
+            $definition,
+            new CalculationOptions(
+                includeIntervals: true,
+                includeCharges: true,
+                calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED,
+            ),
+        );
+
+        self::assertSame('3', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
+        self::assertSame('3', $result->costs['gross']['usageBased']['total']);
+        self::assertSame(1, $result->processedDeltaCount);
+        self::assertCount(1, $result->intervals);
+        self::assertCount(1, $result->charges);
+        self::assertSame('CALCULATION_PROBLEM', $result->warnings[0]['code']);
+        self::assertSame('METER_INTERVAL', $result->warnings[0]['scope']);
         self::assertTrue($result->jsonSerialize()['incomplete']);
     }
 

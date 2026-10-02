@@ -7,8 +7,8 @@ namespace Supla\EnergyCostCalculator\Tests\Engine;
 use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Definition\BillingDefinitionParser;
 use Supla\EnergyCostCalculator\Engine\CalculationOptions;
+use Supla\EnergyCostCalculator\Engine\CalculationProblemPolicy;
 use Supla\EnergyCostCalculator\Engine\CostCalculator;
-use Supla\EnergyCostCalculator\Engine\MissingReferencePolicy;
 use Supla\EnergyCostCalculator\Exception\DefinitionException;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
 use Supla\EnergyCostCalculator\Model\QuantityType;
@@ -119,7 +119,7 @@ final class TemporalNettingTest extends TestCase
         );
     }
 
-    public function testTolerantMissingReferencePolicySkipsWholeNettingWindowAndContinues(): void
+    public function testSkipAffectedCalculationProblemPolicySkipsMissingReferenceNettingWindow(): void
     {
         $definition = $this->definition([
             'type' => 'ACTIVE_ENERGY_IMPORT',
@@ -156,11 +156,60 @@ final class TemporalNettingTest extends TestCase
             new CalculationOptions(
                 includeIntervals: true,
                 includeCharges: true,
-                missingReferencePolicy: MissingReferencePolicy::SKIP_AFFECTED,
+                calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED,
             ),
         );
 
         self::assertTrue($result->jsonSerialize()['incomplete']);
+        self::assertSame('TEMPORAL_NETTING_WINDOW', $result->warnings[0]['scope']);
+        self::assertSame($from->format(DATE_ATOM), $result->warnings[0]['from']);
+        self::assertSame('4', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
+        self::assertSame('4', $result->costs['gross']['usageBased']['total']);
+        self::assertCount(4, $result->intervals);
+        self::assertCount(1, $result->charges);
+        self::assertSame($from->modify('+1 hour')->format(DATE_ATOM), $result->charges[0]['from']);
+    }
+
+    public function testSkipAffectedCalculationProblemPolicySkipsWholeNettingWindowAndContinues(): void
+    {
+        $definition = $this->definition([
+            'type' => 'ACTIVE_ENERGY_IMPORT',
+            'strategy' => 'IMPORT_MINUS_EXPORT_CAP_ZERO',
+            'periodInMinutes' => 60,
+        ]);
+        $definition['periods'][0]['components'][0]['selector'] = [
+            'type' => 'WEEKLY_SCHEDULE',
+            'timezone' => 'Europe/Warsaw',
+            'rules' => [['zone' => 'DAY', 'days' => ['FRI'], 'from' => '11:00', 'to' => '12:00']],
+        ];
+        $definition['periods'][0]['components'][0]['rate'] = [
+            'type' => 'ZONED',
+            'rates' => ['DAY' => '1'],
+            'unit' => 'PLN/kWh',
+        ];
+        $from = new \DateTimeImmutable('2026-01-02T10:00:00+01:00');
+        $deltas = [];
+        for ($i = 0; $i < 8; $i++) {
+            $deltaFrom = $from->modify(sprintf('+%d minutes', $i * 15));
+            $deltas[] = $this->delta($deltaFrom, $deltaFrom->modify('+15 minutes'), '1', '0');
+        }
+
+        $result = (new CostCalculator(
+            new InMemoryEnergyDeltaSource($deltas),
+            new InMemoryReferenceDataSource(),
+        ))->calculate(
+            'meter',
+            new TimeRange($from, $from->modify('+2 hours')),
+            $definition,
+            new CalculationOptions(
+                includeIntervals: true,
+                includeCharges: true,
+                calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED,
+            ),
+        );
+
+        self::assertTrue($result->jsonSerialize()['incomplete']);
+        self::assertSame('CALCULATION_PROBLEM', $result->warnings[0]['code']);
         self::assertSame('TEMPORAL_NETTING_WINDOW', $result->warnings[0]['scope']);
         self::assertSame($from->format(DATE_ATOM), $result->warnings[0]['from']);
         self::assertSame('4', $result->usage[QuantityType::ACTIVE_ENERGY_IMPORT->value]);
