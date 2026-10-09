@@ -18,7 +18,7 @@ use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Plan\CostPlanCompiler;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
 
-#[Group('performace')]
+#[Group('performance')]
 final class TwoYearHistoryPerformanceTest extends TestCase
 {
     private const MAX_CALCULATION_TIME_SECONDS = 15.0;

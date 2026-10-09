@@ -39,39 +39,169 @@
   },
   "inputs": [
     {
-      "id": "distribution.fixed.rate",
-      "label": "Stały składnik sieciowy",
+      "id": "distribution.fixed.rate.2024-H1",
+      "label": "Stały składnik sieciowy (2024-H1)",
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/value",
-        "/periods/1/components/0/rate/value"
+        "/periods/0/components/0/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Domyślnie układ 1-fazowy: 11.46 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 18.53 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym."
+      "help": "Okres 2024-H1. Domyślnie układ 1-fazowy: 11.46 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 18.53 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
     },
     {
-      "id": "capacity.rate",
-      "label": "Opłata mocowa",
+      "id": "capacity.rate.2024-H1",
+      "label": "Opłata mocowa (2024-H1)",
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/1/rate/value",
-        "/periods/1/components/1/rate/value"
+        "/periods/0/components/1/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
+      "help": "Okres 2024-H1. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
     },
     {
-      "id": "distribution.subscription.rate",
-      "label": "Opłata abonamentowa dystrybucyjna",
+      "id": "distribution.subscription.rate.2024-H1",
+      "label": "Opłata abonamentowa dystrybucyjna (2024-H1)",
       "type": "DECIMAL",
       "required": true,
       "targets": [
         "/periods/0/components/2/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Domyślna stawka 2.88 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 6-mies. 0.48, 12-mies. 0.24 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty."
+      "help": "Okres 2024-H1. Domyślna stawka 2.88 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 6-mies. 0.48, 12-mies. 0.24 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
+    },
+    {
+      "id": "distribution.fixed.rate.2024-H2_2025-H1",
+      "label": "Stały składnik sieciowy (2024-H2_2025-H1)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/1/components/0/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2024-H2_2025-H1. Domyślnie układ 1-fazowy: 11.46 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 18.53 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
+    },
+    {
+      "id": "capacity.rate.2024-H2_2025-H1",
+      "label": "Opłata mocowa (2024-H2_2025-H1)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/1/components/1/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2024-H2_2025-H1. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
+    },
+    {
+      "id": "distribution.subscription.rate.2024-H2_2025-H1",
+      "label": "Opłata abonamentowa dystrybucyjna (2024-H2_2025-H1)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/1/components/2/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2024-H2_2025-H1. Domyślna stawka 2.88 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 6-mies. 0.48, 12-mies. 0.24 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
+    },
+    {
+      "id": "distribution.fixed.rate.2025-H2",
+      "label": "Stały składnik sieciowy (2025-H2)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/2/components/0/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2025-H2. Domyślnie układ 1-fazowy: 11.46 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 18.53 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
+    },
+    {
+      "id": "capacity.rate.2025-H2",
+      "label": "Opłata mocowa (2025-H2)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/2/components/1/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2025-H2. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
+    },
+    {
+      "id": "distribution.subscription.rate.2025-H2",
+      "label": "Opłata abonamentowa dystrybucyjna (2025-H2)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/2/components/2/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2025-H2. Domyślna stawka 2.88 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 6-mies. 0.48, 12-mies. 0.24 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
+    },
+    {
+      "id": "distribution.fixed.rate.2026-Q1_Q3",
+      "label": "Stały składnik sieciowy (2026-Q1_Q3)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/3/components/0/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2026-Q1_Q3. Domyślnie układ 1-fazowy: 11.46 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 18.53 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym."
+    },
+    {
+      "id": "capacity.rate.2026-Q1_Q3",
+      "label": "Opłata mocowa (2026-Q1_Q3)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/3/components/1/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2026-Q1_Q3. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
+    },
+    {
+      "id": "distribution.subscription.rate.2026-Q1_Q3",
+      "label": "Opłata abonamentowa dystrybucyjna (2026-Q1_Q3)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/3/components/2/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2026-Q1_Q3. Domyślna stawka 2.88 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 6-mies. 0.48, 12-mies. 0.24 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty."
+    },
+    {
+      "id": "distribution.fixed.rate.2026-Q4",
+      "label": "Stały składnik sieciowy (2026-Q4)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/4/components/0/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2026-Q4. Domyślnie układ 1-fazowy: 11.46 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 18.53 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym."
+    },
+    {
+      "id": "capacity.rate.2026-Q4",
+      "label": "Opłata mocowa (2026-Q4)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/4/components/1/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2026-Q4. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
+    },
+    {
+      "id": "distribution.subscription.rate.2026-Q4",
+      "label": "Opłata abonamentowa dystrybucyjna (2026-Q4)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/4/components/2/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Okres 2026-Q4. Domyślna stawka 2.88 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 6-mies. 0.48, 12-mies. 0.24 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty."
     }
   ],
   "billingDefinitionTemplate": {
@@ -86,6 +216,186 @@
     "periods": [
       {
         "validFrom": null,
+        "validTo": "2024-07-01T00:00:00+02:00",
+        "components": [
+          {
+            "id": "distribution-fixed-network",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "11.46",
+              "unit": "PLN/month"
+            }
+          },
+          {
+            "id": "capacity-fee",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "10.64",
+              "unit": "PLN/month"
+            }
+          },
+          {
+            "id": "distribution-subscription",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "2.88",
+              "unit": "PLN/month"
+            }
+          }
+        ]
+      },
+      {
+        "validFrom": "2024-07-01T00:00:00+02:00",
+        "validTo": "2025-07-01T00:00:00+02:00",
+        "components": [
+          {
+            "id": "distribution-fixed-network",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "11.46",
+              "unit": "PLN/month"
+            }
+          },
+          {
+            "id": "capacity-fee",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "0.00",
+              "unit": "PLN/month"
+            }
+          },
+          {
+            "id": "distribution-subscription",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "2.88",
+              "unit": "PLN/month"
+            }
+          }
+        ]
+      },
+      {
+        "validFrom": "2025-07-01T00:00:00+02:00",
+        "validTo": "2026-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "distribution-fixed-network",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "11.46",
+              "unit": "PLN/month"
+            }
+          },
+          {
+            "id": "capacity-fee",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "11.44",
+              "unit": "PLN/month"
+            }
+          },
+          {
+            "id": "distribution-subscription",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "2.88",
+              "unit": "PLN/month"
+            }
+          }
+        ]
+      },
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
         "validTo": "2026-10-01T00:00:00+02:00",
         "components": [
           {
@@ -210,11 +520,27 @@
     "Domyślna opłata sieciowa stała zakłada układ 1-fazowy (11.46 PLN/mies. netto); dla układu 3-fazowego ustaw 18.53 PLN/mies.",
     "Domyślna opłata mocowa 17.18 PLN/mies. netto odpowiada zużyciu rocznemu powyżej 1200 kWh do 2800 kWh; ustaw stawkę właściwą dla swojego progu. Stawki 2026 wynikają z Informacji Prezesa URE nr 58/2025.",
     "Od 2026-10-01 opłata abonamentowa OSD jest ustawiona na 0.00 PLN/mies. zgodnie z § 56 ust. 3 rozporządzenia Ministra Energii z 3.09.2026 r. (Dz.U. 2026 poz. 1182); ewentualna opłata po stronie sprzedawcy nie jest modelowana przez ten preset.",
-    "Opłata przejściowa nie jest dodawana: została zniesiona od 2026-01-01."
+    "Opłata przejściowa nie jest dodawana: została zniesiona od 2026-01-01.",
+    "Historyczne stawki opłaty mocowej dotyczą gospodarstwa domowego ze zużyciem rocznym >1200 do 2800 kWh. Opłata mocowa została ustawowo wyzerowana od 2024-07-01 do 2025-06-30; pozostałe kwoty są nominalnymi stawkami URE (netto).",
+    "Historycznych stawek stałego składnika sieciowego i abonamentu za lata 2024-2025 nie potwierdzono dla tego wariantu; skopiowano domyślne wartości 2026 jako przybliżenie. W każdym okresie można je niezależnie nadpisać."
   ],
   "source": {
     "title": "Taryfa Stoen Operator na 2026 r.",
     "url": "https://e-bok.stoen.pl/binsource?docId=8321&index=0&language=PL&paramName=BINARYOBJ_FILE",
     "retrievedAt": "2026-09-30"
-  }
+  },
+  "sources": [
+    {
+      "title": "URE: stawki oplaty mocowej za lata 2024, 2025, 2026 (prog ponad 1200 do 2800 kWh, netto; 10.64, 11.44, 17.18 PLN/mies.)",
+      "url": "https://www.ure.gov.pl/pl/energia-elektryczna/ceny-wskazniki/9165%2CStawki-oplaty-mocowej.html"
+    },
+    {
+      "title": "Ustawa z 23.05.2024 r. o bonie energetycznym, art. 28: zawieszenie oplaty mocowej VII-XII 2024 (Dz.U. poz. 859)",
+      "url": "https://eli.gov.pl/eli/DU/2024/859/ogl"
+    },
+    {
+      "title": "Ustawa z 27.11.2024 r. (Dz.U. poz. 1831): oplata mocowa 0 PLN I-VI 2025",
+      "url": "https://eli.gov.pl/eli/DU/2024/1831/ogl"
+    }
+  ]
 }

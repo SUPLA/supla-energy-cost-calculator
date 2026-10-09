@@ -100,6 +100,9 @@ final class AdditionalHouseholdTariffPresetTest extends TestCase
     /** @return array<string, mixed> */
     private function component(string $presetId, string $componentId): array
     {
-        return (new TariffPresetCompiler())->compileComponentToArray($presetId, $componentId, [])['periods'][0]['components'][0];
+        $compiled = (new TariffPresetCompiler())->compileComponentToArray($presetId, $componentId, []);
+        $currentPeriod = $compiled['periods'][array_key_last($compiled['periods'])];
+
+        return $currentPeriod['components'][0];
     }
 }

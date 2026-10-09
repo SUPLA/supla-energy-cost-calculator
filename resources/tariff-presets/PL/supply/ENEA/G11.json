@@ -37,17 +37,47 @@
         "title": "Taryfa ENEA dla energii elektrycznej dla odbiorców z grup taryfowych G na 2026 r.",
         "url": "https://www.enea.pl/media/6820/taryfa-dla-energii-elektrycznej-dla-odbiorcow-z-grup-taryfowych-gpdf.pdf",
         "retrievedAt": "2026-09-23"
+      },
+      {
+        "title": "ENEA SA, taryfa G od 01.07.2024 do 30.09.2025, pkt 5.1 (bez VAT i akcyzy)",
+        "url": "https://www.enea.pl/sites/default/files/2025-02/enea_taryfa_zmiana_2024_wnetrze_07_2024_1dl-informacja_dodatkowa_2.pdf",
+        "retrievedAt": "2026-10-09"
+      },
+      {
+        "title": "ENEA SA, zmiana taryfy G od 01.10.2025 (netto bez akcyzy; pkt 5.1)",
+        "url": "https://www.enea.pl/media/5569/20251001zmiana-taryfygdpdf.pdf",
+        "retrievedAt": "2026-10-09"
       }
     ]
   },
   "inputs": [
     {
-      "id": "energy.rate",
-      "label": "Cena energii czynnej",
+      "id": "energy.rate.2024-07_2025-Q3",
+      "label": "Cena energii czynnej (2024-07_2025-Q3)",
       "type": "DECIMAL",
       "required": true,
       "targets": [
         "/periods/0/components/0/rate/value"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "energy.rate.2025-Q4",
+      "label": "Cena energii czynnej (2025-Q4)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/1/components/0/rate/value"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "energy.rate.2026",
+      "label": "Cena energii czynnej (2026)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/2/components/0/rate/value"
       ],
       "unit": "PLN/kWh"
     }
@@ -64,6 +94,64 @@
     "periods": [
       {
         "validFrom": null,
+        "validTo": "2025-10-01T00:00:00+02:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "kind": "ENERGY_PURCHASE",
+            "category": "ENERGY",
+            "taxTreatment": {
+              "included": [
+                "EXCISE"
+              ]
+            },
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "0.6315",
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      },
+      {
+        "validFrom": "2025-10-01T00:00:00+02:00",
+        "validTo": "2026-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "kind": "ENERGY_PURCHASE",
+            "category": "ENERGY",
+            "taxTreatment": {
+              "included": [
+                "EXCISE"
+              ]
+            },
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "0.5810",
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      },
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
         "validTo": null,
         "components": [
           {
@@ -71,7 +159,9 @@
             "kind": "ENERGY_PURCHASE",
             "category": "ENERGY",
             "taxTreatment": {
-              "included": ["EXCISE"]
+              "included": [
+                "EXCISE"
+              ]
             },
             "quantity": {
               "type": "ACTIVE_ENERGY_IMPORT",
@@ -91,7 +181,9 @@
       }
     ]
   },
-  "warnings": [],
+  "warnings": [
+    "Ceny historyczne sa stawkami taryfowymi netto (bez VAT), zawierajacymi akcyze 0,005 PLN/kWh; nie sa cenami maksymalnymi ani zamrozonymi wynikajacymi z przepisow ochronnych."
+  ],
   "source": {
     "title": "Taryfa ENEA dla energii elektrycznej dla odbiorców z grup taryfowych G na 2026 r.",
     "url": "https://www.enea.pl/media/6820/taryfa-dla-energii-elektrycznej-dla-odbiorcow-z-grup-taryfowych-gpdf.pdf",

@@ -37,13 +37,23 @@
         "title": "Taryfa PGE Obrót dla odbiorców z grup taryfowych G na 2026 r.",
         "url": "https://www.gkpge.pl/content/download/e81cbcdedf76bd67800e1c39c65dc827/file/a5_taryfa_g_12_2026_web.pdf?contentId=196597&inLanguage=pol-PL&version=1",
         "retrievedAt": "2026-09-24"
+      },
+      {
+        "title": "PGE Obrót: taryfa G w brzmieniu od 01.07.2024, stosowana przed zmianą 01.10.2025, stawki taryfowe bez VAT i akcyzy",
+        "url": "https://www.gkpge.pl/content/download/a6e8f82f47ae8aade1f56dcfd7c8af4f/file/zestaw-cen-dla-cennika-taryfowego-g_012025.pdf?contentId=158392&inLanguage=pol-PL&version=4",
+        "retrievedAt": "2026-10-09"
+      },
+      {
+        "title": "Decyzja Prezesa URE zatwierdzająca zmianę taryfy PGE Obrót od 01.10.2025 (tabela stawek G)",
+        "url": "https://bip.ure.gov.pl/download/3/20033/PGEObrotSA.pdf",
+        "retrievedAt": "2026-10-09"
       }
     ]
   },
   "inputs": [
     {
-      "id": "energy.DAY",
-      "label": "Cena energii - Szczyt/Dzień",
+      "id": "energy.DAY.2024-07_2025-Q3",
+      "label": "Cena energii - Szczyt/Dzień (2024-07_2025-Q3)",
       "type": "DECIMAL",
       "required": true,
       "targets": [
@@ -52,12 +62,52 @@
       "unit": "PLN/kWh"
     },
     {
-      "id": "energy.NIGHT",
-      "label": "Cena energii - Pozaszczyt/Noc",
+      "id": "energy.NIGHT.2024-07_2025-Q3",
+      "label": "Cena energii - Pozaszczyt/Noc (2024-07_2025-Q3)",
       "type": "DECIMAL",
       "required": true,
       "targets": [
         "/periods/0/components/0/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "energy.DAY.2025-Q4",
+      "label": "Cena energii - Szczyt/Dzień (2025-Q4)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/1/components/0/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "energy.NIGHT.2025-Q4",
+      "label": "Cena energii - Pozaszczyt/Noc (2025-Q4)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/1/components/0/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "energy.DAY.2026",
+      "label": "Cena energii - Szczyt/Dzień (2026)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/2/components/0/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "energy.NIGHT.2026",
+      "label": "Cena energii - Pozaszczyt/Noc (2026)",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/2/components/0/rate/rates/NIGHT"
       ],
       "unit": "PLN/kWh"
     }
@@ -74,6 +124,210 @@
     "periods": [
       {
         "validFrom": null,
+        "validTo": "2025-10-01T00:00:00+02:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "kind": "ENERGY_PURCHASE",
+            "category": "ENERGY",
+            "taxTreatment": {
+              "included": [
+                "EXCISE"
+              ]
+            },
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "HOLIDAY"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "24:00"
+                    }
+                  ],
+                  "priority": 100
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "24:00"
+                    }
+                  ],
+                  "priority": 200
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "01:00",
+                      "to": "05:00"
+                    }
+                  ],
+                  "priority": 500
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "05:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "01:00"
+                    }
+                  ],
+                  "priority": 500
+                }
+              ],
+              "calendar": "PL_PUBLIC_HOLIDAYS"
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": "0.6960",
+                "NIGHT": "0.4799"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      },
+      {
+        "validFrom": "2025-10-01T00:00:00+02:00",
+        "validTo": "2026-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "energy-purchase",
+            "kind": "ENERGY_PURCHASE",
+            "category": "ENERGY",
+            "taxTreatment": {
+              "included": [
+                "EXCISE"
+              ]
+            },
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "HOLIDAY"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "24:00"
+                    }
+                  ],
+                  "priority": 100
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "00:00",
+                      "to": "24:00"
+                    }
+                  ],
+                  "priority": 200
+                },
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "01:00",
+                      "to": "05:00"
+                    }
+                  ],
+                  "priority": 500
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "05:00",
+                      "to": "24:00"
+                    },
+                    {
+                      "from": "00:00",
+                      "to": "01:00"
+                    }
+                  ],
+                  "priority": 500
+                }
+              ],
+              "calendar": "PL_PUBLIC_HOLIDAYS"
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": "0.6421",
+                "NIGHT": "0.4547"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      },
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
         "validTo": null,
         "components": [
           {
@@ -81,7 +335,9 @@
             "kind": "ENERGY_PURCHASE",
             "category": "ENERGY",
             "taxTreatment": {
-              "included": ["EXCISE"]
+              "included": [
+                "EXCISE"
+              ]
             },
             "quantity": {
               "type": "ACTIVE_ENERGY_IMPORT",
@@ -174,7 +430,9 @@
       }
     ]
   },
-  "warnings": [],
+  "warnings": [
+    "Historia zawiera nominalne ceny taryfowe z akcyzą 0,005 PLN/kWh, bez VAT; ustawowe ceny maksymalne i pozostałe mechanizmy ochronne nie są uwzględnione."
+  ],
   "source": {
     "title": "Taryfa PGE Obrót dla odbiorców z grup taryfowych G na 2026 r.",
     "url": "https://www.gkpge.pl/content/download/e81cbcdedf76bd67800e1c39c65dc827/file/a5_taryfa_g_12_2026_web.pdf?contentId=196597&inLanguage=pol-PL&version=1",

@@ -88,12 +88,12 @@ final class TariffPresetDefaultsTest extends TestCase
             'energy.AFTERNOON_PEAK' => '0.7830',
             'energy.OFF_PEAK' => '0.4260',
         ]];
-        yield 'PGE G11' => ['PL.PGE_OBROT.G11', 'PGE_OBROT', ['energy.rate' => '0.5032']];
-        yield 'PGE G12' => ['PL.PGE_OBROT.G12', 'PGE_OBROT', ['energy.DAY' => '0.5706', 'energy.NIGHT' => '0.3768']];
-        yield 'ENEA G11' => ['PL.ENEA.G11', 'ENEA', ['energy.rate' => '0.5030']];
-        yield 'ENEA G12' => ['PL.ENEA.G12', 'ENEA', ['energy.DAY' => '0.5829', 'energy.NIGHT' => '0.3419']];
-        yield 'Energa G11' => ['PL.ENERGA_OBROT.G11', 'ENERGA_OBROT', ['energy.rate' => '0.5018']];
-        yield 'Energa G12' => ['PL.ENERGA_OBROT.G12', 'ENERGA_OBROT', ['energy.DAY' => '0.5839', 'energy.NIGHT' => '0.3803']];
+        yield 'PGE G11' => ['PL.PGE_OBROT.G11', 'PGE_OBROT', ['energy.rate.2026' => '0.5032']];
+        yield 'PGE G12' => ['PL.PGE_OBROT.G12', 'PGE_OBROT', ['energy.DAY.2026' => '0.5706', 'energy.NIGHT.2026' => '0.3768']];
+        yield 'ENEA G11' => ['PL.ENEA.G11', 'ENEA', ['energy.rate.2026' => '0.5030']];
+        yield 'ENEA G12' => ['PL.ENEA.G12', 'ENEA', ['energy.DAY.2026' => '0.5829', 'energy.NIGHT.2026' => '0.3419']];
+        yield 'Energa G11' => ['PL.ENERGA_OBROT.G11', 'ENERGA_OBROT', ['energy.rate.2026' => '0.5018']];
+        yield 'Energa G12' => ['PL.ENERGA_OBROT.G12', 'ENERGA_OBROT', ['energy.DAY.2026' => '0.5839', 'energy.NIGHT.2026' => '0.3803']];
         yield 'E.ON G11' => ['PL.EON_POLSKA.G11', 'EON_POLSKA', ['energy.rate' => '0.5050']];
         yield 'E.ON G12' => ['PL.EON_POLSKA.G12', 'EON_POLSKA', ['energy.DAY' => '0.5394', 'energy.NIGHT' => '0.4295']];
     }

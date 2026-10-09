@@ -62,8 +62,8 @@ final class TariffPresetCompilerTest extends TestCase
             'PL.ENEA.G12',
             'energy-purchase',
             [
-                'energy.DAY' => '0.58',
-                'energy.NIGHT' => '0.35',
+                'energy.DAY.2026' => '0.58',
+                'energy.NIGHT.2026' => '0.35',
                 'schedule.nightShort.from' => '12:00',
             ],
         );
