@@ -12,31 +12,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.TAURON_SPRZEDAZ.G11.2026",
+          "presetId": "PL.TAURON_SPRZEDAZ.G11",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G11.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G11",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G11.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G11.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G11.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G11.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G11.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G11.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -53,31 +53,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.TAURON_SPRZEDAZ.G12.2026",
+          "presetId": "PL.TAURON_SPRZEDAZ.G12",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G12.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G12",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G12.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G12.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G12.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G12.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G12.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G12.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -94,31 +94,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.TAURON_SPRZEDAZ.G13.2026",
+          "presetId": "PL.TAURON_SPRZEDAZ.G13",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G13.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G13",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G13.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G13.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G13.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G13.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G13.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G13.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -135,31 +135,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.TAURON_SPRZEDAZ.G11.2026",
+          "presetId": "PL.TAURON_SPRZEDAZ.G11",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G14dynamic.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G14dynamic",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G14dynamic.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G14dynamic.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G14dynamic.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G14dynamic.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G14dynamic.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G14dynamic.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -176,31 +176,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.TAURON_SPRZEDAZ.G12w.2026",
+          "presetId": "PL.TAURON_SPRZEDAZ.G12w",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G12w.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G12w",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G12w.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G12w.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G12w.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G12w.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.TAURON_DYSTRYBUCJA.G12w.FIXED.2026",
+          "presetId": "PL.TAURON_DYSTRYBUCJA.G12w.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -217,31 +217,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.PGE_OBROT.G11.2026",
+          "presetId": "PL.PGE_OBROT.G11",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G11.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G11",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G11.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G11.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G11.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G11.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G11.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G11.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -258,31 +258,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.PGE_OBROT.G12.2026",
+          "presetId": "PL.PGE_OBROT.G12",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -299,31 +299,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.PGE_OBROT.G12w.2026",
+          "presetId": "PL.PGE_OBROT.G12w",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12w.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12w",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12w.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12w.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12w.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12w.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12w.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12w.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -340,31 +340,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.PGE_OBROT.G12n.2026",
+          "presetId": "PL.PGE_OBROT.G12n",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12n.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12n",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12n.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12n.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12n.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12n.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.PGE_DYSTRYBUCJA.G12n.FIXED.2026",
+          "presetId": "PL.PGE_DYSTRYBUCJA.G12n.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -381,31 +381,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.ENEA.G11.2026",
+          "presetId": "PL.ENEA.G11",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.ENEA_OPERATOR.G11.2026",
+          "presetId": "PL.ENEA_OPERATOR.G11",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G11.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G11.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G11.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G11.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G11.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G11.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -422,31 +422,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.ENEA.G12.2026",
+          "presetId": "PL.ENEA.G12",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.ENEA_OPERATOR.G12.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G12.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G12.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G12.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -463,31 +463,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.ENEA.G11.2026",
+          "presetId": "PL.ENEA.G11",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.ENEA_OPERATOR.G13active.2026",
+          "presetId": "PL.ENEA_OPERATOR.G13active",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G13active.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G13active.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G13active.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G13active.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G13active.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G13active.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -504,31 +504,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.ENEA.G12w.2026",
+          "presetId": "PL.ENEA.G12w",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.ENEA_OPERATOR.G12w.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12w",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G12w.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12w.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G12w.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12w.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G12w.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12w.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -545,31 +545,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.ENEA.G11.2026",
+          "presetId": "PL.ENEA.G11",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.ENEA_OPERATOR.G12sezON.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12sezON",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G12sezON.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12sezON.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G12sezON.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12sezON.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENEA_OPERATOR.G12sezON.FIXED.2026",
+          "presetId": "PL.ENEA_OPERATOR.G12sezON.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -586,31 +586,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.ENERGA_OBROT.G11.2026",
+          "presetId": "PL.ENERGA_OBROT.G11",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.ENERGA_OPERATOR.G11.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G11",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G11.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G11.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G11.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G11.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G11.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G11.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -627,31 +627,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.ENERGA_OBROT.G12.2026",
+          "presetId": "PL.ENERGA_OBROT.G12",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.ENERGA_OPERATOR.G12.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G12.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G12.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G12.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -668,31 +668,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.ENERGA_OBROT.G12w.2026",
+          "presetId": "PL.ENERGA_OBROT.G12w",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.ENERGA_OPERATOR.G12w.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12w",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G12w.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12w.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G12w.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12w.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G12w.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12w.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -709,31 +709,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.ENERGA_OBROT.G12r.2026",
+          "presetId": "PL.ENERGA_OBROT.G12r",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.ENERGA_OPERATOR.G12r.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12r",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G12r.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12r.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G12r.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12r.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.ENERGA_OPERATOR.G12r.FIXED.2026",
+          "presetId": "PL.ENERGA_OPERATOR.G12r.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -750,31 +750,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.EON_POLSKA.G11.2026",
+          "presetId": "PL.EON_POLSKA.G11",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.STOEN_OPERATOR.G11.2026",
+          "presetId": "PL.STOEN_OPERATOR.G11",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.STOEN_OPERATOR.G11.FIXED.2026",
+          "presetId": "PL.STOEN_OPERATOR.G11.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.STOEN_OPERATOR.G11.FIXED.2026",
+          "presetId": "PL.STOEN_OPERATOR.G11.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.STOEN_OPERATOR.G11.FIXED.2026",
+          "presetId": "PL.STOEN_OPERATOR.G11.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -791,31 +791,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.EON_POLSKA.G12.2026",
+          "presetId": "PL.EON_POLSKA.G12",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.STOEN_OPERATOR.G12.2026",
+          "presetId": "PL.STOEN_OPERATOR.G12",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.STOEN_OPERATOR.G12.FIXED.2026",
+          "presetId": "PL.STOEN_OPERATOR.G12.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.STOEN_OPERATOR.G12.FIXED.2026",
+          "presetId": "PL.STOEN_OPERATOR.G12.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.STOEN_OPERATOR.G12.FIXED.2026",
+          "presetId": "PL.STOEN_OPERATOR.G12.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }
@@ -832,31 +832,31 @@
       "components": [
         {
           "kind": "ENERGY_PURCHASE",
-          "presetId": "PL.EON_POLSKA.G12w.2026",
+          "presetId": "PL.EON_POLSKA.G12w",
           "componentId": "energy-purchase",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_VARIABLE",
-          "presetId": "PL.STOEN_OPERATOR.G12w.2026",
+          "presetId": "PL.STOEN_OPERATOR.G12w",
           "componentId": "distribution-variable",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.STOEN_OPERATOR.G12w.FIXED.2026",
+          "presetId": "PL.STOEN_OPERATOR.G12w.FIXED",
           "componentId": "distribution-fixed-network",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.STOEN_OPERATOR.G12w.FIXED.2026",
+          "presetId": "PL.STOEN_OPERATOR.G12w.FIXED",
           "componentId": "capacity-fee",
           "values": {}
         },
         {
           "kind": "DISTRIBUTION_FIXED",
-          "presetId": "PL.STOEN_OPERATOR.G12w.FIXED.2026",
+          "presetId": "PL.STOEN_OPERATOR.G12w.FIXED",
           "componentId": "distribution-subscription",
           "values": {}
         }

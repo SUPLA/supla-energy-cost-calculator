@@ -1,0 +1,251 @@
+{
+  "version": 1,
+  "id": "PL.TAURON_DYSTRYBUCJA.G12",
+  "label": "TAURON Dystrybucja - G12",
+  "presetType": "TARIFF",
+  "components": [
+    {
+      "kind": "DISTRIBUTION_VARIABLE",
+      "componentId": "distribution-variable",
+      "label": "Dystrybucja zmienna"
+    }
+  ],
+  "provider": {
+    "id": "TAURON_DYSTRYBUCJA",
+    "label": "TAURON Dystrybucja"
+  },
+  "operator": {
+    "id": "TAURON_DYSTRYBUCJA",
+    "label": "TAURON Dystrybucja"
+  },
+  "tariffGroup": "G12",
+  "validFrom": null,
+  "validTo": null,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "taxContext": {
+    "jurisdiction": "PL",
+    "customerClass": "HOUSEHOLD"
+  },
+  "inputs": [
+    {
+      "id": "distribution.DAY.2025",
+      "label": "Dystrybucja DAY 2025",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "distribution.NIGHT.2025",
+      "label": "Dystrybucja NIGHT 2025",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "distribution.DAY.2026",
+      "label": "Dystrybucja DAY 2026",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/1/components/0/rate/rates/DAY"
+      ],
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "distribution.NIGHT.2026",
+      "label": "Dystrybucja NIGHT 2026",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/1/components/0/rate/rates/NIGHT"
+      ],
+      "unit": "PLN/kWh"
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": null,
+        "validTo": "2026-01-01T00:00:00+01:00",
+        "components": [
+          {
+            "id": "distribution-variable",
+            "kind": "DISTRIBUTION_VARIABLE",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "15:00"
+                    }
+                  ]
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "13:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "22:00"
+                    }
+                  ]
+                }
+              ]
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": "0.2899",
+                "NIGHT": "0.0609"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      },
+      {
+        "validFrom": "2026-01-01T00:00:00+01:00",
+        "validTo": null,
+        "components": [
+          {
+            "id": "distribution-variable",
+            "kind": "DISTRIBUTION_VARIABLE",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "WEEKLY_SCHEDULE",
+              "timezone": "Europe/Warsaw",
+              "rules": [
+                {
+                  "zone": "NIGHT",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "22:00",
+                      "to": "06:00"
+                    },
+                    {
+                      "from": "13:00",
+                      "to": "15:00"
+                    }
+                  ]
+                },
+                {
+                  "zone": "DAY",
+                  "days": [
+                    "MON",
+                    "TUE",
+                    "WED",
+                    "THU",
+                    "FRI",
+                    "SAT",
+                    "SUN"
+                  ],
+                  "time_ranges": [
+                    {
+                      "from": "06:00",
+                      "to": "13:00"
+                    },
+                    {
+                      "from": "15:00",
+                      "to": "22:00"
+                    }
+                  ]
+                }
+              ]
+            },
+            "rate": {
+              "type": "ZONED",
+              "rates": {
+                "DAY": "0.2841",
+                "NIGHT": "0.0558"
+              },
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "Przed 2025 r. oraz po 2026 r. stosowana jest odpowiednio pierwsza lub ostatnia znana cena. Wyliczenia poza udokumentowanym zakresem są przybliżone."
+  ],
+  "sources": [
+    {
+      "title": "Taryfa TAURON Dystrybucja na 2025 r. - stawki G",
+      "url": "https://www.tauron-dystrybucja.pl/-/media/offer-documents/dystrybucja/archiwum-taryf/2025/taryfa-td_sa-na-rok-2025.ashx"
+    },
+    {
+      "title": "Taryfa TAURON Dystrybucja na 2026 r.",
+      "url": "https://www.tauron-dystrybucja.pl/-/media/offer-documents/dystrybucja/aktualna-taryfa/taryfa-tauron-dystrybucja-2026_ocr.ashx"
+    }
+  ]
+}

@@ -94,11 +94,11 @@
       "minLength": 1
     },
     "validFrom": {
-      "type": "string",
+      "type": ["string", "null"],
       "format": "date-time"
     },
     "validTo": {
-      "type": "string",
+      "type": ["string", "null"],
       "format": "date-time"
     },
     "currency": {
@@ -127,6 +127,18 @@
     },
     "energyPurchase": {
       "$ref": "#/$defs/energyPurchase"
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "url"],
+        "properties": {
+          "title": {"type": "string", "minLength": 1},
+          "url": {"type": "string", "format": "uri"}
+        },
+        "additionalProperties": false
+      }
     },
     "inputs": {
       "type": "array",

@@ -53,8 +53,8 @@ final class CostPlanStarterCatalogTest extends TestCase
         $starter = (new CostPlanStarterCatalog())->get('PL.STARTER.TAURON_DYSTRYBUCJA.G11');
 
         self::assertFalse(property_exists($starter, 'plan'));
-        self::assertSame('PL.TAURON_SPRZEDAZ.G11.2026', $starter->components[0]['presetId']);
-        self::assertSame('PL.TAURON_DYSTRYBUCJA.G11.2026', $starter->components[1]['presetId']);
+        self::assertSame('PL.TAURON_SPRZEDAZ.G11', $starter->components[0]['presetId']);
+        self::assertSame('PL.TAURON_DYSTRYBUCJA.G11', $starter->components[1]['presetId']);
         self::assertSame([], $starter->components[0]['values']);
         self::assertSame([], $starter->components[1]['values']);
     }

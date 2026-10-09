@@ -18,7 +18,7 @@ use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Plan\CostPlanCompiler;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
 
-#[Group('performance')]
+#[Group('performace')]
 final class TwoYearHistoryPerformanceTest extends TestCase
 {
     private const MAX_CALCULATION_TIME_SECONDS = 15.0;
@@ -107,13 +107,13 @@ final class TwoYearHistoryPerformanceTest extends TestCase
                 'components' => [
                     [
                         'kind' => 'ENERGY_PURCHASE',
-                        'presetId' => 'PL.TAURON_SPRZEDAZ.G11.2026',
+                        'presetId' => 'PL.TAURON_SPRZEDAZ.G11',
                         'componentId' => 'energy-purchase',
                         'values' => ['energy.rate' => '0.71'],
                     ],
                     [
                         'kind' => 'DISTRIBUTION_VARIABLE',
-                        'presetId' => 'PL.ENERGA_OPERATOR.G12.2026',
+                        'presetId' => 'PL.ENERGA_OPERATOR.G12',
                         'componentId' => 'distribution-variable',
                         'values' => [],
                     ],

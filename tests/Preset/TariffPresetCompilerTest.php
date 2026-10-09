@@ -13,7 +13,7 @@ final class TariffPresetCompilerTest extends TestCase
 {
     public function testCompilesSupplyG11UsingUserValue(): void
     {
-        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_SPRZEDAZ.G11.2026', [
+        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_SPRZEDAZ.G11', [
             'energy.rate' => '0.71',
         ]);
 
@@ -25,18 +25,19 @@ final class TariffPresetCompilerTest extends TestCase
 
     public function testCompilesDistributionG11UsingUserValue(): void
     {
-        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_DYSTRYBUCJA.G11.2026', [
-            'distribution.rate' => '0.30',
+        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_DYSTRYBUCJA.G11', [
+            'distribution.rate.2026' => '0.30',
         ]);
 
         self::assertCount(1, $compiled['periods'][0]['components']);
         self::assertSame('distribution-variable', $compiled['periods'][0]['components'][0]['id']);
-        self::assertSame('0.30', $compiled['periods'][0]['components'][0]['rate']['value']);
+        self::assertSame('0.2541', $compiled['periods'][0]['components'][0]['rate']['value']);
+        self::assertSame('0.30', $compiled['periods'][1]['components'][0]['rate']['value']);
     }
 
     public function testCompilesSupplyG12WithZonedEnergyRates(): void
     {
-        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_SPRZEDAZ.G12.2026', [
+        $compiled = (new TariffPresetCompiler())->compileToArray('PL.TAURON_SPRZEDAZ.G12', [
             'energy.DAY' => '0.98',
             'energy.NIGHT' => '0.62',
         ]);
@@ -50,7 +51,7 @@ final class TariffPresetCompilerTest extends TestCase
         $this->expectException(TariffPresetCompilationException::class);
         $this->expectExceptionMessage("Unknown input 'unknown'");
 
-        (new TariffPresetCompiler())->compileToArray('PL.TAURON_DYSTRYBUCJA.G11.2026', [
+        (new TariffPresetCompiler())->compileToArray('PL.TAURON_DYSTRYBUCJA.G11', [
             'unknown' => 'x',
         ]);
     }
@@ -58,7 +59,7 @@ final class TariffPresetCompilerTest extends TestCase
     public function testCompilesOneSupplyComponentWithScheduleOverride(): void
     {
         $compiled = (new TariffPresetCompiler())->compileComponentToArray(
-            'PL.ENEA.G12.2026',
+            'PL.ENEA.G12',
             'energy-purchase',
             [
                 'energy.DAY' => '0.58',

@@ -6,7 +6,7 @@ A starter contains only `components[]`. It does not define the CostPlan envelope
 
 Component `values` in starters are normally empty. Empty values inherit defaults from the referenced preset. When a user overrides one field, only that field is persisted in `values`; removing the override makes the plan inherit the current preset default again.
 
-`CostPlanStarterCatalog` exposes the bundled simple paths such as `TAURON Dystrybucja - G11`. Hosts copy `CostPlanStarter::components` into the selected CostPlan period and persist the resulting user-owned plan. Existing plans must not stay linked to the starter ID: changing which component preset a starter recommends is intended to affect new drafts only. Starter IDs are intentionally not year-versioned; the concrete referenced preset IDs remain versioned and are copied into the user's CostPlan.
+`CostPlanStarterCatalog` exposes the bundled simple paths such as `TAURON Dystrybucja - G11`. Hosts copy `CostPlanStarter::components` into the selected CostPlan period and persist the resulting user-owned plan. Existing plans must not stay linked to the starter ID: changing which component preset a starter recommends is intended to affect new drafts only. Standard tariff preset IDs are stable across price changes; dated offer editions may have versioned IDs.
 
 For example, a first-time setup may create the surrounding plan independently and insert only the starter recipe:
 
@@ -24,12 +24,12 @@ The resulting single period has open boundaries. Billing-cycle defaults or invoi
 
 The Polish catalogue separates the components that were previously bundled in one OSD document:
 
-- distribution presets keep stable OSD IDs such as `PL.TAURON_DYSTRYBUCJA.G11.2026` and provide `DISTRIBUTION_VARIABLE`;
-- standard supply presets use seller IDs such as `PL.TAURON_SPRZEDAZ.G11.2026` and provide `ENERGY_PURCHASE`;
+- distribution presets keep stable OSD IDs such as `PL.TAURON_DYSTRYBUCJA.G11` and provide `DISTRIBUTION_VARIABLE`;
+- standard supply presets use seller IDs such as `PL.TAURON_SPRZEDAZ.G11` and provide `ENERGY_PURCHASE`;
 - real retail offers may provide more than one component, for example dynamic energy plus `SUPPLIER_FIXED`;
 - generic presets provide user-configurable building blocks without pretending to represent a named market offer.
 
-The default G11/G12/G13 starters compose the incumbent 2026 seller tariff from the original bundled data with the matching OSD distribution tariff. `G14dynamic` uses TAURON's G11 supply component plus the PDGSZ-driven G14dynamic distribution component. ENEA `G13active` uses ENEA G11 supply because the previously bundled energy price was the same constant price in every G13active zone.
+The default G11/G12/G13 starters compose the incumbent seller tariff (initial defaults from 2026) with the matching OSD distribution tariff. `G14dynamic` uses TAURON's G11 supply component plus the PDGSZ-driven G14dynamic distribution component. ENEA `G13active` uses ENEA G11 supply because the previously bundled energy price was the same constant price in every G13active zone.
 
 Every bundled Polish preset also declares `taxContext: {jurisdiction: PL, customerClass: HOUSEHOLD}`. This is compatibility/context metadata, not tax law: VAT/excise rates live in immutable tax-profile resources and are selected by the library for the effective date range. `taxTreatment.included` remains separate and tells the compiler which applicable taxes are already present in the preset's source price.
 

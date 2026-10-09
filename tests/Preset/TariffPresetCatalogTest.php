@@ -30,7 +30,7 @@ final class TariffPresetCatalogTest extends TestCase
         $presets = (new TariffPresetCatalog())->presets();
 
         self::assertCount(68, $presets);
-        self::assertSame('PL.TAURON_DYSTRYBUCJA.G11.2026', $presets[0]['id']);
+        self::assertSame('PL.TAURON_DYSTRYBUCJA.G11', $presets[0]['id']);
         self::assertSame('TAURON Dystrybucja - G11', $presets[0]['label']);
         self::assertSame('TARIFF', $presets[0]['presetType']);
         self::assertSame([['kind' => 'DISTRIBUTION_VARIABLE', 'componentId' => 'distribution-variable', 'label' => 'Dystrybucja zmienna']], $presets[0]['components']);
@@ -40,9 +40,9 @@ final class TariffPresetCatalogTest extends TestCase
 
     public function testLoadsBundledPresetById(): void
     {
-        $preset = (new TariffPresetCatalog())->get('PL.TAURON_DYSTRYBUCJA.G12.2026');
+        $preset = (new TariffPresetCatalog())->get('PL.TAURON_DYSTRYBUCJA.G12');
 
-        self::assertSame('PL.TAURON_DYSTRYBUCJA.G12.2026', $preset->id);
+        self::assertSame('PL.TAURON_DYSTRYBUCJA.G12', $preset->id);
         self::assertSame($preset->id, $preset->document['id']);
         self::assertSame('G12', $preset->metadata['tariffGroup']);
         self::assertArrayHasKey('billingDefinitionTemplate', $preset->document);

@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "id": "PL.ENEA_OPERATOR.G11",
+  "label": "ENEA Operator - G11",
+  "presetType": "TARIFF",
+  "components": [
+    {
+      "kind": "DISTRIBUTION_VARIABLE",
+      "componentId": "distribution-variable",
+      "label": "Dystrybucja zmienna"
+    }
+  ],
+  "provider": {
+    "id": "ENEA_OPERATOR",
+    "label": "ENEA Operator"
+  },
+  "operator": {
+    "id": "ENEA_OPERATOR",
+    "label": "ENEA Operator"
+  },
+  "tariffGroup": "G11",
+  "validFrom": null,
+  "validTo": null,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "taxContext": {
+    "jurisdiction": "PL",
+    "customerClass": "HOUSEHOLD"
+  },
+  "inputs": [
+    {
+      "id": "distribution.rate",
+      "label": "Składnik zmienny dystrybucji",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/value"
+      ],
+      "unit": "PLN/kWh",
+      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": null,
+        "validTo": null,
+        "components": [
+          {
+            "id": "distribution-variable",
+            "kind": "DISTRIBUTION_VARIABLE",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "0.2456",
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "source": {
+    "title": "Taryfa ENEA Operator na 2026 r.",
+    "url": "https://www.operator.enea.pl/sites/operator/files/dokumenty/Enea%20Operator_wyci%C4%85g%20z%20taryfy_01.01.2026-31.12.2026.pdf",
+    "retrievedAt": "2026-09-22"
+  }
+}

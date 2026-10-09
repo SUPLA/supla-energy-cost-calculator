@@ -22,13 +22,13 @@ Version 2 assigns a `CostComponentKind` compatibility role to each component of 
     "components": [
       {
         "kind": "ENERGY_PURCHASE",
-        "presetId": "PL.TAURON_SPRZEDAZ.G11.2026",
+        "presetId": "PL.TAURON_SPRZEDAZ.G11",
         "componentId": "energy-purchase",
         "values": {"energy.rate": "0.71"}
       },
       {
         "kind": "DISTRIBUTION_VARIABLE",
-        "presetId": "PL.ENERGA_OPERATOR.G12.2026",
+        "presetId": "PL.ENERGA_OPERATOR.G12",
         "componentId": "distribution-variable",
         "values": {}
       },
@@ -60,7 +60,7 @@ CostPlanDefinition
 
 A non-generic preset ID identifies one real tariff or offer definition. Generic preset IDs identify a versioned reusable configuration shape. Package maintainers may correct an implementation/data mistake under the same ID when the user-facing input contract remains compatible. Existing plans intentionally pick up that correction the next time they compile.
 
-A real operator change (new validity period, changed tariff semantics, new product) must be published under a new preset ID. Do not use a new revision hash as a substitute for a new semantic ID.
+A change of price or its validity boundary does not require a new standard tariff ID: append a price period to its template and expose separate inputs for that period. Changed tariff semantics or a genuinely new contract/offer edition may require another preset ID.
 
 `TariffPreset.revision` is a deterministic SHA-256 content hash. It is useful for diagnostics and cache invalidation, but a persisted cost plan is not pinned to a revision.
 
@@ -86,7 +86,7 @@ A real operator change (new validity period, changed tariff semantics, new produ
 
 ## Preset corrections
 
-Given a persisted plan that references `TEST.G11.2026`, changing a package-owned default in that preset from `0.10` to `0.20` while keeping the same preset ID changes the next compiled `BillingDefinition`. User-provided values remain unchanged.
+Given a persisted plan that references `TEST.G11`, changing a package-owned default in that preset from `0.10` to `0.20` while keeping the same preset ID changes the next compiled `BillingDefinition`. User-provided values remain unchanged.
 
 If a user explicitly overrode the corrected field, the stored override continues to win.
 

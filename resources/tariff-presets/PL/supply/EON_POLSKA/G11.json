@@ -1,0 +1,100 @@
+{
+  "version": 1,
+  "id": "PL.EON_POLSKA.G11",
+  "label": "E.ON Polska - G11",
+  "presetType": "OFFER",
+  "components": [
+    {
+      "kind": "ENERGY_PURCHASE",
+      "componentId": "energy-purchase",
+      "label": "Energia czynna"
+    }
+  ],
+  "provider": {
+    "id": "EON_POLSKA",
+    "label": "E.ON Polska"
+  },
+  "tariffGroup": "G11",
+  "validFrom": null,
+  "validTo": null,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "taxContext": {
+    "jurisdiction": "PL",
+    "customerClass": "HOUSEHOLD"
+  },
+  "energyPurchase": {
+    "supplier": {
+      "id": "EON_POLSKA",
+      "label": "E.ON Polska"
+    },
+    "assumptions": [
+      "billingCycle.anchor w szablonie jest wyłącznie deterministycznym założeniem do samodzielnej kompilacji presetu; CostPlan konfiguruje billingCycles niezależnie.",
+      "Ceny sprzedaży energii są wartościami netto bez VAT, z uwzględnieniem akcyzy 5 zł/MWh."
+    ],
+    "sources": [
+      {
+        "title": "Taryfa E.ON Polska dla grup taryfowych G obowiązująca od 1 stycznia 2026 r.",
+        "url": "https://eon.pl/-/media/eon/dokumenty/dla-domu/taryfa-energii-elektrycznej-eon-polska-sa-dla-grup-taryfowych-g--obowizuje-od-dnia-01_01_2026.ashx",
+        "retrievedAt": "2026-09-23"
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "id": "energy.rate",
+      "label": "Cena energii czynnej",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/value"
+      ],
+      "unit": "PLN/kWh"
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": null,
+        "validTo": null,
+        "components": [
+          {
+            "id": "energy-purchase",
+            "kind": "ENERGY_PURCHASE",
+            "category": "ENERGY",
+            "taxTreatment": {
+              "included": ["EXCISE"]
+            },
+            "quantity": {
+              "type": "ACTIVE_ENERGY_IMPORT",
+              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+              "periodInMinutes": 60
+            },
+            "selector": {
+              "type": "ALWAYS"
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "0.5050",
+              "unit": "PLN/kWh"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [],
+  "source": {
+    "title": "Taryfa E.ON Polska dla grup taryfowych G obowiązująca od 1 stycznia 2026 r.",
+    "url": "https://eon.pl/-/media/eon/dokumenty/dla-domu/taryfa-energii-elektrycznej-eon-polska-sa-dla-grup-taryfowych-g--obowizuje-od-dnia-01_01_2026.ashx",
+    "retrievedAt": "2026-09-23"
+  }
+}

@@ -254,13 +254,13 @@ final class ComponentCostPlanTest extends TestCase
         $components = [
             [
                 'kind' => 'ENERGY_PURCHASE',
-                'presetId' => 'PL.TAURON_SPRZEDAZ.G11.2026',
+                'presetId' => 'PL.TAURON_SPRZEDAZ.G11',
                 'componentId' => 'energy-purchase',
                 'values' => ['energy.rate' => '0.71'],
             ],
             [
                 'kind' => 'DISTRIBUTION_VARIABLE',
-                'presetId' => 'PL.ENERGA_OPERATOR.G12.2026',
+                'presetId' => 'PL.ENERGA_OPERATOR.G12',
                 'componentId' => 'distribution-variable',
                 'values' => [],
             ],

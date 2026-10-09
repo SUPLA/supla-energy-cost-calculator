@@ -14,7 +14,7 @@ The bundled catalogue focuses on current household groups that can be represente
 
 G12w is operator-specific: the inexpensive weekend/holiday zone is common, but weekday hours differ. PGE additionally changes its two-hour off-peak window seasonally. Each OSD therefore has its own G12w preset rather than a shared schedule.
 
-ENEA G12sezON reuses `PL.ENEA.G11.2026` for the starter's energy-purchase component. In ENEA's standard 2026 tariff both G12sezON energy zones have the same `0.5030 PLN/kWh` net price as G11, while distribution remains genuinely time-dependent.
+ENEA G12sezON reuses `PL.ENEA.G11` for the starter's energy-purchase component. In ENEA's standard 2026 tariff both G12sezON energy zones have the same `0.5030 PLN/kWh` net price as G11, while distribution remains genuinely time-dependent.
 
 ## Intentionally not bundled as simple defaults
 

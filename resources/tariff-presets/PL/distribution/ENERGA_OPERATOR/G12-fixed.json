@@ -1,0 +1,220 @@
+{
+  "version": 1,
+  "id": "PL.ENERGA_OPERATOR.G12.FIXED",
+  "label": "Energa-Operator - G12 - opłaty stałe",
+  "presetType": "TARIFF",
+  "components": [
+    {
+      "kind": "DISTRIBUTION_FIXED",
+      "componentId": "distribution-fixed-network",
+      "label": "Dystrybucja stała"
+    },
+    {
+      "kind": "DISTRIBUTION_FIXED",
+      "componentId": "capacity-fee",
+      "label": "Opłata mocowa"
+    },
+    {
+      "kind": "DISTRIBUTION_FIXED",
+      "componentId": "distribution-subscription",
+      "label": "Opłata abonamentowa"
+    }
+  ],
+  "provider": {
+    "id": "ENERGA_OPERATOR",
+    "label": "Energa-Operator"
+  },
+  "operator": {
+    "id": "ENERGA_OPERATOR",
+    "label": "Energa-Operator"
+  },
+  "tariffGroup": "G12",
+  "validFrom": null,
+  "validTo": null,
+  "currency": "PLN",
+  "timezone": "Europe/Warsaw",
+  "taxContext": {
+    "jurisdiction": "PL",
+    "customerClass": "HOUSEHOLD"
+  },
+  "inputs": [
+    {
+      "id": "distribution.fixed.rate",
+      "label": "Stały składnik sieciowy",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/0/rate/value",
+        "/periods/1/components/0/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Domyślnie układ 1-fazowy: 14.35 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 20.17 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym."
+    },
+    {
+      "id": "capacity.rate",
+      "label": "Opłata mocowa",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/1/rate/value",
+        "/periods/1/components/1/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
+    },
+    {
+      "id": "distribution.subscription.rate",
+      "label": "Opłata abonamentowa dystrybucyjna",
+      "type": "DECIMAL",
+      "required": true,
+      "targets": [
+        "/periods/0/components/2/rate/value"
+      ],
+      "unit": "PLN/month",
+      "help": "Domyślna stawka 4.64 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 2-mies. 2.32; zdalny odczyt: 1-mies. 0.74, 2-mies. 0.70 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty."
+    }
+  ],
+  "billingDefinitionTemplate": {
+    "version": 1,
+    "currency": "PLN",
+    "timezone": "Europe/Warsaw",
+    "billingCycle": {
+      "anchor": "2026-01-01",
+      "length": 1,
+      "unit": "MONTH"
+    },
+    "periods": [
+      {
+        "validFrom": null,
+        "validTo": "2026-10-01T00:00:00+02:00",
+        "components": [
+          {
+            "id": "distribution-fixed-network",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "14.35",
+              "unit": "PLN/month"
+            }
+          },
+          {
+            "id": "capacity-fee",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "17.18",
+              "unit": "PLN/month"
+            }
+          },
+          {
+            "id": "distribution-subscription",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "4.64",
+              "unit": "PLN/month"
+            }
+          }
+        ]
+      },
+      {
+        "validFrom": "2026-10-01T00:00:00+02:00",
+        "validTo": null,
+        "components": [
+          {
+            "id": "distribution-fixed-network",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "14.35",
+              "unit": "PLN/month"
+            }
+          },
+          {
+            "id": "capacity-fee",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "17.18",
+              "unit": "PLN/month"
+            }
+          },
+          {
+            "id": "distribution-subscription",
+            "kind": "DISTRIBUTION_FIXED",
+            "category": "NETWORK",
+            "taxTreatment": {
+              "included": []
+            },
+            "quantity": {
+              "type": "PERIOD",
+              "period": "MONTH",
+              "prorate": false
+            },
+            "rate": {
+              "type": "CONSTANT",
+              "value": "0.00",
+              "unit": "PLN/month"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "warnings": [
+    "Domyślna opłata sieciowa stała zakłada układ 1-fazowy (14.35 PLN/mies. netto); dla układu 3-fazowego ustaw 20.17 PLN/mies.",
+    "Domyślna opłata mocowa 17.18 PLN/mies. netto odpowiada zużyciu rocznemu powyżej 1200 kWh do 2800 kWh; ustaw stawkę właściwą dla swojego progu. Stawki 2026 wynikają z Informacji Prezesa URE nr 58/2025.",
+    "Od 2026-10-01 opłata abonamentowa OSD jest ustawiona na 0.00 PLN/mies. zgodnie z § 56 ust. 3 rozporządzenia Ministra Energii z 3.09.2026 r. (Dz.U. 2026 poz. 1182); ewentualna opłata po stronie sprzedawcy nie jest modelowana przez ten preset.",
+    "Opłata przejściowa nie jest dodawana: została zniesiona od 2026-01-01."
+  ],
+  "source": {
+    "title": "Taryfa Energa-Operator na 2026 r.",
+    "url": "https://cdn-netpr.pl/file/mediakit/2933024/8/20251217_taryfa_2026.pdf",
+    "retrievedAt": "2026-09-30"
+  }
+}

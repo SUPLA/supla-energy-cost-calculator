@@ -59,7 +59,7 @@ final class TariffPresetDefaultsTest extends TestCase
 
     public function testDistributionPresetDoesNotContainEnergyPurchase(): void
     {
-        $preset = (new TariffPresetCatalog())->get('PL.TAURON_DYSTRYBUCJA.G11.2026');
+        $preset = (new TariffPresetCatalog())->get('PL.TAURON_DYSTRYBUCJA.G11');
 
         self::assertSame('DISTRIBUTION_VARIABLE', $preset->document['components'][0]['kind']);
         self::assertSame(['distribution-variable'], array_column($preset->document['billingDefinitionTemplate']['periods'][0]['components'], 'id'));
@@ -69,7 +69,7 @@ final class TariffPresetDefaultsTest extends TestCase
     public function testSupplyDefaultMayBeOverriddenByInput(): void
     {
         $catalog = new TariffPresetCatalog();
-        $preset = $catalog->get('PL.TAURON_SPRZEDAZ.G11.2026');
+        $preset = $catalog->get('PL.TAURON_SPRZEDAZ.G11');
 
         self::assertSame('0.5020', $this->readPointer(
             $preset->document['billingDefinitionTemplate'],
@@ -81,21 +81,21 @@ final class TariffPresetDefaultsTest extends TestCase
 
     public static function energyPriceDefaults(): iterable
     {
-        yield 'TAURON G11' => ['PL.TAURON_SPRZEDAZ.G11.2026', 'TAURON_SPRZEDAZ', ['energy.rate' => '0.5020']];
-        yield 'TAURON G12' => ['PL.TAURON_SPRZEDAZ.G12.2026', 'TAURON_SPRZEDAZ', ['energy.DAY' => '0.5480', 'energy.NIGHT' => '0.4180']];
-        yield 'TAURON G13' => ['PL.TAURON_SPRZEDAZ.G13.2026', 'TAURON_SPRZEDAZ', [
+        yield 'TAURON G11' => ['PL.TAURON_SPRZEDAZ.G11', 'TAURON_SPRZEDAZ', ['energy.rate' => '0.5020']];
+        yield 'TAURON G12' => ['PL.TAURON_SPRZEDAZ.G12', 'TAURON_SPRZEDAZ', ['energy.DAY' => '0.5480', 'energy.NIGHT' => '0.4180']];
+        yield 'TAURON G13' => ['PL.TAURON_SPRZEDAZ.G13', 'TAURON_SPRZEDAZ', [
             'energy.MORNING_PEAK' => '0.4718',
             'energy.AFTERNOON_PEAK' => '0.7830',
             'energy.OFF_PEAK' => '0.4260',
         ]];
-        yield 'PGE G11' => ['PL.PGE_OBROT.G11.2026', 'PGE_OBROT', ['energy.rate' => '0.5032']];
-        yield 'PGE G12' => ['PL.PGE_OBROT.G12.2026', 'PGE_OBROT', ['energy.DAY' => '0.5706', 'energy.NIGHT' => '0.3768']];
-        yield 'ENEA G11' => ['PL.ENEA.G11.2026', 'ENEA', ['energy.rate' => '0.5030']];
-        yield 'ENEA G12' => ['PL.ENEA.G12.2026', 'ENEA', ['energy.DAY' => '0.5829', 'energy.NIGHT' => '0.3419']];
-        yield 'Energa G11' => ['PL.ENERGA_OBROT.G11.2026', 'ENERGA_OBROT', ['energy.rate' => '0.5018']];
-        yield 'Energa G12' => ['PL.ENERGA_OBROT.G12.2026', 'ENERGA_OBROT', ['energy.DAY' => '0.5839', 'energy.NIGHT' => '0.3803']];
-        yield 'E.ON G11' => ['PL.EON_POLSKA.G11.2026', 'EON_POLSKA', ['energy.rate' => '0.5050']];
-        yield 'E.ON G12' => ['PL.EON_POLSKA.G12.2026', 'EON_POLSKA', ['energy.DAY' => '0.5394', 'energy.NIGHT' => '0.4295']];
+        yield 'PGE G11' => ['PL.PGE_OBROT.G11', 'PGE_OBROT', ['energy.rate' => '0.5032']];
+        yield 'PGE G12' => ['PL.PGE_OBROT.G12', 'PGE_OBROT', ['energy.DAY' => '0.5706', 'energy.NIGHT' => '0.3768']];
+        yield 'ENEA G11' => ['PL.ENEA.G11', 'ENEA', ['energy.rate' => '0.5030']];
+        yield 'ENEA G12' => ['PL.ENEA.G12', 'ENEA', ['energy.DAY' => '0.5829', 'energy.NIGHT' => '0.3419']];
+        yield 'Energa G11' => ['PL.ENERGA_OBROT.G11', 'ENERGA_OBROT', ['energy.rate' => '0.5018']];
+        yield 'Energa G12' => ['PL.ENERGA_OBROT.G12', 'ENERGA_OBROT', ['energy.DAY' => '0.5839', 'energy.NIGHT' => '0.3803']];
+        yield 'E.ON G11' => ['PL.EON_POLSKA.G11', 'EON_POLSKA', ['energy.rate' => '0.5050']];
+        yield 'E.ON G12' => ['PL.EON_POLSKA.G12', 'EON_POLSKA', ['energy.DAY' => '0.5394', 'energy.NIGHT' => '0.4295']];
     }
 
     /** @param array<string|int, mixed> $document */
