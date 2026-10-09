@@ -7,7 +7,6 @@ namespace Supla\EnergyCostCalculator\Tests\Plan;
 use PHPUnit\Framework\TestCase;
 use Supla\EnergyCostCalculator\Engine\CostCalculator;
 use Supla\EnergyCostCalculator\Exception\CostPlanDefinitionException;
-use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Plan\CostPlanCompiler;
 use Supla\EnergyCostCalculator\Plan\CostPlanDefinition;
@@ -217,21 +216,26 @@ final class ComponentCostPlanTest extends TestCase
         (new CostPlanCompiler())->compile($plan);
     }
 
-    public function testRejectsAmbiguousFixedRateChangeWithinBillingCycle(): void
+    public function testFixedRateChangeWithinBillingCycleUsesRateAtCycleStart(): void
     {
         $plan = $this->plan();
         $plan['periods'][1]['components'][2]['rate'] = '13.00';
         $definition = (new CostPlanCompiler())->compileToArray($plan);
 
-        $this->expectException(CalculationException::class);
-        $this->expectExceptionMessage('changes within one charge period');
-        (new CostCalculator(
+        $result = (new CostCalculator(
             new InMemoryEnergyDeltaSource([]),
             new InMemoryReferenceDataSource(),
         ))->calculate('meter', new TimeRange(
             new \DateTimeImmutable('2026-01-01T00:00:00+01:00'),
             new \DateTimeImmutable('2026-02-01T00:00:00+01:00'),
         ), $this->periodicOnly($definition));
+
+        // The invoice is charged once at the price valid on January 1.
+        // The January 15 tariff change must not charge again at 13.00.
+        self::assertSame('12', $result->costs['net']['periodic']['total']);
+        self::assertSame('14.76', $result->costs['gross']['periodic']['total']);
+        self::assertSame('1', $result->periodicCharges[0]['calculated']['units']);
+        self::assertSame('0', $result->periodicCharges[1]['calculated']['units']);
     }
 
     /** @param array<string, mixed> $definition @return array<string, mixed> */

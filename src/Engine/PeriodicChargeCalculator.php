@@ -83,11 +83,14 @@ final class PeriodicChargeCalculator
     private function once(ComponentDefinition $component, string $period, int $cycleStart, int $bucketStart): string
     {
         $key = $component->id . ':' . $cycleStart . ':' . $bucketStart;
+        $rateConfiguration = $component->rate->config;
+        unset($rateConfiguration['value']);
         $signature = json_encode([
             $component->kind,
             $component->category,
-            $period,
-            $component->rate->config,
+            $component->quantity->options,
+            $component->rate->type,
+            $rateConfiguration,
             $component->taxTreatment->included,
         ], JSON_THROW_ON_ERROR);
         if (isset($this->chargedBuckets[$key])) {
