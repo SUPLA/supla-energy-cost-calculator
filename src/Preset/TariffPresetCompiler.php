@@ -40,6 +40,9 @@ final class TariffPresetCompiler
         if (!is_array($template) || array_is_list($template)) {
             throw new TariffPresetCompilationException("Tariff preset '{$preset->id}' must contain billingDefinitionTemplate object.");
         }
+        if (!isset($template['components']) || array_key_exists('periods', $template)) {
+            throw new TariffPresetCompilationException("Preset '{$preset->id}' must use billingDefinitionTemplate.components with pricePeriods; legacy periods are not supported.");
+        }
 
         $inputs = $document['inputs'] ?? null;
         if (!is_array($inputs) || !array_is_list($inputs)) {
@@ -65,10 +68,10 @@ final class TariffPresetCompiler
                 }
                 $input['targets'] = array_values(array_filter($targets, function (mixed $target) use ($template, $componentId, $preset, $id): bool {
                     $pointer = $this->targetPointer($target, $preset->id, $id);
-                    if (!preg_match('~^/periods/(\d+)/components/(\d+)/~', $pointer, $matches)) {
+                    if (!preg_match('~^/components/(\d+)/~', $pointer, $matches)) {
                         return false;
                     }
-                    $component = $template['periods'][(int)$matches[1]]['components'][(int)$matches[2]] ?? null;
+                    $component = $template['components'][(int)$matches[1]] ?? null;
                     return ($component['id'] ?? null) === $componentId;
                 }));
                 if ($input['targets'] === []) {
@@ -119,6 +122,19 @@ final class TariffPresetCompiler
                 }
             }
         }
+
+        if ($componentId !== null) {
+            // Avoid importing unrelated components' price boundaries into a
+            // single-component CostPlan fragment.
+            $compiled['components'] = array_values(array_filter(
+                $compiled['components'],
+                static fn(array $component): bool => ($component['id'] ?? null) === $componentId,
+            ));
+            if ($compiled['components'] === []) {
+                throw new TariffPresetCompilationException("Preset '{$preset->id}' has no component '$componentId'.");
+            }
+        }
+        $compiled = (new ComponentPricePeriodExpander())->expand($compiled, $preset->id);
 
         if ($componentId !== null) {
             foreach ($compiled['periods'] as &$period) {

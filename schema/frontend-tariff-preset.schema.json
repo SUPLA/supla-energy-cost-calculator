@@ -359,28 +359,32 @@
     },
     "billingDefinitionTemplate": {
       "type": "object",
-      "required": [
-        "periods"
-      ],
+      "required": ["components"],
+      "not": { "required": ["periods"] },
       "properties": {
-        "periods": {
+        "components": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "object",
-            "required": [
-              "components"
-            ],
+            "allOf": [{ "$ref": "#/$defs/executableComponent" }],
+            "required": ["id", "kind", "taxTreatment", "pricePeriods"],
+            "not": { "required": ["rate"] },
             "properties": {
-              "components": {
+              "pricePeriods": {
                 "type": "array",
                 "minItems": 1,
                 "items": {
-                  "$ref": "#/$defs/executableComponent"
+                  "type": "object",
+                  "required": ["validFrom", "validTo", "rate"],
+                  "properties": {
+                    "validFrom": { "type": ["string", "null"], "format": "date-time" },
+                    "validTo": { "type": ["string", "null"], "format": "date-time" },
+                    "rate": { "type": "object", "required": ["type"], "additionalProperties": true }
+                  },
+                  "additionalProperties": false
                 }
               }
-            },
-            "additionalProperties": true
+            }
           }
         }
       },

@@ -1,0 +1,363 @@
+diff --git a/docs/preset-price-periods.md b/docs/preset-price-periods.md
+index 7984ba7..b03e9b4 100644
+--- a/docs/preset-price-periods.md
++++ b/docs/preset-price-periods.md
+@@ -39,9 +39,10 @@ W taryfie `ZONED` strefy mogą mieć osobne pola; wspólna definicja `rate`
+ może wciąż obejmować kilka zmian wynikających ze zmian różnych stref.
+-Dotychczasowe wykonywalne szablony oparte o `periods[]` pozostają obsługiwane.
++Źródłowy preset dopuszcza **wyłącznie** `billingDefinitionTemplate.components[].pricePeriods[]`.
++`periods[]` pozostaje tylko w *wynikowym* `BillingDefinition`, po kompilacji.
+ 
+-Katalog automatycznie normalizuje wczytywane presety, aby supla-cloud
+-widziała niezależne okresy od razu po aktualizacji biblioteki. Żeby zapisać
+-nowy format fizycznie we wszystkich zasobach JSON, wykonaj jednorazowo:
++Katalog **nie** konwertuje presetów przy odczycie. Przed uruchomieniem
++aplikacji i testów należy jawnie przekonwertować wszystkie definicje źródłowe:
+ 
+ ```sh
++php tools/migrate-tariff-price-periods.php --dry-run
+ php tools/migrate-tariff-price-periods.php
+@@ -49,4 +50,6 @@ php tools/migrate-tariff-price-periods.php
+ 
+-Narzędzie jest idempotentne i pomija zasoby, których struktura komponentów
+-naprawdę zmienia się między okresami (te pozostają wykonywalne).
++Narzędzie jest idempotentne. Najpierw analizuje wszystkie pliki, a gdy choć
++jeden nie daje się przekształcić, raportuje jego ścieżkę i przyczynę,
++zwraca kod błędu i **nie zmienia żadnego pliku**. Taki przypadek wymaga
++ręcznej decyzji; nie istnieje fallback do starego formatu.
+ 
+diff --git a/schema/frontend-tariff-preset.schema.json b/schema/frontend-tariff-preset.schema.json
+index 9f529f9..e1e1d70 100644
+--- a/schema/frontend-tariff-preset.schema.json
++++ b/schema/frontend-tariff-preset.schema.json
+@@ -361,23 +361,5 @@
+       "type": "object",
+-      "oneOf": [
+-        { "required": ["periods"] },
+-        { "required": ["components"] }
+-      ],
++      "required": ["components"],
++      "not": { "required": ["periods"] },
+       "properties": {
+-        "periods": {
+-          "type": "array",
+-          "minItems": 1,
+-          "items": {
+-            "type": "object",
+-            "required": ["components"],
+-            "properties": {
+-              "components": {
+-                "type": "array",
+-                "minItems": 1,
+-                "items": { "$ref": "#/$defs/executableComponent" }
+-              }
+-            },
+-            "additionalProperties": true
+-          }
+-        },
+         "components": {
+diff --git a/src/Preset/ComponentPricePeriodExpander.php b/src/Preset/ComponentPricePeriodExpander.php
+index 3620d1a..8700d1a 100644
+--- a/src/Preset/ComponentPricePeriodExpander.php
++++ b/src/Preset/ComponentPricePeriodExpander.php
+@@ -15,3 +15,3 @@ final class ComponentPricePeriodExpander
+         if (!array_key_exists('components', $template)) {
+-            return $template; // Existing executable templates remain supported.
++            throw new TariffPresetCompilationException("Preset '$presetId' must use billingDefinitionTemplate.components with pricePeriods.");
+         }
+diff --git a/src/Preset/TariffPresetCatalog.php b/src/Preset/TariffPresetCatalog.php
+index 8556d6f..a44b3d2 100644
+--- a/src/Preset/TariffPresetCatalog.php
++++ b/src/Preset/TariffPresetCatalog.php
+@@ -56,7 +56,2 @@
+         $document = $this->decodeObject($json, "tariff preset '$id'");
+-        if ($this->presetDirectory === null) {
+-            // Present bundled legacy presets as independent component price histories
+-            // until the JSON resources are materialized with the migration tool.
+-            $document = (new TariffPresetPricePeriodMigrator())->convert($document);
+-        }
+         if (($document['id'] ?? null) !== $id) {
+diff --git a/src/Preset/TariffPresetPricePeriodMigrator.php b/src/Preset/TariffPresetPricePeriodMigrator.php
+index b95808d..7755ff5 100644
+--- a/src/Preset/TariffPresetPricePeriodMigrator.php
++++ b/src/Preset/TariffPresetPricePeriodMigrator.php
+@@ -9,3 +9,3 @@ namespace Supla\EnergyCostCalculator\Preset;
+  * Only consolidates adjacent periods with byte-equivalent rate definitions and identical
+- * non-price component definitions. Executable legacy templates remain valid if not convertible.
++ * non-price component definitions. Unsupported inputs fail explicitly for manual review.
+  */
+@@ -17,4 +17,13 @@ final class TariffPresetPricePeriodMigrator
+         $template = $document['billingDefinitionTemplate'] ?? null;
+-        if (!is_array($template) || isset($template['components']) || !isset($template['periods'])) {
+-            return $document;
++        if (!is_array($template) || array_is_list($template)) {
++            throw new \RuntimeException('Preset has no billingDefinitionTemplate object.');
++        }
++        if (array_key_exists('components', $template)) {
++            if (array_key_exists('periods', $template)) {
++                throw new \RuntimeException('Preset mixes components and legacy periods.');
++            }
++            return $document; // Already migrated.
++        }
++        if (!array_key_exists('periods', $template)) {
++            throw new \RuntimeException('Preset has neither components nor periods.');
+         }
+@@ -23,3 +32,3 @@ final class TariffPresetPricePeriodMigrator
+             || !is_array($periods[0]['components'] ?? null)) {
+-            return $document;
++            throw new \RuntimeException('Legacy preset has malformed or empty periods array.');
+         }
+@@ -27,3 +36,3 @@ final class TariffPresetPricePeriodMigrator
+         if (!array_is_list($sourceComponents) || $sourceComponents === []) {
+-            return $document;
++            throw new \RuntimeException('First legacy period has malformed or empty components array.');
+         }
+@@ -34,3 +43,3 @@ final class TariffPresetPricePeriodMigrator
+             if (!is_array($component) || !isset($component['rate'])) {
+-                return $document;
++                throw new \RuntimeException("Legacy component $componentIndex has no rate.");
+             }
+@@ -43,3 +52,3 @@ final class TariffPresetPricePeriodMigrator
+                 if (!is_array($current) || !is_array($current['rate'] ?? null)) {
+-                    return $document;
++                    throw new \RuntimeException("Period $periodIndex has no rate for component $componentIndex.");
+                 }
+@@ -48,3 +57,3 @@ final class TariffPresetPricePeriodMigrator
+                 if ($struct !== $base || count($period['components']) !== count($sourceComponents)) {
+-                    return $document; // Preserve structural changes as executable periods.
++                    throw new \RuntimeException("Period $periodIndex changes non-price fields or component count for component $componentIndex ('{$base['id']}').");
+                 }
+diff --git a/tests/Preset/BundledIndependentPricePeriodsTest.php b/tests/Preset/BundledIndependentPricePeriodsTest.php
+index 2330455..65c9044 100644
+--- a/tests/Preset/BundledIndependentPricePeriodsTest.php
++++ b/tests/Preset/BundledIndependentPricePeriodsTest.php
+@@ -32,2 +32,24 @@ final class BundledIndependentPricePeriodsTest extends TestCase
+ 
++    public function testMigrationRejectsNonPriceStructuralChanges(): void
++    {
++        $component = static fn(string $period): array => [
++            'id' => 'fixed',
++            'kind' => 'DISTRIBUTION_FIXED',
++            'category' => 'NETWORK',
++            'quantity' => ['type' => 'PERIOD', 'period' => $period],
++            'taxTreatment' => ['included' => []],
++            'rate' => ['type' => 'CONSTANT', 'value' => '7.83', 'unit' => 'PLN/month'],
++        ];
++        $document = [
++            'inputs' => [],
++            'billingDefinitionTemplate' => ['periods' => [
++                ['validFrom' => null, 'validTo' => '2026-01-01T00:00:00+01:00', 'components' => [$component('MONTH')]],
++                ['validFrom' => '2026-01-01T00:00:00+01:00', 'validTo' => null, 'components' => [$component('YEAR')]],
++            ]],
++        ];
++        $this->expectException(\RuntimeException::class);
++        $this->expectExceptionMessage('changes non-price fields');
++        (new TariffPresetPricePeriodMigrator())->convert($document);
++    }
++
+     public function testPreservedZonedRateFieldsCanShareOneInputAcrossPricePeriods(): void
+diff --git a/tests/Preset/ComponentPricePeriodsTest.php b/tests/Preset/ComponentPricePeriodsTest.php
+index 163d813..1fbb480 100644
+--- a/tests/Preset/ComponentPricePeriodsTest.php
++++ b/tests/Preset/ComponentPricePeriodsTest.php
+@@ -54,2 +54,18 @@ final class ComponentPricePeriodsTest extends TestCase
+ 
++    public function testLegacySourcePeriodsAreRejected(): void
++    {
++        $preset = $this->preset();
++        $document = $preset->document;
++        unset($document['billingDefinitionTemplate']['components']);
++        $document['billingDefinitionTemplate']['periods'] = [[
++            'validFrom' => null,
++            'validTo' => null,
++            'components' => [],
++        ]];
++
++        $this->expectException(TariffPresetCompilationException::class);
++        $this->expectExceptionMessage('legacy periods are not supported');
++        (new TariffPresetCompiler())->compileToArray(new TariffPreset('TEST', '', [], $document), []);
++    }
++
+     private function preset(): TariffPreset
+diff --git a/tools/migrate-tariff-price-periods.php b/tools/migrate-tariff-price-periods.php
+index fe994fb..680e94d 100644
+--- a/tools/migrate-tariff-price-periods.php
++++ b/tools/migrate-tariff-price-periods.php
+@@ -4,5 +4,4 @@ declare(strict_types=1);
+ 
+-// Materialize the catalog's independently dated source components in the bundled JSONs.
+-// Run once from the project root: php tools/migrate-tariff-price-periods.php
+-// Use --dry-run to inspect without writing. The operation is idempotent.
++// One-time, explicit source migration. No catalog read-time normalization.
++// The script scans/validates every preset before writing anything.
+ 
+@@ -14,40 +13,57 @@ $root = dirname(__DIR__) . '/resources/tariff-presets';
+ $dryRun = in_array('--dry-run', $argv, true);
+-$converted = 0;
+-$unchanged = 0;
+-$skippedStandard = 0;
+ $migrator = new TariffPresetPricePeriodMigrator();
++$changes = [];
++$errors = [];
++$unchanged = 0;
++$paths = [];
+ $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root));
+ foreach ($iterator as $file) {
+-    if (!$file->isFile() || $file->getExtension() !== 'json' || $file->getFilename() === 'index.json') {
+-        continue;
++    if ($file->isFile() && $file->getExtension() === 'json' && $file->getFilename() !== 'index.json') {
++        $paths[] = $file->getPathname();
+     }
+-    $path = $file->getPathname();
+-    $original = file_get_contents($path);
+-    if ($original === false) {
+-        throw new RuntimeException("Cannot read '$path'.");
+-    }
+-    $document = json_decode($original, true, 512, JSON_THROW_ON_ERROR);
+-    $migrated = $migrator->convert($document);
+-    if ($migrated === $document) {
+-        $unchanged++;
+-        if (isset($document['billingDefinitionTemplate']['periods'])
+-            && (str_contains($path, '/PL/distribution/') || str_contains($path, '/PL/supply/'))) {
+-            fwrite(STDERR, "WARNING: Standard tariff was not convertible: $path\n");
+-            $skippedStandard++;
++}
++sort($paths);
++foreach ($paths as $path) {
++    $relative = substr($path, strlen($root) + 1);
++    try {
++        $original = file_get_contents($path);
++        if ($original === false) {
++            throw new RuntimeException('Cannot read file.');
+         }
+-        continue;
+-    }
+-    if (!$dryRun) {
+-        $output = json_encode($migrated, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR) . "\n";
+-        if (file_put_contents($path, $output) === false) {
+-            throw new RuntimeException("Cannot write '$path'.");
++        $document = json_decode($original, true, 512, JSON_THROW_ON_ERROR);
++        if (!is_array($document) || array_is_list($document)) {
++            throw new RuntimeException('Expected a JSON object.');
++        }
++        $migrated = $migrator->convert($document);
++        $template = $migrated['billingDefinitionTemplate'] ?? null;
++        if (!is_array($template) || !isset($template['components']) || isset($template['periods'])) {
++            throw new RuntimeException('Conversion did not produce components/pricePeriods.');
+         }
++        if ($migrated === $document) {
++            $unchanged++;
++            continue;
++        }
++        $changes[$path] = json_encode(
++            $migrated,
++            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR,
++        ) . "\n";
++        printf("%s %s\n", $dryRun ? 'Would convert' : 'Ready to convert', $relative);
++    } catch (Throwable $error) {
++        $errors[] = "$relative: {$error->getMessage()}";
+     }
+-    $converted++;
+-    printf("%s %s\n", $dryRun ? 'Would convert' : 'Converted', substr($path, strlen($root) + 1));
+ }
+-printf("%d converted; %d already normalized or left in legacy format.\n", $converted, $unchanged);
+-if ($skippedStandard > 0) {
+-    fwrite(STDERR, "$skippedStandard standard tariff preset(s) require manual review.\n");
++if ($errors !== []) {
++    foreach ($errors as $error) {
++        fwrite(STDERR, "ERROR: $error\n");
++    }
++    fwrite(STDERR, "No files modified. Resolve the errors and rerun the migration.\n");
+     exit(1);
+ }
++if (!$dryRun) {
++    foreach ($changes as $path => $json) {
++        if (file_put_contents($path, $json) === false) {
++            throw new RuntimeException("Cannot write '$path'.");
++        }
++    }
++}
++printf("%d %s; %d already normalized.\n", count($changes), $dryRun ? 'to convert' : 'converted', $unchanged);
+
+diff --git a/src/Preset/TariffPresetCompiler.php b/src/Preset/TariffPresetCompiler.php
+--- a/src/Preset/TariffPresetCompiler.php
++++ b/src/Preset/TariffPresetCompiler.php
+@@ -42,2 +42,5 @@
+         }
++        if (!isset($template['components']) || array_key_exists('periods', $template)) {
++            throw new TariffPresetCompilationException("Preset '{$preset->id}' must use billingDefinitionTemplate.components with pricePeriods; legacy periods are not supported.");
++        }
+ 
+
+diff --git a/src/Preset/TariffPresetCompiler.php b/src/Preset/TariffPresetCompiler.php
+--- a/src/Preset/TariffPresetCompiler.php
++++ b/src/Preset/TariffPresetCompiler.php
+@@ -67,9 +67,6 @@
+                     $pointer = $this->targetPointer($target, $preset->id, $id);
+-                    if (preg_match('~^/components/(\d+)/~', $pointer, $matches)) {
+-                        $component = $template['components'][(int)$matches[1]] ?? null;
+-                    } elseif (preg_match('~^/periods/(\d+)/components/(\d+)/~', $pointer, $matches)) {
+-                        $component = $template['periods'][(int)$matches[1]]['components'][(int)$matches[2]] ?? null;
+-                    } else {
++                    if (!preg_match('~^/components/(\d+)/~', $pointer, $matches)) {
+                         return false;
+                     }
++                    $component = $template['components'][(int)$matches[1]] ?? null;
+                     return ($component['id'] ?? null) === $componentId;
+
+diff --git a/src/Preset/TariffPresetCompiler.php b/src/Preset/TariffPresetCompiler.php
+--- a/src/Preset/TariffPresetCompiler.php
++++ b/src/Preset/TariffPresetCompiler.php
+@@ -126,2 +126,2 @@
+-        if ($componentId !== null && isset($compiled['components'])) {
++        if ($componentId !== null) {
+             // Avoid importing unrelated components' price boundaries into a
+
+diff --git a/tests/Preset/TariffPresetCompilerTest.php b/tests/Preset/TariffPresetCompilerTest.php
+--- a/tests/Preset/TariffPresetCompilerTest.php
++++ b/tests/Preset/TariffPresetCompilerTest.php
+@@ -81,3 +81,3 @@
+ 
+-        (new TariffPresetCompiler())->compileToArray($this->customPreset('/periods/0/components/0/rate/rates/A~1B'), []);
++        (new TariffPresetCompiler())->compileToArray($this->customPreset('/components/0/pricePeriods/0/rate/rates/A~1B'), []);
+     }
+@@ -86,3 +86,3 @@
+     {
+-        $preset = $this->customPreset('/periods/0/components/0/rate/rates/A~1B');
++        $preset = $this->customPreset('/components/0/pricePeriods/0/rate/rates/A~1B');
+         $document = $preset->document;
+@@ -99,3 +99,3 @@
+     {
+-        $preset = $this->customPreset('/periods/0/components/0/rate/rates/A~1B');
++        $preset = $this->customPreset('/components/0/pricePeriods/0/rate/rates/A~1B');
+ 
+@@ -108,3 +108,3 @@
+     {
+-        $preset = $this->customPreset('periods/0/components/0/rate/rates/A~1B');
++        $preset = $this->customPreset('components/0/pricePeriods/0/rate/rates/A~1B');
+ 
+
+diff --git a/tests/Preset/TariffPresetCompilerTest.php b/tests/Preset/TariffPresetCompilerTest.php
+--- a/tests/Preset/TariffPresetCompilerTest.php
++++ b/tests/Preset/TariffPresetCompilerTest.php
+@@ -140,11 +140,11 @@
+                 'billingCycle' => ['anchor' => '2026-01-01', 'length' => 1, 'unit' => 'MONTH'],
+-                'periods' => [[
+-                    'validFrom' => '2026-01-01T00:00:00+01:00',
+-                    'validTo' => '2027-01-01T00:00:00+01:00',
+-                    'components' => [[
+-                        'id' => 'energy',
+-                        'kind' => 'ENERGY_PURCHASE',
+-                        'category' => 'ENERGY',
+-                        'taxTreatment' => ['included' => []],
+-                        'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
++                'components' => [[
++                    'id' => 'energy',
++                    'kind' => 'ENERGY_PURCHASE',
++                    'category' => 'ENERGY',
++                    'taxTreatment' => ['included' => []],
++                    'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
++                    'pricePeriods' => [[
++                        'validFrom' => '2026-01-01T00:00:00+01:00',
++                        'validTo' => '2027-01-01T00:00:00+01:00',
+                         'rate' => [

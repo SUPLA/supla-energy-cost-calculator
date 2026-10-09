@@ -2,9 +2,13 @@
 
 ## Format i otwarte granice
 
-Źródłem wykonawczym historii cen jest obecnie `billingDefinitionTemplate.periods[]`
-wewnątrz presetu. Okresy te NIE są okresami taryf (`CostPlan.periods[]`)
-wybieranymi przez użytkownika. Granice są półotwarte `[validFrom, validTo)`.
+Każdy komponent może definiować własną historię cen w
+`billingDefinitionTemplate.components[].pricePeriods[]`. Zawarty tam `rate`
+zachowuje pełny dotychczasowy format (`CONSTANT`, `ZONED` lub `REFERENCE`,
+z jednostką i wartościami dziesiętnymi jako stringi). `TariffPresetCompiler`
+scala granice zmian komponentów do zwykłego wykonywalnego `periods[]`.
+Okresy cenowe NIE są okresami taryf (`CostPlan.periods[]`) wybieranymi
+przez użytkownika. Granice są półotwarte `[validFrom, validTo)`.
 
 - **Pierwszy okres** ma `validFrom: null`, a **ostatni** `validTo: null`.
   Oznacza to świadome używanie najstarszej znanej stawki również dla wcześniejszych
@@ -16,24 +20,39 @@ wybieranymi przez użytkownika. Granice są półotwarte `[validFrom, validTo)`.
   wynika z ich granic. Dane mogą być orientacyjne dla dat poza zweryfikowanym
   zakresem obowiązywania stawek; to celowo preferowane nad błędem obliczenia.
 
-Każdy okres ma własne `components[]` (ograniczenie obecnego DSL). Cena każdego
-składnika w każdym okresie otrzymuje **osobny input** skierowany do dokładnie
-jednej stawki, np.:
+W definicji presetu nie trzeba powtarzać stawki komponentu tylko dlatego,
+że zmieniła się opłata innego komponentu. Każdy input wskazuje na źródłowy
+okres cenowy komponentu, np.:
 
 ```json
 {
-  "id": "distribution.rate.2025",
+  "id": "capacity.rate.2025-H2",
   "type": "DECIMAL",
-  "targets": ["/periods/0/components/0/rate/value"],
+  "targets": ["/components/1/pricePeriods/2/rate/value"],
   "required": true
 }
 ```
 
-Dla roku 2026 input `distribution.rate.2026` wskazuje na
-`/periods/1/components/0/rate/value`. Dla `ZONED` każda strefa ma odrębny
-input w każdym okresie. Dzięki temu zmiana ceny w jednym okresie nie nadpisuje
-stawek w innym. Dotyczy to również opłat wyzerowanych: wartość `0.00` może
-być ręcznie nadpisana w odpowiednim okresie.
+Dla stałej ceny obowiązującej przez cały czas wystarczy jedno
+`pricePeriods: [{"validFrom": null, "validTo": null, "rate": {...}}]`
+i jeden input. Zmiana innej opłaty nie tworzy nowych inputów.
+W taryfie `ZONED` strefy mogą mieć osobne pola; wspólna definicja `rate`
+może wciąż obejmować kilka zmian wynikających ze zmian różnych stref.
+Źródłowy preset dopuszcza **wyłącznie** `billingDefinitionTemplate.components[].pricePeriods[]`.
+`periods[]` pozostaje tylko w *wynikowym* `BillingDefinition`, po kompilacji.
+
+Katalog **nie** konwertuje presetów przy odczycie. Przed uruchomieniem
+aplikacji i testów należy jawnie przekonwertować wszystkie definicje źródłowe:
+
+```sh
+php tools/migrate-tariff-price-periods.php --dry-run
+php tools/migrate-tariff-price-periods.php
+```
+
+Narzędzie jest idempotentne. Najpierw analizuje wszystkie pliki, a gdy choć
+jeden nie daje się przekształcić, raportuje jego ścieżkę i przyczynę,
+zwraca kod błędu i **nie zmienia żadnego pliku**. Taki przypadek wymaga
+ręcznej decyzji; nie istnieje fallback do starego formatu.
 
 Nazwa i identyfikator taryfy nie zawierają roku. Katalog używa stałych ID
 (np. `PL.TAURON_DYSTRYBUCJA.G11`) i aktualizuje historię wewnątrz presetu.
@@ -69,9 +88,10 @@ Nie dodano taryf sprzedażowych za 2025 r. na podstawie samych cen
 maksymalnych: limity ustawowe i nominalne ceny ofertowe to inne pojęcia.
 Nie dodano także przyszłych podwyżek bez potwierdzonych taryf.
 
-**Pozostające ograniczenie silnika:** przy zmianie stawki opłaty okresowej
-w środku cyklu rozliczeniowego `prorate: false` może powodować błąd naliczania;
-to zagadnienie jest niezależne od otwartych granic historii cen.
+Przy zmianie stawki opłaty okresowej wewnątrz jednego cyklu, `prorate: false`
+stosuje jedną stawkę obowiązującą na początku okresu naliczenia. Wynik nie
+wymaga dzielenia opłaty na części tylko dlatego, że cena zmieniła się w
+środku cyklu.
 
 ## Struktura katalogu
 

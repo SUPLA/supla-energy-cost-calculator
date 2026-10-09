@@ -79,12 +79,12 @@ final class TariffPresetCompilerTest extends TestCase
         $this->expectException(TariffPresetCompilationException::class);
         $this->expectExceptionMessage("Required input 'rate'");
 
-        (new TariffPresetCompiler())->compileToArray($this->customPreset('/periods/0/components/0/rate/rates/A~1B'), []);
+        (new TariffPresetCompiler())->compileToArray($this->customPreset('/components/0/pricePeriods/0/rate/rates/A~1B'), []);
     }
 
     public function testRejectsIntegerBelowPresetMinimum(): void
     {
-        $preset = $this->customPreset('/periods/0/components/0/rate/rates/A~1B');
+        $preset = $this->customPreset('/components/0/pricePeriods/0/rate/rates/A~1B');
         $document = $preset->document;
         $document['inputs'][0]['type'] = 'INTEGER';
         $document['inputs'][0]['minimum'] = 1;
@@ -97,7 +97,7 @@ final class TariffPresetCompilerTest extends TestCase
 
     public function testSupportsEscapedJsonPointerTokens(): void
     {
-        $preset = $this->customPreset('/periods/0/components/0/rate/rates/A~1B');
+        $preset = $this->customPreset('/components/0/pricePeriods/0/rate/rates/A~1B');
 
         $compiled = (new TariffPresetCompiler())->compileToArray($preset, ['rate' => '0.42']);
 
@@ -106,7 +106,7 @@ final class TariffPresetCompilerTest extends TestCase
 
     public function testRejectsMalformedJsonPointerTarget(): void
     {
-        $preset = $this->customPreset('periods/0/components/0/rate/rates/A~1B');
+        $preset = $this->customPreset('components/0/pricePeriods/0/rate/rates/A~1B');
 
         $this->expectException(TariffPresetCompilationException::class);
         $this->expectExceptionMessage('is not a JSON Pointer');
@@ -138,15 +138,15 @@ final class TariffPresetCompilerTest extends TestCase
                     ]],
                 ]],
                 'billingCycle' => ['anchor' => '2026-01-01', 'length' => 1, 'unit' => 'MONTH'],
-                'periods' => [[
-                    'validFrom' => '2026-01-01T00:00:00+01:00',
-                    'validTo' => '2027-01-01T00:00:00+01:00',
-                    'components' => [[
-                        'id' => 'energy',
-                        'kind' => 'ENERGY_PURCHASE',
-                        'category' => 'ENERGY',
-                        'taxTreatment' => ['included' => []],
-                        'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+                'components' => [[
+                    'id' => 'energy',
+                    'kind' => 'ENERGY_PURCHASE',
+                    'category' => 'ENERGY',
+                    'taxTreatment' => ['included' => []],
+                    'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+                    'pricePeriods' => [[
+                        'validFrom' => '2026-01-01T00:00:00+01:00',
+                        'validTo' => '2027-01-01T00:00:00+01:00',
                         'rate' => [
                             'type' => 'ZONED',
                             'rates' => ['A/B' => null],

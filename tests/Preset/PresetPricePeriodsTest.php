@@ -54,17 +54,16 @@ final class PresetPricePeriodsTest extends TestCase
         $compiled = (new TariffPresetCompiler())->compileComponentToArray('PL.TAURON_DYSTRYBUCJA.G11.FIXED', 'capacity-fee', [
             'capacity.rate.2025-H2' => '12.00',
         ]);
-        self::assertCount(4, $compiled['periods']);
+        self::assertCount(3, $compiled['periods']);
         self::assertSame('0.00', $compiled['periods'][0]['components'][0]['rate']['value']);
         self::assertSame('12.00', $compiled['periods'][1]['components'][0]['rate']['value']);
         self::assertSame('17.18', $compiled['periods'][2]['components'][0]['rate']['value']);
-        self::assertSame('17.18', $compiled['periods'][3]['components'][0]['rate']['value']);
     }
 
     public function testSubscriptionFeeTurnsZeroInOctober2026(): void
     {
         $compiled = (new TariffPresetCompiler())->compileComponentToArray('PL.TAURON_DYSTRYBUCJA.G12.FIXED', 'distribution-subscription', []);
-        self::assertSame('2026-10-01T00:00:00+02:00', $compiled['periods'][3]['validFrom']);
-        self::assertSame('0.00', $compiled['periods'][3]['components'][0]['rate']['value']);
+        self::assertSame('2026-10-01T00:00:00+02:00', $compiled['periods'][1]['validFrom']);
+        self::assertSame('0.00', $compiled['periods'][1]['components'][0]['rate']['value']);
     }
 }

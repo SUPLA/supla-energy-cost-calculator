@@ -23,9 +23,7 @@ final class DistributionFixedPresetTest extends TestCase
 
         $compiled = (new TariffPresetCompiler($catalog))->compileToArray($preset, [
             'distribution.fixed.rate.2026-JAN-SEP' => '10.86',
-            'distribution.fixed.rate.2026-OCT-DEC' => '10.86',
             'capacity.rate.2026-JAN-SEP' => '24.05',
-            'capacity.rate.2026-OCT-DEC' => '24.05',
             'distribution.subscription.rate.2026-JAN-SEP' => '2.28',
             'distribution.subscription.rate.2026-OCT-DEC' => '0.00',
         ]);

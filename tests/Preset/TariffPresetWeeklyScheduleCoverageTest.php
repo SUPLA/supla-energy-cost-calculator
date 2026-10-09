@@ -9,6 +9,7 @@ use Supla\EnergyCostCalculator\Definition\SelectorDefinition;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
 use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCatalog;
+use Supla\EnergyCostCalculator\Preset\TariffPresetCompiler;
 use Supla\EnergyCostCalculator\Reference\ReferenceDataCache;
 use Supla\EnergyCostCalculator\Strategy\Selector\DefaultSelectorResolver;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
@@ -19,6 +20,7 @@ final class TariffPresetWeeklyScheduleCoverageTest extends TestCase
     {
         $resolver = new DefaultSelectorResolver();
         $catalog = new TariffPresetCatalog();
+        $compiler = new TariffPresetCompiler($catalog);
         $ranges = [
             new TimeRange(
                 new \DateTimeImmutable('2026-01-12T00:00:00+01:00'),
@@ -32,7 +34,7 @@ final class TariffPresetWeeklyScheduleCoverageTest extends TestCase
 
         foreach ($catalog->presets() as $metadata) {
             $preset = $catalog->get($metadata['id']);
-            foreach ($preset->document['billingDefinitionTemplate']['periods'] as $period) {
+            foreach ($compiler->compileToArray($preset, [])['periods'] as $period) {
                 foreach ($period['components'] as $component) {
                     $selector = $component['selector'] ?? null;
                     if (!is_array($selector) || ($selector['type'] ?? null) !== 'WEEKLY_SCHEDULE') {

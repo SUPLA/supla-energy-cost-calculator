@@ -62,7 +62,7 @@ final class TariffPresetDefaultsTest extends TestCase
         $preset = (new TariffPresetCatalog())->get('PL.TAURON_DYSTRYBUCJA.G11');
 
         self::assertSame('DISTRIBUTION_VARIABLE', $preset->document['components'][0]['kind']);
-        self::assertSame(['distribution-variable'], array_column($preset->document['billingDefinitionTemplate']['periods'][0]['components'], 'id'));
+        self::assertSame(['distribution-variable'], array_column((new TariffPresetCompiler())->compileToArray($preset, [])['periods'][0]['components'], 'id'));
         self::assertArrayNotHasKey('energyPurchase', $preset->document);
     }
 
@@ -71,10 +71,7 @@ final class TariffPresetDefaultsTest extends TestCase
         $catalog = new TariffPresetCatalog();
         $preset = $catalog->get('PL.TAURON_SPRZEDAZ.G11');
 
-        self::assertSame('0.5020', $this->readPointer(
-            $preset->document['billingDefinitionTemplate'],
-            '/periods/0/components/0/rate/value',
-        ));
+        self::assertSame('0.5020', (new TariffPresetCompiler($catalog))->compileToArray($preset, [])['periods'][0]['components'][0]['rate']['value']);
         $compiled = (new TariffPresetCompiler($catalog))->compileToArray($preset, ['energy.rate' => '0.6000']);
         self::assertSame('0.6000', $compiled['periods'][0]['components'][0]['rate']['value']);
     }
