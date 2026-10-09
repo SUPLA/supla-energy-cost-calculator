@@ -34,7 +34,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/add"
+        "/components/0/pricePeriods/0/rate/add"
       ],
       "unit": "PLN/kWh",
       "help": "Domyślna wartość 0,0905 PLN/kWh obejmuje składnik K 0,0855 PLN/kWh i akcyzę 0,0050 PLN/kWh dla 2026 r."
@@ -45,7 +45,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/1/rate/value"
+        "/components/1/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month"
     }
@@ -59,24 +59,26 @@
       "length": 1,
       "unit": "MONTH"
     },
-    "periods": [
+    "components": [
       {
-        "validFrom": "2026-01-01T00:00:00+01:00",
-        "validTo": "2027-01-01T00:00:00+01:00",
-        "components": [
+        "id": "energy-purchase",
+        "kind": "ENERGY_PURCHASE",
+        "category": "ENERGY",
+        "taxTreatment": {
+          "included": [
+            "EXCISE"
+          ]
+        },
+        "quantity": {
+          "type": "ACTIVE_ENERGY_IMPORT"
+        },
+        "selector": {
+          "type": "ALWAYS"
+        },
+        "pricePeriods": [
           {
-            "id": "energy-purchase",
-            "kind": "ENERGY_PURCHASE",
-            "category": "ENERGY",
-            "taxTreatment": {
-              "included": ["EXCISE"]
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT"
-            },
-            "selector": {
-              "type": "ALWAYS"
-            },
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
             "rate": {
               "type": "REFERENCE",
               "source": "PL.TGE.FIXING1",
@@ -87,19 +89,25 @@
               "add": "0.0905",
               "unit": "PLN/kWh"
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "supplier-fixed",
+        "kind": "SUPPLIER_FIXED",
+        "category": "SERVICE",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "PERIOD",
+          "period": "MONTH",
+          "prorate": false
+        },
+        "pricePeriods": [
           {
-            "id": "supplier-fixed",
-            "kind": "SUPPLIER_FIXED",
-            "category": "SERVICE",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": "2027-01-01T00:00:00+01:00",
             "rate": {
               "type": "CONSTANT",
               "value": "22.00",

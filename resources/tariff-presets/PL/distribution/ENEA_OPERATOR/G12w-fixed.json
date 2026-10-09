@@ -39,15 +39,15 @@
   },
   "inputs": [
     {
-      "id": "distribution.fixed.rate.2024-H1",
-      "label": "Stały składnik sieciowy (2024-H1)",
+      "id": "distribution.fixed.rate",
+      "label": "Stały składnik sieciowy",
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/value"
+        "/components/0/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Okres 2024-H1. Domyślnie układ 1-fazowy: 16.85 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 26.23 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
+      "help": "Domyślnie układ 1-fazowy: 16.85 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 26.23 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
     },
     {
       "id": "capacity.rate.2024-H1",
@@ -55,7 +55,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/1/rate/value"
+        "/components/1/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month",
       "help": "Okres 2024-H1. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
@@ -66,21 +66,10 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/2/rate/value"
+        "/components/2/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month",
       "help": "Okres 2024-H1. Domyślna stawka 3.84 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 2-mies. 1.92, 6-mies. 0.64, 12-mies. 0.32 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
-    },
-    {
-      "id": "distribution.fixed.rate.2024-H2_2025-H1",
-      "label": "Stały składnik sieciowy (2024-H2_2025-H1)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/1/components/0/rate/value"
-      ],
-      "unit": "PLN/month",
-      "help": "Okres 2024-H2_2025-H1. Domyślnie układ 1-fazowy: 16.85 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 26.23 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
     },
     {
       "id": "capacity.rate.2024-H2_2025-H1",
@@ -88,32 +77,10 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/1/components/1/rate/value"
+        "/components/1/pricePeriods/1/rate/value"
       ],
       "unit": "PLN/month",
       "help": "Okres 2024-H2_2025-H1. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
-    },
-    {
-      "id": "distribution.subscription.rate.2024-H2_2025-H1",
-      "label": "Opłata abonamentowa dystrybucyjna (2024-H2_2025-H1)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/1/components/2/rate/value"
-      ],
-      "unit": "PLN/month",
-      "help": "Okres 2024-H2_2025-H1. Domyślna stawka 3.84 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 2-mies. 1.92, 6-mies. 0.64, 12-mies. 0.32 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
-    },
-    {
-      "id": "distribution.fixed.rate.2025-H2",
-      "label": "Stały składnik sieciowy (2025-H2)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/2/components/0/rate/value"
-      ],
-      "unit": "PLN/month",
-      "help": "Okres 2025-H2. Domyślnie układ 1-fazowy: 16.85 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 26.23 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
     },
     {
       "id": "capacity.rate.2025-H2",
@@ -121,32 +88,10 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/2/components/1/rate/value"
+        "/components/1/pricePeriods/2/rate/value"
       ],
       "unit": "PLN/month",
       "help": "Okres 2025-H2. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
-    },
-    {
-      "id": "distribution.subscription.rate.2025-H2",
-      "label": "Opłata abonamentowa dystrybucyjna (2025-H2)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/2/components/2/rate/value"
-      ],
-      "unit": "PLN/month",
-      "help": "Okres 2025-H2. Domyślna stawka 3.84 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 2-mies. 1.92, 6-mies. 0.64, 12-mies. 0.32 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
-    },
-    {
-      "id": "distribution.fixed.rate.2026-Q1_Q3",
-      "label": "Stały składnik sieciowy (2026-Q1_Q3)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/3/components/0/rate/value"
-      ],
-      "unit": "PLN/month",
-      "help": "Okres 2026-Q1_Q3. Domyślnie układ 1-fazowy: 16.85 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 26.23 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym."
     },
     {
       "id": "capacity.rate.2026-Q1_Q3",
@@ -154,43 +99,10 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/3/components/1/rate/value"
+        "/components/1/pricePeriods/3/rate/value"
       ],
       "unit": "PLN/month",
       "help": "Okres 2026-Q1_Q3. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
-    },
-    {
-      "id": "distribution.subscription.rate.2026-Q1_Q3",
-      "label": "Opłata abonamentowa dystrybucyjna (2026-Q1_Q3)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/3/components/2/rate/value"
-      ],
-      "unit": "PLN/month",
-      "help": "Okres 2026-Q1_Q3. Domyślna stawka 3.84 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 2-mies. 1.92, 6-mies. 0.64, 12-mies. 0.32 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty."
-    },
-    {
-      "id": "distribution.fixed.rate.2026-Q4",
-      "label": "Stały składnik sieciowy (2026-Q4)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/4/components/0/rate/value"
-      ],
-      "unit": "PLN/month",
-      "help": "Okres 2026-Q4. Domyślnie układ 1-fazowy: 16.85 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 26.23 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym."
-    },
-    {
-      "id": "capacity.rate.2026-Q4",
-      "label": "Opłata mocowa (2026-Q4)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/4/components/1/rate/value"
-      ],
-      "unit": "PLN/month",
-      "help": "Okres 2026-Q4. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
     },
     {
       "id": "distribution.subscription.rate.2026-Q4",
@@ -198,7 +110,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/4/components/2/rate/value"
+        "/components/2/pricePeriods/1/rate/value"
       ],
       "unit": "PLN/month",
       "help": "Okres 2026-Q4. Domyślna stawka 3.84 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 2-mies. 1.92, 6-mies. 0.64, 12-mies. 0.32 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty."
@@ -213,41 +125,47 @@
       "length": 1,
       "unit": "MONTH"
     },
-    "periods": [
+    "components": [
       {
-        "validFrom": null,
-        "validTo": "2024-07-01T00:00:00+02:00",
-        "components": [
+        "id": "distribution-fixed-network",
+        "kind": "DISTRIBUTION_FIXED",
+        "category": "NETWORK",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "PERIOD",
+          "period": "MONTH",
+          "prorate": false
+        },
+        "pricePeriods": [
           {
-            "id": "distribution-fixed-network",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": null,
+            "validTo": null,
             "rate": {
               "type": "CONSTANT",
               "value": "16.85",
               "unit": "PLN/month"
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "capacity-fee",
+        "kind": "DISTRIBUTION_FIXED",
+        "category": "NETWORK",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "PERIOD",
+          "period": "MONTH",
+          "prorate": false
+        },
+        "pricePeriods": [
           {
-            "id": "capacity-fee",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": null,
+            "validTo": "2024-07-01T00:00:00+02:00",
             "rate": {
               "type": "CONSTANT",
               "value": "10.64",
@@ -255,59 +173,8 @@
             }
           },
           {
-            "id": "distribution-subscription",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "3.84",
-              "unit": "PLN/month"
-            }
-          }
-        ]
-      },
-      {
-        "validFrom": "2024-07-01T00:00:00+02:00",
-        "validTo": "2025-07-01T00:00:00+02:00",
-        "components": [
-          {
-            "id": "distribution-fixed-network",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "16.85",
-              "unit": "PLN/month"
-            }
-          },
-          {
-            "id": "capacity-fee",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": "2024-07-01T00:00:00+02:00",
+            "validTo": "2025-07-01T00:00:00+02:00",
             "rate": {
               "type": "CONSTANT",
               "value": "0.00",
@@ -315,59 +182,8 @@
             }
           },
           {
-            "id": "distribution-subscription",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "3.84",
-              "unit": "PLN/month"
-            }
-          }
-        ]
-      },
-      {
-        "validFrom": "2025-07-01T00:00:00+02:00",
-        "validTo": "2026-01-01T00:00:00+01:00",
-        "components": [
-          {
-            "id": "distribution-fixed-network",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "16.85",
-              "unit": "PLN/month"
-            }
-          },
-          {
-            "id": "capacity-fee",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": "2025-07-01T00:00:00+02:00",
+            "validTo": "2026-01-01T00:00:00+01:00",
             "rate": {
               "type": "CONSTANT",
               "value": "11.44",
@@ -375,137 +191,41 @@
             }
           },
           {
-            "id": "distribution-subscription",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": null,
             "rate": {
               "type": "CONSTANT",
-              "value": "3.84",
+              "value": "17.18",
               "unit": "PLN/month"
             }
           }
         ]
       },
       {
-        "validFrom": "2026-01-01T00:00:00+01:00",
-        "validTo": "2026-10-01T00:00:00+02:00",
-        "components": [
+        "id": "distribution-subscription",
+        "kind": "DISTRIBUTION_FIXED",
+        "category": "NETWORK",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "PERIOD",
+          "period": "MONTH",
+          "prorate": false
+        },
+        "pricePeriods": [
           {
-            "id": "distribution-fixed-network",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "16.85",
-              "unit": "PLN/month"
-            }
-          },
-          {
-            "id": "capacity-fee",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "17.18",
-              "unit": "PLN/month"
-            }
-          },
-          {
-            "id": "distribution-subscription",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": null,
+            "validTo": "2026-10-01T00:00:00+02:00",
             "rate": {
               "type": "CONSTANT",
               "value": "3.84",
               "unit": "PLN/month"
             }
-          }
-        ]
-      },
-      {
-        "validFrom": "2026-10-01T00:00:00+02:00",
-        "validTo": null,
-        "components": [
-          {
-            "id": "distribution-fixed-network",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "16.85",
-              "unit": "PLN/month"
-            }
           },
           {
-            "id": "capacity-fee",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "17.18",
-              "unit": "PLN/month"
-            }
-          },
-          {
-            "id": "distribution-subscription",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": "2026-10-01T00:00:00+02:00",
+            "validTo": null,
             "rate": {
               "type": "CONSTANT",
               "value": "0.00",

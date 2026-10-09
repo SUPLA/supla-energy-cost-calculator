@@ -24,7 +24,7 @@ final class DistributionFixedPresetTest extends TestCase
         $compiled = (new TariffPresetCompiler($catalog))->compileToArray($preset, [
             'distribution.fixed.rate.2026-JAN-SEP' => '10.86',
             'capacity.rate.2026-JAN-SEP' => '24.05',
-            'distribution.subscription.rate.2026-JAN-SEP' => '2.28',
+            'distribution.subscription.rate.2025-H1' => '2.28',
             'distribution.subscription.rate.2026-OCT-DEC' => '0.00',
         ]);
 
@@ -35,6 +35,8 @@ final class DistributionFixedPresetTest extends TestCase
         self::assertSame('10.86', $compiled['periods'][3]['components'][0]['rate']['value']);
         self::assertSame('24.05', $compiled['periods'][2]['components'][1]['rate']['value']);
         self::assertSame('24.05', $compiled['periods'][3]['components'][1]['rate']['value']);
+        self::assertSame('2.28', $compiled['periods'][0]['components'][2]['rate']['value']);
+        self::assertSame('2.28', $compiled['periods'][1]['components'][2]['rate']['value']);
         self::assertSame('2.28', $compiled['periods'][2]['components'][2]['rate']['value']);
         self::assertSame('0.00', $compiled['periods'][3]['components'][2]['rate']['value']);
     }

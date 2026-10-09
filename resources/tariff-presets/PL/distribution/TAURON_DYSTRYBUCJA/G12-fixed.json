@@ -44,7 +44,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/value"
+        "/components/0/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month"
     },
@@ -54,7 +54,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/1/rate/value"
+        "/components/1/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month"
     },
@@ -64,17 +64,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/2/rate/value"
-      ],
-      "unit": "PLN/month"
-    },
-    {
-      "id": "distribution.fixed.rate.2025-H2",
-      "label": "Stały składnik sieciowy (2025-H2)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/1/components/0/rate/value"
+        "/components/2/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month"
     },
@@ -84,17 +74,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/1/components/1/rate/value"
-      ],
-      "unit": "PLN/month"
-    },
-    {
-      "id": "distribution.subscription.rate.2025-H2",
-      "label": "Opłata abonamentowa (2025-H2)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/1/components/2/rate/value"
+        "/components/1/pricePeriods/1/rate/value"
       ],
       "unit": "PLN/month"
     },
@@ -104,7 +84,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/2/components/0/rate/value"
+        "/components/0/pricePeriods/1/rate/value"
       ],
       "unit": "PLN/month"
     },
@@ -114,37 +94,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/2/components/1/rate/value"
-      ],
-      "unit": "PLN/month"
-    },
-    {
-      "id": "distribution.subscription.rate.2026-JAN-SEP",
-      "label": "Opłata abonamentowa (2026-JAN-SEP)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/2/components/2/rate/value"
-      ],
-      "unit": "PLN/month"
-    },
-    {
-      "id": "distribution.fixed.rate.2026-OCT-DEC",
-      "label": "Stały składnik sieciowy (2026-OCT-DEC)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/3/components/0/rate/value"
-      ],
-      "unit": "PLN/month"
-    },
-    {
-      "id": "capacity.rate.2026-OCT-DEC",
-      "label": "Opłata mocowa (2026-OCT-DEC)",
-      "type": "DECIMAL",
-      "required": true,
-      "targets": [
-        "/periods/3/components/1/rate/value"
+        "/components/1/pricePeriods/2/rate/value"
       ],
       "unit": "PLN/month"
     },
@@ -154,7 +104,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/3/components/2/rate/value"
+        "/components/2/pricePeriods/1/rate/value"
       ],
       "unit": "PLN/month"
     }
@@ -168,23 +118,23 @@
       "length": 1,
       "unit": "MONTH"
     },
-    "periods": [
+    "components": [
       {
-        "validFrom": null,
-        "validTo": "2025-07-01T00:00:00+02:00",
-        "components": [
+        "id": "distribution-fixed-network",
+        "kind": "DISTRIBUTION_FIXED",
+        "category": "NETWORK",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "PERIOD",
+          "period": "MONTH",
+          "prorate": false
+        },
+        "pricePeriods": [
           {
-            "id": "distribution-fixed-network",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": null,
+            "validTo": "2026-01-01T00:00:00+01:00",
             "rate": {
               "type": "CONSTANT",
               "value": "7.02",
@@ -192,17 +142,32 @@
             }
           },
           {
-            "id": "capacity-fee",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": null,
+            "rate": {
+              "type": "CONSTANT",
+              "value": "7.38",
+              "unit": "PLN/month"
+            }
+          }
+        ]
+      },
+      {
+        "id": "capacity-fee",
+        "kind": "DISTRIBUTION_FIXED",
+        "category": "NETWORK",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "PERIOD",
+          "period": "MONTH",
+          "prorate": false
+        },
+        "pricePeriods": [
+          {
+            "validFrom": null,
+            "validTo": "2025-07-01T00:00:00+02:00",
             "rate": {
               "type": "CONSTANT",
               "value": "0.00",
@@ -210,59 +175,8 @@
             }
           },
           {
-            "id": "distribution-subscription",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "4.56",
-              "unit": "PLN/month"
-            }
-          }
-        ]
-      },
-      {
-        "validFrom": "2025-07-01T00:00:00+02:00",
-        "validTo": "2026-01-01T00:00:00+01:00",
-        "components": [
-          {
-            "id": "distribution-fixed-network",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "7.02",
-              "unit": "PLN/month"
-            }
-          },
-          {
-            "id": "capacity-fee",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": "2025-07-01T00:00:00+02:00",
+            "validTo": "2026-01-01T00:00:00+01:00",
             "rate": {
               "type": "CONSTANT",
               "value": "11.44",
@@ -270,137 +184,41 @@
             }
           },
           {
-            "id": "distribution-subscription",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": null,
             "rate": {
               "type": "CONSTANT",
-              "value": "4.56",
+              "value": "17.18",
               "unit": "PLN/month"
             }
           }
         ]
       },
       {
-        "validFrom": "2026-01-01T00:00:00+01:00",
-        "validTo": "2026-10-01T00:00:00+02:00",
-        "components": [
+        "id": "distribution-subscription",
+        "kind": "DISTRIBUTION_FIXED",
+        "category": "NETWORK",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "PERIOD",
+          "period": "MONTH",
+          "prorate": false
+        },
+        "pricePeriods": [
           {
-            "id": "distribution-fixed-network",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "7.38",
-              "unit": "PLN/month"
-            }
-          },
-          {
-            "id": "capacity-fee",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "17.18",
-              "unit": "PLN/month"
-            }
-          },
-          {
-            "id": "distribution-subscription",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": null,
+            "validTo": "2026-10-01T00:00:00+02:00",
             "rate": {
               "type": "CONSTANT",
               "value": "4.56",
               "unit": "PLN/month"
             }
-          }
-        ]
-      },
-      {
-        "validFrom": "2026-10-01T00:00:00+02:00",
-        "validTo": null,
-        "components": [
-          {
-            "id": "distribution-fixed-network",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "7.38",
-              "unit": "PLN/month"
-            }
           },
           {
-            "id": "capacity-fee",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
-            "rate": {
-              "type": "CONSTANT",
-              "value": "17.18",
-              "unit": "PLN/month"
-            }
-          },
-          {
-            "id": "distribution-subscription",
-            "kind": "DISTRIBUTION_FIXED",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": "2026-10-01T00:00:00+02:00",
+            "validTo": null,
             "rate": {
               "type": "CONSTANT",
               "value": "0.00",

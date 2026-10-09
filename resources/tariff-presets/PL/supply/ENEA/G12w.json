@@ -57,7 +57,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/rates/DAY"
+        "/components/0/pricePeriods/0/rate/rates/DAY"
       ],
       "unit": "PLN/kWh"
     },
@@ -67,7 +67,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/rates/NIGHT"
+        "/components/0/pricePeriods/0/rate/rates/NIGHT"
       ],
       "unit": "PLN/kWh"
     },
@@ -77,7 +77,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/1/components/0/rate/rates/DAY"
+        "/components/0/pricePeriods/1/rate/rates/DAY"
       ],
       "unit": "PLN/kWh"
     },
@@ -87,7 +87,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/1/components/0/rate/rates/NIGHT"
+        "/components/0/pricePeriods/1/rate/rates/NIGHT"
       ],
       "unit": "PLN/kWh"
     },
@@ -97,7 +97,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/2/components/0/rate/rates/DAY"
+        "/components/0/pricePeriods/2/rate/rates/DAY"
       ],
       "unit": "PLN/kWh"
     },
@@ -107,7 +107,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/2/components/0/rate/rates/NIGHT"
+        "/components/0/pricePeriods/2/rate/rates/NIGHT"
       ],
       "unit": "PLN/kWh"
     }
@@ -121,106 +121,106 @@
       "length": 1,
       "unit": "MONTH"
     },
-    "periods": [
+    "components": [
       {
-        "validFrom": null,
-        "validTo": "2025-10-01T00:00:00+02:00",
-        "components": [
-          {
-            "id": "energy-purchase",
-            "kind": "ENERGY_PURCHASE",
-            "category": "ENERGY",
-            "taxTreatment": {
-              "included": [
-                "EXCISE"
-              ]
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "WEEKLY_SCHEDULE",
-              "timezone": "Europe/Warsaw",
-              "rules": [
+        "id": "energy-purchase",
+        "kind": "ENERGY_PURCHASE",
+        "category": "ENERGY",
+        "taxTreatment": {
+          "included": [
+            "EXCISE"
+          ]
+        },
+        "quantity": {
+          "type": "ACTIVE_ENERGY_IMPORT",
+          "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+          "periodInMinutes": 60
+        },
+        "selector": {
+          "type": "WEEKLY_SCHEDULE",
+          "timezone": "Europe/Warsaw",
+          "rules": [
+            {
+              "zone": "NIGHT",
+              "days": [
+                "HOLIDAY"
+              ],
+              "time_ranges": [
                 {
-                  "zone": "NIGHT",
-                  "days": [
-                    "HOLIDAY"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "24:00"
-                    }
-                  ],
-                  "priority": 100
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "SAT",
-                    "SUN"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "24:00"
-                    }
-                  ],
-                  "priority": 200
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "MON"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "06:00"
-                    }
-                  ],
-                  "priority": 500
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "21:00",
-                      "to": "06:00"
-                    }
-                  ],
-                  "priority": 500
-                },
-                {
-                  "zone": "DAY",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "06:00",
-                      "to": "21:00"
-                    }
-                  ],
-                  "priority": 500
+                  "from": "00:00",
+                  "to": "24:00"
                 }
               ],
-              "calendar": "PL_PUBLIC_HOLIDAYS"
+              "priority": 100
             },
+            {
+              "zone": "NIGHT",
+              "days": [
+                "SAT",
+                "SUN"
+              ],
+              "time_ranges": [
+                {
+                  "from": "00:00",
+                  "to": "24:00"
+                }
+              ],
+              "priority": 200
+            },
+            {
+              "zone": "NIGHT",
+              "days": [
+                "MON"
+              ],
+              "time_ranges": [
+                {
+                  "from": "00:00",
+                  "to": "06:00"
+                }
+              ],
+              "priority": 500
+            },
+            {
+              "zone": "NIGHT",
+              "days": [
+                "MON",
+                "TUE",
+                "WED",
+                "THU",
+                "FRI"
+              ],
+              "time_ranges": [
+                {
+                  "from": "21:00",
+                  "to": "06:00"
+                }
+              ],
+              "priority": 500
+            },
+            {
+              "zone": "DAY",
+              "days": [
+                "MON",
+                "TUE",
+                "WED",
+                "THU",
+                "FRI"
+              ],
+              "time_ranges": [
+                {
+                  "from": "06:00",
+                  "to": "21:00"
+                }
+              ],
+              "priority": 500
+            }
+          ],
+          "calendar": "PL_PUBLIC_HOLIDAYS"
+        },
+        "pricePeriods": [
+          {
+            "validFrom": null,
+            "validTo": "2025-10-01T00:00:00+02:00",
             "rate": {
               "type": "ZONED",
               "rates": {
@@ -229,108 +229,10 @@
               },
               "unit": "PLN/kWh"
             }
-          }
-        ]
-      },
-      {
-        "validFrom": "2025-10-01T00:00:00+02:00",
-        "validTo": "2026-01-01T00:00:00+01:00",
-        "components": [
+          },
           {
-            "id": "energy-purchase",
-            "kind": "ENERGY_PURCHASE",
-            "category": "ENERGY",
-            "taxTreatment": {
-              "included": [
-                "EXCISE"
-              ]
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "WEEKLY_SCHEDULE",
-              "timezone": "Europe/Warsaw",
-              "rules": [
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "HOLIDAY"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "24:00"
-                    }
-                  ],
-                  "priority": 100
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "SAT",
-                    "SUN"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "24:00"
-                    }
-                  ],
-                  "priority": 200
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "MON"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "06:00"
-                    }
-                  ],
-                  "priority": 500
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "21:00",
-                      "to": "06:00"
-                    }
-                  ],
-                  "priority": 500
-                },
-                {
-                  "zone": "DAY",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "06:00",
-                      "to": "21:00"
-                    }
-                  ],
-                  "priority": 500
-                }
-              ],
-              "calendar": "PL_PUBLIC_HOLIDAYS"
-            },
+            "validFrom": "2025-10-01T00:00:00+02:00",
+            "validTo": "2026-01-01T00:00:00+01:00",
             "rate": {
               "type": "ZONED",
               "rates": {
@@ -339,108 +241,10 @@
               },
               "unit": "PLN/kWh"
             }
-          }
-        ]
-      },
-      {
-        "validFrom": "2026-01-01T00:00:00+01:00",
-        "validTo": null,
-        "components": [
+          },
           {
-            "id": "energy-purchase",
-            "kind": "ENERGY_PURCHASE",
-            "category": "ENERGY",
-            "taxTreatment": {
-              "included": [
-                "EXCISE"
-              ]
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "WEEKLY_SCHEDULE",
-              "timezone": "Europe/Warsaw",
-              "rules": [
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "HOLIDAY"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "24:00"
-                    }
-                  ],
-                  "priority": 100
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "SAT",
-                    "SUN"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "24:00"
-                    }
-                  ],
-                  "priority": 200
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "MON"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "06:00"
-                    }
-                  ],
-                  "priority": 500
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "21:00",
-                      "to": "06:00"
-                    }
-                  ],
-                  "priority": 500
-                },
-                {
-                  "zone": "DAY",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "06:00",
-                      "to": "21:00"
-                    }
-                  ],
-                  "priority": 500
-                }
-              ],
-              "calendar": "PL_PUBLIC_HOLIDAYS"
-            },
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": null,
             "rate": {
               "type": "ZONED",
               "rates": {

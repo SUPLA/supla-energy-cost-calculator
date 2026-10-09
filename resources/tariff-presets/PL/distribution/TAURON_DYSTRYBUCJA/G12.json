@@ -34,7 +34,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/rates/DAY"
+        "/components/0/pricePeriods/0/rate/rates/DAY"
       ],
       "unit": "PLN/kWh"
     },
@@ -44,7 +44,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/rates/NIGHT"
+        "/components/0/pricePeriods/0/rate/rates/NIGHT"
       ],
       "unit": "PLN/kWh"
     },
@@ -54,7 +54,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/1/components/0/rate/rates/DAY"
+        "/components/0/pricePeriods/1/rate/rates/DAY"
       ],
       "unit": "PLN/kWh"
     },
@@ -64,7 +64,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/1/components/0/rate/rates/NIGHT"
+        "/components/0/pricePeriods/1/rate/rates/NIGHT"
       ],
       "unit": "PLN/kWh"
     }
@@ -78,73 +78,73 @@
       "length": 1,
       "unit": "MONTH"
     },
-    "periods": [
+    "components": [
       {
-        "validFrom": null,
-        "validTo": "2026-01-01T00:00:00+01:00",
-        "components": [
-          {
-            "id": "distribution-variable",
-            "kind": "DISTRIBUTION_VARIABLE",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "WEEKLY_SCHEDULE",
-              "timezone": "Europe/Warsaw",
-              "rules": [
+        "id": "distribution-variable",
+        "kind": "DISTRIBUTION_VARIABLE",
+        "category": "NETWORK",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "ACTIVE_ENERGY_IMPORT",
+          "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+          "periodInMinutes": 60
+        },
+        "selector": {
+          "type": "WEEKLY_SCHEDULE",
+          "timezone": "Europe/Warsaw",
+          "rules": [
+            {
+              "zone": "NIGHT",
+              "days": [
+                "MON",
+                "TUE",
+                "WED",
+                "THU",
+                "FRI",
+                "SAT",
+                "SUN"
+              ],
+              "time_ranges": [
                 {
-                  "zone": "NIGHT",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI",
-                    "SAT",
-                    "SUN"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "22:00",
-                      "to": "06:00"
-                    },
-                    {
-                      "from": "13:00",
-                      "to": "15:00"
-                    }
-                  ]
+                  "from": "22:00",
+                  "to": "06:00"
                 },
                 {
-                  "zone": "DAY",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI",
-                    "SAT",
-                    "SUN"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "06:00",
-                      "to": "13:00"
-                    },
-                    {
-                      "from": "15:00",
-                      "to": "22:00"
-                    }
-                  ]
+                  "from": "13:00",
+                  "to": "15:00"
                 }
               ]
             },
+            {
+              "zone": "DAY",
+              "days": [
+                "MON",
+                "TUE",
+                "WED",
+                "THU",
+                "FRI",
+                "SAT",
+                "SUN"
+              ],
+              "time_ranges": [
+                {
+                  "from": "06:00",
+                  "to": "13:00"
+                },
+                {
+                  "from": "15:00",
+                  "to": "22:00"
+                }
+              ]
+            }
+          ]
+        },
+        "pricePeriods": [
+          {
+            "validFrom": null,
+            "validTo": "2026-01-01T00:00:00+01:00",
             "rate": {
               "type": "ZONED",
               "rates": {
@@ -153,75 +153,10 @@
               },
               "unit": "PLN/kWh"
             }
-          }
-        ]
-      },
-      {
-        "validFrom": "2026-01-01T00:00:00+01:00",
-        "validTo": null,
-        "components": [
+          },
           {
-            "id": "distribution-variable",
-            "kind": "DISTRIBUTION_VARIABLE",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "WEEKLY_SCHEDULE",
-              "timezone": "Europe/Warsaw",
-              "rules": [
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI",
-                    "SAT",
-                    "SUN"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "22:00",
-                      "to": "06:00"
-                    },
-                    {
-                      "from": "13:00",
-                      "to": "15:00"
-                    }
-                  ]
-                },
-                {
-                  "zone": "DAY",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI",
-                    "SAT",
-                    "SUN"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "06:00",
-                      "to": "13:00"
-                    },
-                    {
-                      "from": "15:00",
-                      "to": "22:00"
-                    }
-                  ]
-                }
-              ]
-            },
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": null,
             "rate": {
               "type": "ZONED",
               "rates": {

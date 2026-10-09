@@ -169,15 +169,15 @@ final class CostPlanTaxContextTest extends TestCase
                 'version' => 1,
                 'currency' => 'PLN',
                 'timezone' => 'Europe/Warsaw',
-                'periods' => [[
-                    'validFrom' => null,
-                    'validTo' => null,
-                    'components' => [[
-                        'id' => $componentId,
-                        'kind' => $kind,
-                        'category' => $category,
-                        'taxTreatment' => ['included' => []],
-                        'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+                'components' => [[
+                    'id' => $componentId,
+                    'kind' => $kind,
+                    'category' => $category,
+                    'taxTreatment' => ['included' => []],
+                    'quantity' => ['type' => 'ACTIVE_ENERGY_IMPORT'],
+                    'pricePeriods' => [[
+                        'validFrom' => null,
+                        'validTo' => null,
                         'rate' => ['type' => 'CONSTANT', 'value' => '1', 'unit' => 'PLN/kWh'],
                     ]],
                 ]],

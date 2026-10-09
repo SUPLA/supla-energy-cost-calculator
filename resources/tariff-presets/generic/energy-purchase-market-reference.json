@@ -47,7 +47,7 @@
         }
       ],
       "targets": [
-        "/periods/0/components/0/rate/source"
+        "/components/0/pricePeriods/0/rate/source"
       ]
     },
     {
@@ -56,7 +56,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/multiplier"
+        "/components/0/pricePeriods/0/rate/multiplier"
       ]
     },
     {
@@ -65,7 +65,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/add"
+        "/components/0/pricePeriods/0/rate/add"
       ],
       "unit": "PLN/kWh"
     },
@@ -75,18 +75,34 @@
       "type": "CHOICE",
       "required": true,
       "options": [
-        {"value": "WITHOUT_TAXES", "label": "Bez podatków"},
-        {"value": "WITH_EXCISE", "label": "Z akcyzą"},
-        {"value": "WITH_EXCISE_AND_VAT", "label": "Z akcyzą i VAT"}
-      ],
-      "targets": [{
-        "pointer": "/periods/0/components/0/taxTreatment/included",
-        "values": {
-          "WITHOUT_TAXES": [],
-          "WITH_EXCISE": ["EXCISE"],
-          "WITH_EXCISE_AND_VAT": ["EXCISE", "VAT"]
+        {
+          "value": "WITHOUT_TAXES",
+          "label": "Bez podatków"
+        },
+        {
+          "value": "WITH_EXCISE",
+          "label": "Z akcyzą"
+        },
+        {
+          "value": "WITH_EXCISE_AND_VAT",
+          "label": "Z akcyzą i VAT"
         }
-      }]
+      ],
+      "targets": [
+        {
+          "pointer": "/components/0/taxTreatment/included",
+          "values": {
+            "WITHOUT_TAXES": [],
+            "WITH_EXCISE": [
+              "EXCISE"
+            ],
+            "WITH_EXCISE_AND_VAT": [
+              "EXCISE",
+              "VAT"
+            ]
+          }
+        }
+      ]
     }
   ],
   "billingDefinitionTemplate": {
@@ -98,24 +114,24 @@
       "length": 1,
       "unit": "MONTH"
     },
-    "periods": [
+    "components": [
       {
-        "validFrom": null,
-        "validTo": null,
-        "components": [
+        "id": "energy-purchase",
+        "kind": "ENERGY_PURCHASE",
+        "category": "ENERGY",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "ACTIVE_ENERGY_IMPORT"
+        },
+        "selector": {
+          "type": "ALWAYS"
+        },
+        "pricePeriods": [
           {
-            "id": "energy-purchase",
-            "kind": "ENERGY_PURCHASE",
-            "category": "ENERGY",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT"
-            },
-            "selector": {
-              "type": "ALWAYS"
-            },
+            "validFrom": null,
+            "validTo": null,
             "rate": {
               "type": "REFERENCE",
               "source": "PL.TGE.FIXING1_HOURLY",

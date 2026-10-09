@@ -34,7 +34,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/rates/DAY"
+        "/components/0/pricePeriods/0/rate/rates/DAY"
       ],
       "unit": "PLN/kWh"
     },
@@ -44,7 +44,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/rates/NIGHT"
+        "/components/0/pricePeriods/0/rate/rates/NIGHT"
       ],
       "unit": "PLN/kWh"
     }
@@ -58,112 +58,112 @@
       "length": 1,
       "unit": "MONTH"
     },
-    "periods": [
+    "components": [
       {
-        "validFrom": null,
-        "validTo": null,
-        "components": [
-          {
-            "id": "distribution-variable",
-            "kind": "DISTRIBUTION_VARIABLE",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "WEEKLY_SCHEDULE",
-              "timezone": "Europe/Warsaw",
-              "rules": [
+        "id": "distribution-variable",
+        "kind": "DISTRIBUTION_VARIABLE",
+        "category": "NETWORK",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "ACTIVE_ENERGY_IMPORT",
+          "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+          "periodInMinutes": 60
+        },
+        "selector": {
+          "type": "WEEKLY_SCHEDULE",
+          "timezone": "Europe/Warsaw",
+          "rules": [
+            {
+              "zone": "NIGHT",
+              "days": [
+                "HOLIDAY"
+              ],
+              "time_ranges": [
                 {
-                  "zone": "NIGHT",
-                  "days": [
-                    "HOLIDAY"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "24:00"
-                    }
-                  ],
-                  "priority": 100
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "SAT",
-                    "SUN"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "24:00"
-                    }
-                  ],
-                  "priority": 200
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "MON"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "00:00",
-                      "to": "06:00"
-                    }
-                  ],
-                  "priority": 500
-                },
-                {
-                  "zone": "NIGHT",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "22:00",
-                      "to": "06:00"
-                    },
-                    {
-                      "from": "13:00",
-                      "to": "15:00"
-                    }
-                  ],
-                  "priority": 500
-                },
-                {
-                  "zone": "DAY",
-                  "days": [
-                    "MON",
-                    "TUE",
-                    "WED",
-                    "THU",
-                    "FRI"
-                  ],
-                  "time_ranges": [
-                    {
-                      "from": "06:00",
-                      "to": "13:00"
-                    },
-                    {
-                      "from": "15:00",
-                      "to": "22:00"
-                    }
-                  ],
-                  "priority": 500
+                  "from": "00:00",
+                  "to": "24:00"
                 }
               ],
-              "calendar": "PL_PUBLIC_HOLIDAYS"
+              "priority": 100
             },
+            {
+              "zone": "NIGHT",
+              "days": [
+                "SAT",
+                "SUN"
+              ],
+              "time_ranges": [
+                {
+                  "from": "00:00",
+                  "to": "24:00"
+                }
+              ],
+              "priority": 200
+            },
+            {
+              "zone": "NIGHT",
+              "days": [
+                "MON"
+              ],
+              "time_ranges": [
+                {
+                  "from": "00:00",
+                  "to": "06:00"
+                }
+              ],
+              "priority": 500
+            },
+            {
+              "zone": "NIGHT",
+              "days": [
+                "MON",
+                "TUE",
+                "WED",
+                "THU",
+                "FRI"
+              ],
+              "time_ranges": [
+                {
+                  "from": "22:00",
+                  "to": "06:00"
+                },
+                {
+                  "from": "13:00",
+                  "to": "15:00"
+                }
+              ],
+              "priority": 500
+            },
+            {
+              "zone": "DAY",
+              "days": [
+                "MON",
+                "TUE",
+                "WED",
+                "THU",
+                "FRI"
+              ],
+              "time_ranges": [
+                {
+                  "from": "06:00",
+                  "to": "13:00"
+                },
+                {
+                  "from": "15:00",
+                  "to": "22:00"
+                }
+              ],
+              "priority": 500
+            }
+          ],
+          "calendar": "PL_PUBLIC_HOLIDAYS"
+        },
+        "pricePeriods": [
+          {
+            "validFrom": null,
+            "validTo": null,
             "rate": {
               "type": "ZONED",
               "rates": {

@@ -1,6 +1,12 @@
 {
   "profiles": [
-    {"id": "PL.HOUSEHOLD.VAT23_EXCISE5.V1", "path": "PL/household-vat23-excise5-v1.json"},
-    {"id": "PL.HOUSEHOLD.VAT5_EXCISE0.V1", "path": "PL/household-vat5-excise0-v1.json"}
+    {
+      "id": "PL.HOUSEHOLD.VAT23_EXCISE5.V1",
+      "path": "PL/household-vat23-excise5-v1.json"
+    },
+    {
+      "id": "PL.HOUSEHOLD.VAT5_EXCISE0.V1",
+      "path": "PL/household-vat5-excise0-v1.json"
+    }
   ]
 }

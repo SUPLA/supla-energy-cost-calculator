@@ -34,7 +34,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/value"
+        "/components/0/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/kWh",
       "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
@@ -49,26 +49,26 @@
       "length": 1,
       "unit": "MONTH"
     },
-    "periods": [
+    "components": [
       {
-        "validFrom": null,
-        "validTo": null,
-        "components": [
+        "id": "distribution-variable",
+        "kind": "DISTRIBUTION_VARIABLE",
+        "category": "NETWORK",
+        "taxTreatment": {
+          "included": []
+        },
+        "quantity": {
+          "type": "ACTIVE_ENERGY_IMPORT",
+          "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+          "periodInMinutes": 60
+        },
+        "selector": {
+          "type": "ALWAYS"
+        },
+        "pricePeriods": [
           {
-            "id": "distribution-variable",
-            "kind": "DISTRIBUTION_VARIABLE",
-            "category": "NETWORK",
-            "taxTreatment": {
-              "included": []
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "ALWAYS"
-            },
+            "validFrom": null,
+            "validTo": null,
             "rate": {
               "type": "CONSTANT",
               "value": "0.3485",

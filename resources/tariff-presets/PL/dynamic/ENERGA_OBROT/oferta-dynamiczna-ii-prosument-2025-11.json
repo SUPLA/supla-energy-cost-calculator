@@ -34,7 +34,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/add"
+        "/components/0/pricePeriods/0/rate/add"
       ],
       "unit": "PLN/kWh",
       "help": "Domyślna wartość wynika z tej edycji oferty; nadpisz tylko gdy Twoja umowa wskazuje inną wartość."
@@ -45,7 +45,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/1/rate/value"
+        "/components/1/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month",
       "help": "Wartość można nadpisać zgodnie z wariantem faktury/umowy."
@@ -60,30 +60,32 @@
       "length": 1,
       "unit": "MONTH"
     },
-    "periods": [
+    "components": [
       {
-        "validFrom": null,
-        "validTo": null,
-        "components": [
+        "id": "energy-purchase",
+        "kind": "ENERGY_PURCHASE",
+        "category": "ENERGY",
+        "taxTreatment": {
+          "included": [
+            "EXCISE"
+          ]
+        },
+        "quantity": {
+          "type": "ACTIVE_ENERGY_IMPORT",
+          "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+          "periodInMinutes": 60,
+          "allocation": {
+            "strategy": "EQUAL",
+            "periodInMinutes": 15
+          }
+        },
+        "selector": {
+          "type": "ALWAYS"
+        },
+        "pricePeriods": [
           {
-            "id": "energy-purchase",
-            "kind": "ENERGY_PURCHASE",
-            "category": "ENERGY",
-            "taxTreatment": {
-              "included": ["EXCISE"]
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60,
-              "allocation": {
-                "strategy": "EQUAL",
-                "periodInMinutes": 15
-              }
-            },
-            "selector": {
-              "type": "ALWAYS"
-            },
+            "validFrom": null,
+            "validTo": null,
             "rate": {
               "type": "REFERENCE",
               "source": "PL.TGE.FIXING1",
@@ -92,22 +94,30 @@
               "add": "0.0878",
               "unit": "PLN/kWh"
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "supplier-fixed",
+        "kind": "SUPPLIER_FIXED",
+        "category": "SERVICE",
+        "taxTreatment": {
+          "included": [
+            "VAT"
+          ]
+        },
+        "quantity": {
+          "type": "PERIOD",
+          "period": "MONTH",
+          "prorate": false
+        },
+        "pricePeriods": [
           {
-            "id": "supplier-fixed",
-            "kind": "SUPPLIER_FIXED",
-            "category": "SERVICE",
-            "taxTreatment": {
-            "included": ["VAT"]
-            },
-            "quantity": {
-              "type": "PERIOD",
-              "period": "MONTH",
-              "prorate": false
-            },
+            "validFrom": null,
+            "validTo": null,
             "rate": {
               "type": "CONSTANT",
-            "value": "9.99",
+              "value": "9.99",
               "unit": "PLN/month"
             }
           }

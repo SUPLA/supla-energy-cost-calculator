@@ -52,7 +52,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/0/components/0/rate/value"
+        "/components/0/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/kWh"
     },
@@ -62,7 +62,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/1/components/0/rate/value"
+        "/components/0/pricePeriods/1/rate/value"
       ],
       "unit": "PLN/kWh"
     },
@@ -72,7 +72,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/2/components/0/rate/value"
+        "/components/0/pricePeriods/2/rate/value"
       ],
       "unit": "PLN/kWh"
     },
@@ -82,7 +82,7 @@
       "type": "DECIMAL",
       "required": true,
       "targets": [
-        "/periods/3/components/0/rate/value"
+        "/components/0/pricePeriods/3/rate/value"
       ],
       "unit": "PLN/kWh"
     }
@@ -96,115 +96,55 @@
       "length": 1,
       "unit": "MONTH"
     },
-    "periods": [
+    "components": [
       {
-        "validFrom": null,
-        "validTo": "2024-07-01T00:00:00+02:00",
-        "components": [
+        "id": "energy-purchase",
+        "kind": "ENERGY_PURCHASE",
+        "category": "ENERGY",
+        "taxTreatment": {
+          "included": [
+            "EXCISE"
+          ]
+        },
+        "quantity": {
+          "type": "ACTIVE_ENERGY_IMPORT",
+          "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
+          "periodInMinutes": 60
+        },
+        "selector": {
+          "type": "ALWAYS"
+        },
+        "pricePeriods": [
           {
-            "id": "energy-purchase",
-            "kind": "ENERGY_PURCHASE",
-            "category": "ENERGY",
-            "taxTreatment": {
-              "included": [
-                "EXCISE"
-              ]
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "ALWAYS"
-            },
+            "validFrom": null,
+            "validTo": "2024-07-01T00:00:00+02:00",
             "rate": {
               "type": "CONSTANT",
               "value": "0.7464",
               "unit": "PLN/kWh"
             }
-          }
-        ]
-      },
-      {
-        "validFrom": "2024-07-01T00:00:00+02:00",
-        "validTo": "2025-10-01T00:00:00+02:00",
-        "components": [
+          },
           {
-            "id": "energy-purchase",
-            "kind": "ENERGY_PURCHASE",
-            "category": "ENERGY",
-            "taxTreatment": {
-              "included": [
-                "EXCISE"
-              ]
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "ALWAYS"
-            },
+            "validFrom": "2024-07-01T00:00:00+02:00",
+            "validTo": "2025-10-01T00:00:00+02:00",
             "rate": {
               "type": "CONSTANT",
               "value": "0.6299",
               "unit": "PLN/kWh"
             }
-          }
-        ]
-      },
-      {
-        "validFrom": "2025-10-01T00:00:00+02:00",
-        "validTo": "2026-01-01T00:00:00+01:00",
-        "components": [
+          },
           {
-            "id": "energy-purchase",
-            "kind": "ENERGY_PURCHASE",
-            "category": "ENERGY",
-            "taxTreatment": {
-              "included": [
-                "EXCISE"
-              ]
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "ALWAYS"
-            },
+            "validFrom": "2025-10-01T00:00:00+02:00",
+            "validTo": "2026-01-01T00:00:00+01:00",
             "rate": {
               "type": "CONSTANT",
               "value": "0.5796",
               "unit": "PLN/kWh"
             }
-          }
-        ]
-      },
-      {
-        "validFrom": "2026-01-01T00:00:00+01:00",
-        "validTo": null,
-        "components": [
+          },
           {
-            "id": "energy-purchase",
-            "kind": "ENERGY_PURCHASE",
-            "category": "ENERGY",
-            "taxTreatment": {
-              "included": [
-                "EXCISE"
-              ]
-            },
-            "quantity": {
-              "type": "ACTIVE_ENERGY_IMPORT",
-              "strategy": "IMPORT_MINUS_EXPORT_CAP_ZERO",
-              "periodInMinutes": 60
-            },
-            "selector": {
-              "type": "ALWAYS"
-            },
+            "validFrom": "2026-01-01T00:00:00+01:00",
+            "validTo": null,
             "rate": {
               "type": "CONSTANT",
               "value": "0.5018",

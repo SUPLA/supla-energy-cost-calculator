@@ -55,10 +55,10 @@ final class ExpandedPolishPriceHistoryTest extends TestCase
             }
 
             $expectedPricePointers = [];
-            foreach ($periods as $periodIndex => $period) {
-                foreach ($period['components'] as $componentIndex => $component) {
-                    $base = "/periods/$periodIndex/components/$componentIndex/rate";
-                    $rate = $component['rate'];
+            foreach ($preset->document['billingDefinitionTemplate']['components'] as $componentIndex => $component) {
+                foreach ($component['pricePeriods'] as $pricePeriodIndex => $pricePeriod) {
+                    $base = "/components/$componentIndex/pricePeriods/$pricePeriodIndex/rate";
+                    $rate = $pricePeriod['rate'];
                     if ($rate['type'] === 'CONSTANT') {
                         $expectedPricePointers[] = "$base/value";
                     } elseif ($rate['type'] === 'ZONED') {
@@ -103,7 +103,7 @@ final class ExpandedPolishPriceHistoryTest extends TestCase
         $compiled = (new TariffPresetCompiler())->compileComponentToArray('PL.ENERGA_OPERATOR.G12.FIXED', 'capacity-fee', [
             'capacity.rate.2025-H2' => '12.00',
         ]);
-        self::assertSame(['10.64', '0.00', '12.00', '17.18', '17.18'],
+        self::assertSame(['10.64', '0.00', '12.00', '17.18'],
             array_map(static fn(array $period): string => $period['components'][0]['rate']['value'], $compiled['periods']));
         self::assertSame('2025-07-01T00:00:00+02:00', $compiled['periods'][2]['validFrom']);
     }

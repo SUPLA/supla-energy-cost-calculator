@@ -9,7 +9,26 @@
     "retrievedAt": "2026-09-29"
   },
   "rules": [
-    {"id": "EXCISE", "type": "PER_QUANTITY", "appliesToKinds": ["ENERGY_PURCHASE"], "rate": "0.005", "unit": "PLN/kWh"},
-    {"id": "VAT", "type": "PERCENTAGE", "appliesToKinds": ["ENERGY_PURCHASE", "DISTRIBUTION_VARIABLE", "DISTRIBUTION_FIXED", "SUPPLIER_FIXED"], "rate": "0.23", "base": "CURRENT_SUBTOTAL"}
+    {
+      "id": "EXCISE",
+      "type": "PER_QUANTITY",
+      "appliesToKinds": [
+        "ENERGY_PURCHASE"
+      ],
+      "rate": "0.005",
+      "unit": "PLN/kWh"
+    },
+    {
+      "id": "VAT",
+      "type": "PERCENTAGE",
+      "appliesToKinds": [
+        "ENERGY_PURCHASE",
+        "DISTRIBUTION_VARIABLE",
+        "DISTRIBUTION_FIXED",
+        "SUPPLIER_FIXED"
+      ],
+      "rate": "0.23",
+      "base": "CURRENT_SUBTOTAL"
+    }
   ]
 }
