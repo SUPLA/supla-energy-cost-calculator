@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace Supla\EnergyCostCalculator\Tests\Preset;
 
 use PHPUnit\Framework\TestCase;
+use Supla\EnergyCostCalculator\Definition\SelectorDefinition;
+use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCatalog;
 use Supla\EnergyCostCalculator\Preset\TariffPresetCompiler;
+use Supla\EnergyCostCalculator\Reference\ReferenceDataCache;
+use Supla\EnergyCostCalculator\Strategy\Selector\DefaultSelectorResolver;
+use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
 
 final class AdditionalHouseholdTariffPresetTest extends TestCase
 {
@@ -94,6 +99,34 @@ final class AdditionalHouseholdTariffPresetTest extends TestCase
         ];
         foreach ($cases as $id => $rates) {
             self::assertSame($rates, $this->component($id, 'energy-purchase')['rate']['rates'], $id);
+        }
+    }
+
+    public function testEneaG12sezOnCoversEveryHourUsingTheCurrentCalendarMonth(): void
+    {
+        $component = $this->component('PL.ENEA_OPERATOR.G12sezON', 'distribution-variable');
+        $selector = new SelectorDefinition('WEEKLY_SCHEDULE', $component['selector']);
+        $timezone = new \DateTimeZone('Europe/Warsaw');
+        $from = new \DateTimeImmutable('2026-01-01', $timezone);
+        $to = new \DateTimeImmutable('2027-01-01', $timezone);
+        $references = new ReferenceDataCache(new InMemoryReferenceDataSource(), new TimeRange($from, $to));
+        $resolver = new DefaultSelectorResolver();
+
+        // Section 2.2.10 of ENEA's tariff defines zones by the current month,
+        // including the early hours of April 1 and October 1.
+        for ($start = $from; $start < $to; $start = $end) {
+            $end = $start->setTimestamp($start->getTimestamp() + 3600);
+            $month = (int) $start->format('n');
+            $hour = (int) $start->format('G');
+            $recommended = $month >= 4 && $month <= 9
+                ? (($hour >= 4 && $hour < 6) || ($hour >= 9 && $hour < 17))
+                : ($hour < 6 || $hour >= 22 || ($hour >= 11 && $hour < 13));
+
+            self::assertSame(
+                $recommended ? 'RECOMMENDED_CONSUMPTION' : 'OTHER',
+                $resolver->resolveRange(new TimeRange($start, $end), $selector, $references),
+                $start->format(\DateTimeInterface::ATOM),
+            );
         }
     }
 
