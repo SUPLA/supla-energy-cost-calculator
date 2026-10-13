@@ -245,7 +245,9 @@ independent of warnings and measurements; no periodic components means complete.
 Always use the original selected range for coverage. Never truncate it to measurements,
 extrapolate usage, or special-case current/future periods using the system clock.
 Reporting plus `SKIP_AFFECTED` can price complete available temporal-netting windows
-and emits `MISSING_METER_DATA` for unavailable spans; strict/legacy coverage remains unchanged.
+and emits `MISSING_METER_DATA` for leading/internal meter gaps or entirely missing data.
+Trailing absence after the final reading and an otherwise contiguous unfinished final
+netting window are silently skipped; strict/legacy coverage remains unchanged.
 
 Tariff regression fixtures should support the form:
 

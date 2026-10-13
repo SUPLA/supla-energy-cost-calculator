@@ -102,9 +102,11 @@ of warnings and data availability. It does not duplicate period or charge detail
 The input `TimeRange` is always the user's selection, including future boundaries.
 Available measurements constrain usage facts, not billing-period coverage. There is no
 current-period policy, estimation mode or system clock. Under opt-in reporting plus
-`SKIP_AFFECTED`, missing temporal-netting coverage is reported as `MISSING_METER_DATA`
-warnings while complete available windows can be priced. Each window must still be
-complete and contiguous; legacy/strict global coverage checks are preserved.
+`SKIP_AFFECTED`, leading/internal meter gaps and entirely missing data produce
+`MISSING_METER_DATA` warnings while complete available windows can be priced.
+Trailing absence after the final reading and an otherwise contiguous unfinished final
+netting window are silently skipped. Priced windows must still be complete and
+contiguous; legacy/strict global coverage checks are preserved.
 
 
 ## Temporal netting

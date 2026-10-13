@@ -712,13 +712,18 @@ final class CostCalculator
 
         if ($requiresCompleteDeltaCoverage && $expectedDeltaFrom != $range->to) {
             if ($reportAvailableWindows) {
-                $warnings[] = [
-                    'code' => 'MISSING_METER_DATA',
-                    'scope' => 'METER_INTERVAL',
-                    'from' => $expectedDeltaFrom->format(DATE_ATOM),
-                    'to' => $range->to->format(DATE_ATOM),
-                    'message' => 'Usage costs are based only on available meter data.',
-                ];
+                // A trailing span after the final available delta is not a gap
+                // inside the meter history. Keep the warning if no deltas were
+                // available at all for the requested range.
+                if ($expectedDeltaFrom == $range->from) {
+                    $warnings[] = [
+                        'code' => 'MISSING_METER_DATA',
+                        'scope' => 'METER_INTERVAL',
+                        'from' => $expectedDeltaFrom->format(DATE_ATOM),
+                        'to' => $range->to->format(DATE_ATOM),
+                        'message' => 'Usage costs are based only on available meter data.',
+                    ];
+                }
             } else {
                 throw new CalculationException(sprintf(
                     'Meter deltas end at %s; complete coverage through %s is required for temporal netting.',

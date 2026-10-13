@@ -241,8 +241,8 @@ final class ReportSummaryTest extends TestCase
     public static function trailingNettingRangeEnds(): iterable
     {
         yield 'selected range ends at last reading' => ['2026-10-09T21:30:00Z', []];
-        // Missing measurements AFTER the final reading are a separate existing warning.
-        yield 'selected range extends past last reading' => ['2026-10-09T23:00:00Z', ['MISSING_METER_DATA']];
+        // Missing measurements after the final reading are silently ignored.
+        yield 'selected range extends past last reading' => ['2026-10-09T23:00:00Z', []];
     }
 
     public function testFinalWindowWithMissingBeginningStillWarns(): void
@@ -394,6 +394,77 @@ final class ReportSummaryTest extends TestCase
         $this->expectException(CalculationException::class);
         $this->calculator(['2026-10-10'])->calculate('meter', $this->range('2026-10-01', '2026-11-01'), $definition,
             new CalculationOptions(calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED));
+    }
+
+    public function testTrailingMissingDataAndLastUnfinishedWindowAreNotWarnings(): void
+    {
+        $definition = $this->definition();
+        $definition['periods'][0]['components'][0]['quantity'] += [
+            'strategy' => 'IMPORT_MINUS_EXPORT_CAP_ZERO',
+            'periodInMinutes' => 60,
+        ];
+        $deltas = [];
+        foreach ([
+            ['20:00', '20:15'], ['20:15', '20:30'],
+            ['20:30', '20:45'], ['20:45', '21:00'],
+            ['21:00', '21:15'], ['21:15', '21:30'],
+        ] as [$from, $to]) {
+            $deltas[] = new EnergyDelta(
+                new \DateTimeImmutable("2026-10-09T{$from}:00Z"),
+                new \DateTimeImmutable("2026-10-09T{$to}:00Z"),
+                ['ACTIVE_ENERGY_IMPORT' => '1', 'ACTIVE_ENERGY_EXPORT' => '0'],
+            );
+        }
+        $result = (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource()))
+            ->calculate('meter', $this->range('2026-10-09T20:00:00Z', '2026-11-01T00:00:00Z'), $definition,
+                new CalculationOptions(includeCharges: true, includeReportSummary: true,
+                    calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED));
+
+        // The complete 20:00-21:00 window is priced; 21:00-21:30 is discarded.
+        // The remainder of the requested month is simply outside available data.
+        self::assertSame([], $result->warnings);
+        self::assertSame('4', $result->usage['ACTIVE_ENERGY_IMPORT']);
+        self::assertSame('4.92', $result->reportSummary['costs']['gross']['usageBased']['total']);
+        self::assertCount(1, $result->charges);
+        self::assertSame('2026-10-09T20:00:00+00:00', $result->charges[0]['from']);
+    }
+
+    public function testMiddleMeterGapStillWarnsButTrailingAbsenceDoesNot(): void
+    {
+        $definition = $this->definition();
+        $definition['periods'][0]['components'][0]['quantity'] += [
+            'strategy' => 'IMPORT_MINUS_EXPORT_CAP_ZERO',
+            'periodInMinutes' => 60,
+        ];
+        $deltas = [
+            new EnergyDelta(new \DateTimeImmutable('2026-10-09T20:00:00Z'), new \DateTimeImmutable('2026-10-09T21:00:00Z'),
+                ['ACTIVE_ENERGY_IMPORT' => '1', 'ACTIVE_ENERGY_EXPORT' => '0']),
+            new EnergyDelta(new \DateTimeImmutable('2026-10-09T22:00:00Z'), new \DateTimeImmutable('2026-10-09T23:00:00Z'),
+                ['ACTIVE_ENERGY_IMPORT' => '1', 'ACTIVE_ENERGY_EXPORT' => '0']),
+        ];
+        $result = (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource()))
+            ->calculate('meter', $this->range('2026-10-09T20:00:00Z', '2026-11-01T00:00:00Z'), $definition,
+                new CalculationOptions(includeReportSummary: true,
+                    calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED));
+
+        self::assertSame(['MISSING_METER_DATA'], array_column($result->warnings, 'code'));
+        self::assertSame('2026-10-09T21:00:00+00:00', $result->warnings[0]['from']);
+        self::assertSame('2026-10-09T22:00:00+00:00', $result->warnings[0]['to']);
+        self::assertSame('2', $result->usage['ACTIVE_ENERGY_IMPORT']);
+    }
+
+    public function testCompletelyMissingMeterDataStillWarns(): void
+    {
+        $definition = $this->definition();
+        $definition['periods'][0]['components'][0]['quantity'] += [
+            'strategy' => 'IMPORT_MINUS_EXPORT_CAP_ZERO',
+            'periodInMinutes' => 60,
+        ];
+        $result = $this->calculate($definition, '2026-10-01', '2026-11-01', [], true);
+
+        self::assertSame(['MISSING_METER_DATA'], array_column($result->warnings, 'code'));
+        self::assertSame('0', $result->reportSummary['costs']['gross']['usageBased']['total']);
+        self::assertSame('12.3', $result->reportSummary['costs']['gross']['periodic']['total']);
     }
 
     public function testLegacyJsonIsUnchangedWhenReportIsNotRequested(): void

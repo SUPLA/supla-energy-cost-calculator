@@ -129,9 +129,11 @@ prices/tax coverage still fail explicitly. Proration uses the configured nominal
 rules, never a fraction inferred from an arbitrary user selection.
 
 With reporting enabled and `SKIP_AFFECTED`, temporal netting uses available complete
-windows and reports unavailable spans as `MISSING_METER_DATA` warnings. Incomplete
-windows are still skipped; neither missing data nor failed charges become zero usage
-facts. Legacy callers and strict reporting retain the existing coverage checks.
+windows. Leading/internal meter gaps and entirely missing data produce `MISSING_METER_DATA`
+warnings; the span after the final reading is silently ignored. An otherwise contiguous
+unfinished final netting window is also skipped without a warning. Other incomplete
+windows still warn; neither missing data nor failed charges become zero usage facts.
+Legacy callers and strict reporting retain the existing coverage checks.
 
 Usage-based costs are calculated from their natural charge windows. Periodic charges are deliberately kept out of time-series charge facts. Use `charges[]` for cost charts: ordinary components produce charges at meter-delta resolution, temporally netted components without allocation produce one charge per complete netting window, and allocated netting components produce one charge per allocation slot. `intervals[]` remains a meter-interval diagnostic view and never receives an artificial share of a wider netting-window cost.
 
