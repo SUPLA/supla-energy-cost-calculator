@@ -36,8 +36,7 @@
       "targets": [
         "/components/0/pricePeriods/0/rate/rates/MORNING_PEAK"
       ],
-      "unit": "PLN/kWh",
-      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+      "unit": "PLN/kWh"
     },
     {
       "id": "distribution.AFTERNOON_PEAK",
@@ -47,8 +46,7 @@
       "targets": [
         "/components/0/pricePeriods/0/rate/rates/AFTERNOON_PEAK"
       ],
-      "unit": "PLN/kWh",
-      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+      "unit": "PLN/kWh"
     },
     {
       "id": "distribution.OFF_PEAK",
@@ -58,8 +56,7 @@
       "targets": [
         "/components/0/pricePeriods/0/rate/rates/OFF_PEAK"
       ],
-      "unit": "PLN/kWh",
-      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+      "unit": "PLN/kWh"
     }
   ],
   "billingDefinitionTemplate": {

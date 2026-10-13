@@ -288,6 +288,9 @@
     ]
   },
   "warnings": [
+    "Ceny historyczne są taryfowe; nie uwzględniają ustawowych limitów ani indywidualnych rabatów."
+  ],
+  "llmNotes": [
     "Historia zawiera nominalne ceny taryfowe z akcyzą 0,005 PLN/kWh, bez VAT; ustawowe ceny maksymalne i pozostałe mechanizmy ochronne nie są uwzględnione."
   ],
   "source": {

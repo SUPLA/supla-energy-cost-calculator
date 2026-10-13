@@ -85,6 +85,8 @@ Bundled tariff presets are production resources exposed through `TariffPresetCat
 resources/tariff-presets/
 ```
 
+Preset user copy belongs only in `warnings[]` (preset-level actions) and `inputs[].help` (field-level decisions). Place source interpretation, editor/LLM instructions and technical details in `llmNotes[]`; never render `llmNotes` to users. Keep text concise, Polish and actionable.
+
 Host applications must not resolve package resource paths directly. A preset revision is the SHA-256 hash of its deterministically encoded JSON document, independent of file formatting and line endings.
 
 Cost-plan compilation also belongs to this package. Persisted version 2 cost plans reference stable preset IDs plus user-specific component values/overrides and are compiled with `CostPlanCompiler` into executable `BillingDefinition` objects. Compatible fixes to an existing preset ID intentionally affect existing plans; real tariff changes require a new preset ID. Do not pin a cost plan to a preset revision. Preset revision hashes are for diagnostics/cache invalidation. Adjacent plan periods with identical billing-cycle definitions must not create artificial billing-cycle boundaries.

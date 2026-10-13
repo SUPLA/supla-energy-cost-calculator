@@ -104,9 +104,7 @@
       }
     ]
   },
-  "warnings": [
-    "Preset generyczny: ustaw cenę zgodnie z własną umową."
-  ],
+  "warnings": [],
   "source": {
     "title": "Konfiguracja użytkownika",
     "url": "https://www.supla.org/",

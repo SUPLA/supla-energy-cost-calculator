@@ -171,6 +171,9 @@
     ]
   },
   "warnings": [
+    "Poza latami 2025–2026 stosowane są skrajne znane stawki. Zweryfikuj je na fakturze."
+  ],
+  "llmNotes": [
     "Przed 2025 r. oraz po 2026 r. stosowana jest odpowiednio pierwsza lub ostatnia znana cena. Wyliczenia poza udokumentowanym zakresem są przybliżone."
   ],
   "sources": [

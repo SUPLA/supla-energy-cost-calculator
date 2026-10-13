@@ -156,6 +156,9 @@
     ]
   },
   "warnings": [
+    "Ceny historyczne są taryfowe; nie uwzględniają ustawowych limitów ani indywidualnych rabatów."
+  ],
+  "llmNotes": [
     "Ceny historyczne sa stawkami taryfowymi netto (bez VAT), zawierajacymi akcyze 0,005 PLN/kWh; nie sa cenami maksymalnymi ani zamrozonymi wynikajacymi z przepisow ochronnych."
   ],
   "source": {

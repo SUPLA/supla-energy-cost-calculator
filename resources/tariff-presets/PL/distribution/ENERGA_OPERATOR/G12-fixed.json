@@ -47,7 +47,7 @@
         "/components/0/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Domyślnie układ 1-fazowy: 14.35 PLN/mies. netto. Dla układu 3-fazowego stawka wynosi 20.17 PLN/mies. netto; nadpisz tę wartość zgodnie z układem pomiarowym. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
+      "help": "1 faza: 14,35 zł netto/mies.; 3 fazy: 20,17 zł netto/mies. Sprawdź liczbę faz instalacji."
     },
     {
       "id": "capacity.rate.2024-H1",
@@ -58,7 +58,7 @@
         "/components/1/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Okres 2024-H1. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
+      "help": "Stawka zależy od rocznego zużycia energii. Sprawdź próg właściwy dla tego okresu."
     },
     {
       "id": "distribution.subscription.rate.2024-H1",
@@ -69,7 +69,7 @@
         "/components/2/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Okres 2024-H1. Domyślna stawka 4.64 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 2-mies. 2.32; zdalny odczyt: 1-mies. 0.74, 2-mies. 0.70 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty. Sugerowana historyczna stawka dla tego skladnika jest przyblizeniem, nie potwierdzona archiwalna taryfa."
+      "help": "Stawka zależy od okresu rozliczeń i sposobu odczytu licznika; dane historyczne są szacunkowe."
     },
     {
       "id": "capacity.rate.2024-H2_2025-H1",
@@ -80,7 +80,7 @@
         "/components/1/pricePeriods/1/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Okres 2024-H2_2025-H1. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
+      "help": "Stawka zależy od rocznego zużycia energii. Sprawdź próg właściwy dla tego okresu."
     },
     {
       "id": "capacity.rate.2025-H2",
@@ -91,7 +91,7 @@
         "/components/1/pricePeriods/2/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Okres 2025-H2. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
+      "help": "Stawka zależy od rocznego zużycia energii. Sprawdź próg właściwy dla tego okresu."
     },
     {
       "id": "capacity.rate.2026-Q1_Q3",
@@ -102,7 +102,7 @@
         "/components/1/pricePeriods/3/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Okres 2026-Q1_Q3. Domyślnie próg rocznego zużycia >1200 do 2800 kWh: 17.18 PLN/mies. netto. Stawki 2026: <500 kWh: 4.29; 500-1200 kWh: 10.31; >1200-2800 kWh: 17.18; >2800 kWh: 24.05 PLN/mies."
+      "help": "Opłata mocowa 2026 wg zużycia rocznego: do 500 kWh – 4,29 zł; 500–1200 – 10,31 zł; 1200–2800 – 17,18 zł; powyżej 2800 – 24,05 zł netto/mies."
     },
     {
       "id": "distribution.subscription.rate.2026-Q4",
@@ -113,7 +113,7 @@
         "/components/2/pricePeriods/1/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Okres 2026-Q4. Domyślna stawka 4.64 PLN/mies. netto odpowiada okresowi 1-miesięcznemu. Alternatywy taryfowe: 2-mies. 2.32; zdalny odczyt: 1-mies. 0.74, 2-mies. 0.70 PLN/mies. Od 01.10.2026 OSD nie nalicza tej opłaty."
+      "help": "Od 1.10.2026 abonament dystrybucyjny wynosi 0 zł/mies."
     }
   ],
   "billingDefinitionTemplate": {
@@ -237,7 +237,9 @@
     ]
   },
   "warnings": [
-    "Domyślna opłata sieciowa stała zakłada układ 1-fazowy (14.35 PLN/mies. netto); dla układu 3-fazowego ustaw 20.17 PLN/mies.",
+    "Stawki sieciowe i abonamentowe za lata 2024–2025 są szacunkowe. Jeśli rozliczasz ten okres, sprawdź je na fakturze."
+  ],
+  "llmNotes": [
     "Domyślna opłata mocowa 17.18 PLN/mies. netto odpowiada zużyciu rocznemu powyżej 1200 kWh do 2800 kWh; ustaw stawkę właściwą dla swojego progu. Stawki 2026 wynikają z Informacji Prezesa URE nr 58/2025.",
     "Od 2026-10-01 opłata abonamentowa OSD jest ustawiona na 0.00 PLN/mies. zgodnie z § 56 ust. 3 rozporządzenia Ministra Energii z 3.09.2026 r. (Dz.U. 2026 poz. 1182); ewentualna opłata po stronie sprzedawcy nie jest modelowana przez ten preset.",
     "Opłata przejściowa nie jest dodawana: została zniesiona od 2026-01-01.",

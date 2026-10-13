@@ -90,6 +90,21 @@ Given a persisted plan that references `TEST.G11`, changing a package-owned defa
 
 If a user explicitly overrode the corrected field, the stored override continues to win.
 
+## Preset messages and maintenance notes
+
+`warnings[]` contains short, actionable notices that a host may show to users when
+configuring a preset. `inputs[].help` explains a specific input or an alternative
+rate; avoid repeating those details in `warnings`. Neither field should contain
+instructions addressed to the frontend, references to calculator internals, source
+research logs, or legislative citations unless essential to a user's decision.
+
+The optional `llmNotes[]` holds provenance, calculation assumptions, limitations,
+and maintenance instructions for authors/LLMs. **It must not be rendered to users**;
+frontend/API adapters should explicitly select user-visible fields rather than
+blindly presenting every text field from a preset document. `llmNotes` does not
+affect `CostPlan` compilation or the values of a tariff. Changes to message text
+can change a preset `revision` hash but must not change tariff semantics.
+
 ## Host application responsibility
 
 A host such as `supla-cloud` should persist the version 2 cost-plan JSON and pass it to `CostPlanCompiler`. It should not implement preset input mapping, JSON Pointer handling, component composition, or calculator semantic validation.

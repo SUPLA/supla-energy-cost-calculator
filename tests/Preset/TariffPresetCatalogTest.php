@@ -66,6 +66,32 @@ final class TariffPresetCatalogTest extends TestCase
         }
     }
 
+    public function testUserVisiblePresetMessagesStayConciseAndSeparateFromMaintenanceNotes(): void
+    {
+        $catalog = new TariffPresetCatalog();
+        foreach ($catalog->presets() as $metadata) {
+            $document = $catalog->get($metadata['id'])->document;
+            foreach ($document['warnings'] ?? [] as $warning) {
+                self::assertNotSame('', trim($warning), $metadata['id']);
+                self::assertLessThanOrEqual(300, strlen($warning), $metadata['id']);
+                self::assertDoesNotMatchRegularExpression(
+                    '/\b(?:frontend|CostPlan|temporal netting|REFERENCE|billingCycles|fallback)\b/i',
+                    $warning,
+                    $metadata['id'],
+                );
+            }
+            foreach ($document['llmNotes'] ?? [] as $note) {
+                self::assertIsString($note, $metadata['id']);
+                self::assertNotSame('', trim($note), $metadata['id']);
+            }
+            foreach ($document['inputs'] ?? [] as $input) {
+                if (isset($input['help'])) {
+                    self::assertLessThanOrEqual(350, strlen($input['help']), $metadata['id'] . ': ' . $input['id']);
+                }
+            }
+        }
+    }
+
     public function testRevisionIsDeterministicContentHash(): void
     {
         $document = [

@@ -125,6 +125,10 @@
     ]
   },
   "warnings": [
+    "Sprawdź w umowie okres obowiązywania tej wersji oferty i wysokość opłaty handlowej.",
+    "Koszt nie uwzględnia wynagrodzenia za energię oddaną do sieci (net-billingu)."
+  ],
+  "llmNotes": [
     "Cena energii: RDN Fixing I po ograniczeniu ceny źródłowej do zakresu 0..4000 PLN/MWh, przeliczony na PLN/kWh + składnik K 0,1150 PLN/kWh dla prosumenta + akcyza 0,0050 PLN/kWh, czyli add = 0,1200 PLN/kWh netto.",
     "Dla prosumenta pobór i oddanie są najpierw bilansowane w oknie 60 minut, a dodatni wynik poboru jest dzielony po równo na cztery 15-minutowe sloty i wyceniany według ceny właściwej dla każdego slotu.",
     "Domyślna opłata handlowa dla prosumenta wynosi 27,00 PLN netto/mies. (33,21 PLN brutto przy VAT 23%).",

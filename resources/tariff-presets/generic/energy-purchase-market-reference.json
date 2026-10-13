@@ -145,7 +145,8 @@
       }
     ]
   },
-  "warnings": [
+  "warnings": [],
+  "llmNotes": [
     "Preset generyczny: formuła ceny to reference × multiplier + add. Wybór źródła nie narzuca temporal nettingu; cena jest naliczana na naturalnych interwałach danych pomiarowych."
   ],
   "source": {

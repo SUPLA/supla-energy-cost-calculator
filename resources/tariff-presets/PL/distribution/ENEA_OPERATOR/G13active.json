@@ -36,8 +36,7 @@
       "targets": [
         "/components/0/pricePeriods/0/rate/rates/RECOMMENDED_LIMITATION"
       ],
-      "unit": "PLN/kWh",
-      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+      "unit": "PLN/kWh"
     },
     {
       "id": "distribution.OTHER",
@@ -47,8 +46,7 @@
       "targets": [
         "/components/0/pricePeriods/0/rate/rates/OTHER"
       ],
-      "unit": "PLN/kWh",
-      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+      "unit": "PLN/kWh"
     },
     {
       "id": "distribution.RECOMMENDED_CONSUMPTION",
@@ -58,8 +56,7 @@
       "targets": [
         "/components/0/pricePeriods/0/rate/rates/RECOMMENDED_CONSUMPTION"
       ],
-      "unit": "PLN/kWh",
-      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+      "unit": "PLN/kWh"
     }
   ],
   "billingDefinitionTemplate": {

@@ -40,6 +40,7 @@
   "inputs": [
     {
       "id": "distribution.fixed.rate.2025-H1",
+      "help": "1 faza: 7,02 zł netto/mies.; 3 fazy: 10,34 zł netto/mies.",
       "label": "Stały składnik sieciowy (2025-H1)",
       "type": "DECIMAL",
       "required": true,
@@ -80,6 +81,7 @@
     },
     {
       "id": "distribution.fixed.rate.2026-JAN-SEP",
+      "help": "1 faza: 7,38 zł netto/mies.; 3 fazy: 10,86 zł netto/mies.",
       "label": "Stały składnik sieciowy (2026-JAN-SEP)",
       "type": "DECIMAL",
       "required": true,
@@ -230,6 +232,10 @@
     ]
   },
   "warnings": [
+    "Dostosuj opłatę mocową do swojego rocznego zużycia energii.",
+    "Poza latami 2025–2026 używane są skrajne znane stawki. Sprawdź je na fakturze."
+  ],
+  "llmNotes": [
     "Opłata mocowa dla gospodarstw domowych: 0 PLN od 01.01 do 30.06.2025; 11,44 PLN/mies. od 01.07 do 31.12.2025 dla progu >1200-2800 kWh; 17,18 PLN/mies. w 2026 dla tego progu. Inne progi wymagają nadpisania odpowiednich inputów.",
     "Opłata sieciowa stała zakłada układ 1-fazowy (2025: 7,02; 2026: 7,38 PLN/mies.). Dla 3-fazowego wybierz odpowiednie stawki (2025: 10,34; 2026: 10,86 PLN/mies.).",
     "Od 01.10.2026 abonament dystrybucyjny jest ustawiony na 0 PLN/mies.; regułę należy zachować także przy ręcznych nadpisaniach.",

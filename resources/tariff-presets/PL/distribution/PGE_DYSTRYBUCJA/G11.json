@@ -36,8 +36,7 @@
       "targets": [
         "/components/0/pricePeriods/0/rate/value"
       ],
-      "unit": "PLN/kWh",
-      "help": "Wartość startowa pochodzi z taryfy OSD na 2026 r. i może być nadpisana."
+      "unit": "PLN/kWh"
     }
   ],
   "billingDefinitionTemplate": {

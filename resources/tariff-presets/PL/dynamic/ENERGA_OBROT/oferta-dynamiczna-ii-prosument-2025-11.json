@@ -37,7 +37,7 @@
         "/components/0/pricePeriods/0/rate/add"
       ],
       "unit": "PLN/kWh",
-      "help": "Domyślna wartość wynika z tej edycji oferty; nadpisz tylko gdy Twoja umowa wskazuje inną wartość."
+      "help": "Zmień tylko wtedy, gdy umowa podaje inną wartość."
     },
     {
       "id": "supplier.fixed",
@@ -48,7 +48,7 @@
         "/components/1/pricePeriods/0/rate/value"
       ],
       "unit": "PLN/month",
-      "help": "Wartość można nadpisać zgodnie z wariantem faktury/umowy."
+      "help": "Dostosuj opłatę do sposobu otrzymywania faktury i warunków umowy."
     }
   ],
   "billingDefinitionTemplate": {
@@ -126,6 +126,11 @@
     ]
   },
   "warnings": [
+    "Opłata handlowa: 9,99 zł brutto/mies. z e-fakturą lub 14,99 zł z fakturą papierową.",
+    "Sprawdź w umowie okres obowiązywania warunków tej oferty.",
+    "Koszt nie uwzględnia wynagrodzenia za energię oddaną do sieci (net-billingu)."
+  ],
+  "llmNotes": [
     "Cena energii: RDN Fixing I w naturalnej rozdzielczości publikacji TGE, przeliczony z PLN/MWh na PLN/kWh + 0,0878 PLN/kWh netto.",
     "Dla prosumenta pobór i oddanie są najpierw bilansowane w oknie 60 minut, a dodatni wynik poboru jest dzielony po równo na cztery 15-minutowe ORN-y i wyceniany według ceny właściwej dla każdego ORN-u.",
     "Domyślna opłata handlowa 9,99 PLN brutto/mies. dla eFaktury zawiera VAT; wariant papierowy kosztuje 14,99 PLN brutto/mies.",
