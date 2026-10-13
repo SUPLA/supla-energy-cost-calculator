@@ -10,6 +10,7 @@ final readonly class CalculationOptions
         public bool $includeIntervals = false,
         public bool $includeCharges = false,
         public CalculationProblemPolicy $calculationProblemPolicy = CalculationProblemPolicy::STRICT,
+        public bool $includeReportSummary = false,
     ) {
     }
 }

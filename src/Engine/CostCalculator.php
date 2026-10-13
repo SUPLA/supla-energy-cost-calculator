@@ -86,6 +86,10 @@ final class CostCalculator
         $finalizingWindow = null;
         $resolvingNettingWindow = null;
         $requiresCompleteDeltaCoverage = $this->definitionUsesTemporalNetting($definition, $range);
+        // Reporting with SKIP_AFFECTED can use available complete netting windows.
+        // Legacy/strict callers retain the requirement for coverage of the whole range.
+        $reportAvailableWindows = $options->includeReportSummary
+            && $options->calculationProblemPolicy === CalculationProblemPolicy::SKIP_AFFECTED;
         $expectedDeltaFrom = $range->from;
 
         /** @var array<string, array<string, mixed>> $billingSummaryState */
@@ -274,6 +278,9 @@ final class CostCalculator
         $summaryKey = null;
 
         foreach ($this->deltaSource->getDeltas($meterId, $range) as $delta) {
+            // Retry this fact after rolling back a failed preceding window.
+            do {
+            $retryDelta = false;
             $resolvingNettingWindow = null;
             $deltaState = [
                 'usageBasedTotal' => $usageBasedTotal,
@@ -299,6 +306,16 @@ final class CostCalculator
             }
             if ($delta->from < $range->from || $delta->to > $range->to) {
                 throw new IntervalCrossesBillingPeriodException('Requested range cuts through a delta interval. Use boundaries aligned to meter intervals.');
+            }
+            if ($requiresCompleteDeltaCoverage && $reportAvailableWindows && $delta->from > $expectedDeltaFrom) {
+                $warnings[] = [
+                    'code' => 'MISSING_METER_DATA',
+                    'scope' => 'METER_INTERVAL',
+                    'from' => $expectedDeltaFrom->format(DATE_ATOM),
+                    'to' => $delta->from->format(DATE_ATOM),
+                    'message' => 'Usage costs are based only on available meter data.',
+                ];
+                $expectedDeltaFrom = $delta->from;
             }
             $periodAtDelta = $definition->periodAt($delta->from);
             if ($periodAtDelta !== null) {
@@ -329,6 +346,10 @@ final class CostCalculator
             $expectedDeltaFrom = $delta->to;
 
             foreach ($activeNettingWindows as $key => $window) {
+                if ($reportAvailableWindows && isset($skippedNettingWindows[$key])) {
+                    unset($activeNettingWindows[$key]);
+                    continue;
+                }
                 if ($delta->from >= $window['to']) {
                     $finalizingWindow = $window;
                     $finalizeNettingWindow($window);
@@ -605,6 +626,11 @@ final class CostCalculator
                 $processed = $state['processed'];
                 $billingSummaryState = $state['billingSummaryState'];
                 $activeNettingWindows = $state['activeNettingWindows'];
+                if ($reportAvailableWindows && $finalizingWindow !== null) {
+                    // The failure belongs to the preceding window, not this delta.
+                    $retryDelta = true;
+                    $expectedDeltaFrom = $delta->from;
+                }
                 $finalizingWindow = null;
                 continue;
             } catch (CalculationException $exception) {
@@ -650,17 +676,32 @@ final class CostCalculator
                 $processed = $state['processed'];
                 $billingSummaryState = $state['billingSummaryState'];
                 $activeNettingWindows = $state['activeNettingWindows'];
+                if ($reportAvailableWindows && $finalizingWindow !== null) {
+                    $retryDelta = true;
+                    $expectedDeltaFrom = $delta->from;
+                }
                 $finalizingWindow = null;
                 continue;
             }
+            } while ($retryDelta);
         }
 
         if ($requiresCompleteDeltaCoverage && $expectedDeltaFrom != $range->to) {
-            throw new CalculationException(sprintf(
-                'Meter deltas end at %s; complete coverage through %s is required for temporal netting.',
-                $expectedDeltaFrom->format(DATE_ATOM),
-                $range->to->format(DATE_ATOM),
-            ));
+            if ($reportAvailableWindows) {
+                $warnings[] = [
+                    'code' => 'MISSING_METER_DATA',
+                    'scope' => 'METER_INTERVAL',
+                    'from' => $expectedDeltaFrom->format(DATE_ATOM),
+                    'to' => $range->to->format(DATE_ATOM),
+                    'message' => 'Usage costs are based only on available meter data.',
+                ];
+            } else {
+                throw new CalculationException(sprintf(
+                    'Meter deltas end at %s; complete coverage through %s is required for temporal netting.',
+                    $expectedDeltaFrom->format(DATE_ATOM),
+                    $range->to->format(DATE_ATOM),
+                ));
+            }
         }
 
         foreach ($activeNettingWindows as $window) {
@@ -789,6 +830,7 @@ final class CostCalculator
             $intervals,
             $charges,
             $warnings,
+            $options->includeReportSummary ? $this->reportSummary($billingPeriodSummaries) : null,
         );
     }
 
@@ -922,6 +964,47 @@ final class CostCalculator
             ];
         }
         return $summaries;
+    }
+
+    /** @param list<array<string, mixed>> $billingPeriods @return array<string, mixed> */
+    private function reportSummary(array $billingPeriods): array
+    {
+        $usage = [];
+        $periodic = ['taxes' => ['byTax' => []]];
+        foreach (['net', 'gross'] as $basis) {
+            $usage[$basis] = ['total' => '0', 'byComponent' => [], 'byZone' => []];
+            $periodic[$basis] = ['total' => '0', 'byComponent' => []];
+        }
+        $taxes = [];
+        $fixedChargesComplete = true;
+        foreach ($billingPeriods as $period) {
+            foreach (['net', 'gross'] as $basis) {
+                $costs = $period['costs'][$basis];
+                $usage[$basis]['total'] = $this->math->add($usage[$basis]['total'], $costs['usageBased']['total']);
+                foreach (['byComponent', 'byZone'] as $breakdown) {
+                    foreach ($costs['usageBased'][$breakdown] as $id => $amount) {
+                        $this->addAmount($usage[$basis][$breakdown], $id, $amount);
+                    }
+                    ksort($usage[$basis][$breakdown]);
+                }
+                if ($costs['periodic']['total'] === null) {
+                    $fixedChargesComplete = false;
+                } else {
+                    $periodic[$basis]['total'] = $this->math->add($periodic[$basis]['total'], $costs['periodic']['total']);
+                    foreach ($costs['periodic']['byComponent'] as $id => $amount) {
+                        $this->addAmount($periodic[$basis]['byComponent'], $id, $amount);
+                    }
+                }
+            }
+            // Even when total is unknown, byTax contains all included usage taxes.
+            foreach ($period['costs']['taxes']['byTax'] as $id => $amount) {
+                $this->addAmount($taxes, $id, $amount);
+            }
+        }
+        return [
+            'costs' => $this->costSummary($usage['net'], $taxes, $usage['gross'], $periodic, false),
+            'fixedChargesComplete' => $fixedChargesComplete,
+        ];
     }
 
     /** @param list<ResolvedBillingPeriod> $billingPeriods */

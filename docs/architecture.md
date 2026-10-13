@@ -20,7 +20,7 @@ The package never imports Doctrine, Symfony or SUPLA entities.
 7. For temporally netted quantities: accumulate complete aligned windows, resolve the window quantity, optionally allocate it to named sub-slots, then resolve selector/rate and one charge per resulting pricing interval.
 8. Resolve the billing-cycle context (`anchor + length + unit`).
 9. Keep periodic charge definitions separate from usage-based charge facts.
-10. Calculate periodic charges only when the requested range covers complete billing cycles.
+10. Calculate periodic charges for fully covered effective billing periods; strict top-level totals still require alignment of the entire range.
 11. Return usage totals, optional meter-interval diagnostics, and optional natural-resolution `charges[]`.
 
 ## Taxes
@@ -89,6 +89,22 @@ Billing-cycle validity boundaries are hard boundaries. They cut the nominal peri
 Periodic fees are not distributed into 15-minute/hour/day chart facts. For partial billing-cycle queries the result exposes their definitions but leaves the periodic/full total unknown (`null`). For ranges aligned to complete billing cycles the engine calculates them. Periodic units are anchored to the billing period start, so a `MONTH` fee on a `15 Jan -> 15 Feb` billing cycle counts as one unit, not two calendar-month overlaps.
 
 This separation lets clients build hour/day/month charts from `charges[]` while still presenting fixed-fee information and exact full totals for billing-period views. `intervals[]` remains tied to raw meter intervals; a wider netting-window charge is never smeared back into its constituent intervals.
+
+`CalculationOptions.includeReportSummary` (default false) adds an optional `reportSummary`
+with the full existing `costs` shape and `fixedChargesComplete`. It aggregates
+`billingPeriods[]` rather than resolving charges/taxes again. Every period contributes
+usage costs and its included `taxes.byTax` (even when `taxes.total` is null); only fully
+covered periods contribute periodic costs. Numeric decimal-string totals therefore
+remain available for arbitrary selections, with zero for periodic amounts not included.
+The fixed-charge flag detects unknown periodic totals in partial periods, independently
+of warnings and data availability. It does not duplicate period or charge details.
+
+The input `TimeRange` is always the user's selection, including future boundaries.
+Available measurements constrain usage facts, not billing-period coverage. There is no
+current-period policy, estimation mode or system clock. Under opt-in reporting plus
+`SKIP_AFFECTED`, missing temporal-netting coverage is reported as `MISSING_METER_DATA`
+warnings while complete available windows can be priced. Each window must still be
+complete and contiguous; legacy/strict global coverage checks are preserved.
 
 
 ## Temporal netting

@@ -87,6 +87,52 @@ A validity boundary cuts the nominal cycle. In the example above, `15 Jun -> 15 
 
 The result exposes `billingPeriods[]` summaries with usage, usage-based costs, periodic costs and totals for every effective billing period. Usage-based costs also expose `byZone`, both globally and per billing-period summary.
 
+### Reporting arbitrary date ranges
+
+Enable `new CalculationOptions(includeReportSummary: true)` to additionally return
+`CalculationResult.reportSummary` (and the same JSON key). It is omitted from JSON by default.
+The existing strict `costs`, `billingPeriods`, `periodicCharges` and billing-context semantics remain unchanged.
+
+```json
+{
+  "reportSummary": {
+    "costs": {
+      "net": {
+        "usageBased": {"total": "100", "byComponent": {"energy": "100"}, "byZone": {}},
+        "periodic": {"total": "10", "byComponent": {"fixed": "10"}},
+        "total": "110"
+      },
+      "gross": {
+        "usageBased": {"total": "123", "byComponent": {"energy": "123"}, "byZone": {}},
+        "periodic": {"total": "12.3", "byComponent": {"fixed": "12.3"}},
+        "total": "135.3"
+      },
+      "taxes": {"total": "25.3", "byTax": {"VAT": "25.3"}}
+    },
+    "fixedChargesComplete": false
+  }
+}
+```
+
+The report aggregates the existing per-billing-period calculations: usage from every
+overlapping period, fixed charges only from fully covered **effective** periods, and
+the taxes on those included amounts. An omitted fixed charge contributes zero, not
+`null`, to this reporting total. `fixedChargesComplete` is false only when a partial
+period has applicable fixed-charge components; plans without them report zero and true.
+This flag is independent of `warnings`/`incomplete` and measurement availability.
+
+Always pass the original user-selected half-open `[from, to)` range, never the bounds
+of available measurements. Selecting an entire month includes its fixed charges even
+when readings stop mid-month; usage is never extrapolated. Historical, ongoing and
+future periods use identical rules, with no clock or estimation flag. Missing fixed
+prices/tax coverage still fail explicitly. Proration uses the configured nominal-period
+rules, never a fraction inferred from an arbitrary user selection.
+
+With reporting enabled and `SKIP_AFFECTED`, temporal netting uses available complete
+windows and reports unavailable spans as `MISSING_METER_DATA` warnings. Incomplete
+windows are still skipped; neither missing data nor failed charges become zero usage
+facts. Legacy callers and strict reporting retain the existing coverage checks.
+
 Usage-based costs are calculated from their natural charge windows. Periodic charges are deliberately kept out of time-series charge facts. Use `charges[]` for cost charts: ordinary components produce charges at meter-delta resolution, temporally netted components without allocation produce one charge per complete netting window, and allocated netting components produce one charge per allocation slot. `intervals[]` remains a meter-interval diagnostic view and never receives an artificial share of a wider netting-window cost.
 
 When the requested range covers complete billing cycles, periodic charges are also calculated and `costs.gross.total` contains the full amount. When the range covers only part of a billing cycle and periodic charges exist, `costs.net.periodic.total`, `costs.gross.periodic.total`, `costs.taxes.total`, and both full totals are `null`; `periodicCharges[]` still contains the fee definitions so the UI can display e.g. `+ 12 PLN/month`.

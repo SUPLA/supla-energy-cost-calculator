@@ -20,6 +20,7 @@ final readonly class CalculationResult implements \JsonSerializable
      * @param list<array<string, mixed>> $charges
      * @param array<string, mixed> $costs
      * @param list<array<string, mixed>> $warnings
+     * @param array<string, mixed>|null $reportSummary
      */
     public function __construct(
         public string $currency,
@@ -35,12 +36,13 @@ final readonly class CalculationResult implements \JsonSerializable
         public array $intervals = [],
         public array $charges = [],
         public array $warnings = [],
+        public ?array $reportSummary = null,
     ) {
     }
 
     public function jsonSerialize(): array
     {
-        return [
+        $result = [
             'currency' => $this->currency,
             'range' => [
                 'from' => $this->range->from->format(DATE_ATOM),
@@ -62,5 +64,9 @@ final readonly class CalculationResult implements \JsonSerializable
             'incomplete' => $this->warnings !== [],
             'warnings' => $this->warnings,
         ];
+        if ($this->reportSummary !== null) {
+            $result['reportSummary'] = $this->reportSummary;
+        }
+        return $result;
     }
 }

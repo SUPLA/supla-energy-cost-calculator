@@ -235,6 +235,18 @@ When invoice boundaries change historically, represent them with top-level `bill
 
 `billingPeriods[]` in the result is the canonical per-invoice-period summary. It should contain usage, usage-based costs, periodic costs, total, and usage-based `byZone`. Do not force `byPhase` into the core model when phase data is not naturally available.
 
+`CalculationOptions.includeReportSummary` optionally adds `reportSummary: {costs, fixedChargesComplete}`.
+Aggregate the existing billing-period financial results: all usage, only fully covered
+effective periods' fixed charges, and included individual taxes (`byTax` remains valid
+even when a partial period's tax total is null). Keep the full cost-summary shape and
+decimal strings, including periodic zero when no charges were included. Preserve strict
+legacy fields and omit the new JSON key when not requested. The fixed-charge flag is
+independent of warnings and measurements; no periodic components means complete.
+Always use the original selected range for coverage. Never truncate it to measurements,
+extrapolate usage, or special-case current/future periods using the system clock.
+Reporting plus `SKIP_AFFECTED` can price complete available temporal-netting windows
+and emits `MISSING_METER_DATA` for unavailable spans; strict/legacy coverage remains unchanged.
+
 Tariff regression fixtures should support the form:
 
 ```text
