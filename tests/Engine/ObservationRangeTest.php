@@ -42,15 +42,18 @@ final class ObservationRangeTest extends TestCase
         self::assertTrue($result->reportSummary['fixedChargesComplete']);
         self::assertSame('20', $result->costs['net']['periodic']['total']);
         self::assertSame('2', $result->periodicCharges[0]['calculated']['units']);
-        self::assertSame('0', $result->billingPeriods[0]['costs']['gross']['periodic']['total']);
-        self::assertSame('12.3', $result->billingPeriods[8]['costs']['gross']['periodic']['total']);
-        self::assertSame('12.3', $result->billingPeriods[9]['costs']['gross']['periodic']['total']);
-        self::assertSame('0', $result->billingPeriods[10]['costs']['gross']['periodic']['total']);
+        self::assertCount(2, $result->billingPeriods);
+        self::assertCount(2, $result->billingContext['periods']);
+        self::assertSame('2026-09-01T00:00:00+00:00', $result->billingPeriods[0]['from']);
+        self::assertSame('2026-10-01T00:00:00+00:00', $result->billingPeriods[1]['from']);
+        self::assertSame('2026-11-01T00:00:00+00:00', $result->billingPeriods[1]['to']);
+        self::assertSame('12.3', $result->billingPeriods[0]['costs']['gross']['periodic']['total']);
+        self::assertSame('12.3', $result->billingPeriods[1]['costs']['gross']['periodic']['total']);
         self::assertSame([], $result->warnings);
     }
 
     #[DataProvider('observationBoundaries')]
-    public function testObservationBoundariesAreHalfOpen(string $from, string $to, string $net): void
+    public function testObservationBoundariesAreHalfOpen(string $from, string $to, string $net, int $count): void
     {
         $result = $this->calculator([])->calculate(
             'meter', $this->range('2026-01-01', '2027-01-01'), $this->definition(),
@@ -58,13 +61,15 @@ final class ObservationRangeTest extends TestCase
         );
         self::assertSame($net, $result->reportSummary['costs']['net']['periodic']['total']);
         self::assertTrue($result->reportSummary['fixedChargesComplete']);
+        self::assertCount($count, $result->billingPeriods);
+        self::assertCount($count, $result->billingContext['periods']);
     }
 
     public static function observationBoundaries(): iterable
     {
-        yield 'October only' => ['2026-10-01', '2026-11-01', '10'];
-        yield 'last minute of September also counts September' => ['2026-09-30T23:59:00Z', '2026-10-09', '20'];
-        yield 'meter starts after selection' => ['2027-01-01', '2027-02-01', '0'];
+        yield 'October only' => ['2026-10-01', '2026-11-01', '10', 1];
+        yield 'last minute of September also counts September' => ['2026-09-30T23:59:00Z', '2026-10-09', '20', 2];
+        yield 'meter starts after selection' => ['2027-01-01', '2027-02-01', '0', 0];
     }
 
     public function testPartialPeriodsOutsideObservationDoNotMakeFixedChargesIncomplete(): void
@@ -77,13 +82,17 @@ final class ObservationRangeTest extends TestCase
         // August is not observed, September is complete and October is partial.
         self::assertSame('10', $result->reportSummary['costs']['net']['periodic']['total']);
         self::assertFalse($result->reportSummary['fixedChargesComplete']);
-        self::assertSame('0', $result->billingPeriods[0]['costs']['gross']['periodic']['total']);
-        self::assertNull($result->billingPeriods[2]['costs']['gross']['periodic']['total']);
+        self::assertCount(2, $result->billingPeriods);
+        self::assertSame('2026-09-01T00:00:00+00:00', $result->billingPeriods[0]['from']);
+        self::assertSame('12.3', $result->billingPeriods[0]['costs']['gross']['periodic']['total']);
+        self::assertNull($result->billingPeriods[1]['costs']['gross']['periodic']['total']);
 
         $beforeInstallation = $this->calculator([])->calculate(
             'meter', $this->range('2026-01-10', '2026-01-20'), $this->definition(),
             new CalculationOptions(includeReportSummary: true, observationRange: $observation),
         );
+        self::assertSame([], $beforeInstallation->billingPeriods);
+        self::assertSame([], $beforeInstallation->billingContext['periods']);
         self::assertSame('0', $beforeInstallation->reportSummary['costs']['gross']['periodic']['total']);
         self::assertTrue($beforeInstallation->reportSummary['fixedChargesComplete']);
     }
@@ -117,6 +126,23 @@ final class ObservationRangeTest extends TestCase
         );
         self::assertSame('120', $result->reportSummary['costs']['net']['periodic']['total']);
         self::assertSame('12', $result->periodicCharges[0]['calculated']['units']);
+        self::assertCount(12, $result->billingPeriods);
+        self::assertCount(12, $result->billingContext['periods']);
+    }
+
+    public function testObservationFiltersPeriodsWithoutReportSummary(): void
+    {
+        $result = $this->calculator([])->calculate(
+            'meter', $this->range('2026-01-01', '2027-01-01'), $this->definition(),
+            new CalculationOptions(observationRange: $this->range('2026-09-03', '2026-10-09')),
+        );
+
+        self::assertCount(2, $result->billingPeriods);
+        self::assertCount(2, $result->billingContext['periods']);
+        self::assertSame('2026-09-01T00:00:00+00:00', $result->billingPeriods[0]['from']);
+        self::assertSame('2026-10-01T00:00:00+00:00', $result->billingPeriods[1]['from']);
+        self::assertNull($result->reportSummary);
+        self::assertArrayNotHasKey('reportSummary', $result->jsonSerialize());
     }
 
     public function testLeadingMissingDataOutsideObservationIsSilentButInternalGapWarns(): void

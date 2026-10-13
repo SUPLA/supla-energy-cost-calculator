@@ -835,8 +835,16 @@ final class CostCalculator
             default => null,
         };
 
+        // Resolve against the whole selected range, but only expose billing
+        // periods intersecting the known meter history. Keep full periods at
+        // the observation boundaries; do not clip their invoice dates.
+        $visibleBillingPeriods = $options->observationRange === null ? $billingPeriods : array_values(array_filter(
+            $billingPeriods,
+            static fn(ResolvedBillingPeriod $period): bool => $period->range->overlaps($options->observationRange),
+        ));
+
         $billingContextPeriods = [];
-        foreach ($billingPeriods as $billingPeriod) {
+        foreach ($visibleBillingPeriods as $billingPeriod) {
             $fullyCovered = $this->rangeContains($range, $billingPeriod->range);
             $billingContextPeriods[] = [
                 'from' => $billingPeriod->range->from->format(DATE_ATOM),
@@ -849,7 +857,7 @@ final class CostCalculator
         $billingPeriodSummaries = $this->billingPeriodSummaries(
             $definition,
             $range,
-            $billingPeriods,
+            $visibleBillingPeriods,
             $billingSummaryState,
             $options->observationRange,
         );
