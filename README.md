@@ -93,6 +93,10 @@ Enable `new CalculationOptions(includeReportSummary: true)` to additionally retu
 `CalculationResult.reportSummary` (and the same JSON key). It is omitted from JSON by default.
 The existing strict `costs`, `billingPeriods`, `periodicCharges` and billing-context semantics remain unchanged.
 
+Optionally pass the **full meter-history bounds** as `observationRange: new TimeRange($firstDeltaFrom, $lastDeltaTo)` in `CalculationOptions`. This is independent of the requested `TimeRange`; do not derive it only from deltas returned for the current selection. A fixed charge is included only if the selected range covers the whole billing period **and** that billing period overlaps the known observation range. For example, observations from September 3 through October 9 with a full-year 2026 selection include September and October fixed charges, but not January–August or November–December. The full applicable monthly fee is used (no automatic proration), even when the meter starts mid-month. A month with zero kWh or missing intermediate data still overlaps the overall observation range and remains eligible. With this option, `periodicCharges[]`, `billingPeriods[]` financial amounts and `reportSummary` reflect the same observed-period qualification; the meaning of `fullyCovered` is unchanged. `fixedChargesComplete` concerns omitted charges within the observation range, not periods outside it.
+
+Omitting `observationRange` (`null`) preserves the previous behavior. For a meter with **no recorded observations at all**, callers should handle that separately; `null` means unknown/not supplied, not a known empty history. Missing-meter-data warnings for temporal netting are limited to gaps inside the known observation bounds; the calculation still retains the original user-selected range.
+
 ```json
 {
   "reportSummary": {

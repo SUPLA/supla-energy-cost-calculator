@@ -11,6 +11,7 @@ final readonly class CalculationOptions
         public bool $includeCharges = false,
         public CalculationProblemPolicy $calculationProblemPolicy = CalculationProblemPolicy::STRICT,
         public bool $includeReportSummary = false,
+        public ?\Supla\EnergyCostCalculator\Model\TimeRange $observationRange = null,
     ) {
     }
 }

@@ -308,13 +308,19 @@ final class CostCalculator
                 throw new IntervalCrossesBillingPeriodException('Requested range cuts through a delta interval. Use boundaries aligned to meter intervals.');
             }
             if ($requiresCompleteDeltaCoverage && $reportAvailableWindows && $delta->from > $expectedDeltaFrom) {
-                $warnings[] = [
-                    'code' => 'MISSING_METER_DATA',
-                    'scope' => 'METER_INTERVAL',
-                    'from' => $expectedDeltaFrom->format(DATE_ATOM),
-                    'to' => $delta->from->format(DATE_ATOM),
-                    'message' => 'Usage costs are based only on available meter data.',
-                ];
+                // Missing data before the meter's first observation is not a gap in its history.
+                $missing = new TimeRange($expectedDeltaFrom, $delta->from);
+                $missing = $options->observationRange === null
+                    ? $missing : $missing->intersection($options->observationRange);
+                if ($missing !== null) {
+                    $warnings[] = [
+                        'code' => 'MISSING_METER_DATA',
+                        'scope' => 'METER_INTERVAL',
+                        'from' => $missing->from->format(DATE_ATOM),
+                        'to' => $missing->to->format(DATE_ATOM),
+                        'message' => 'Usage costs are based only on available meter data.',
+                    ];
+                }
                 $expectedDeltaFrom = $delta->from;
             }
             $periodAtDelta = $definition->periodAt($delta->from);
@@ -712,15 +718,19 @@ final class CostCalculator
 
         if ($requiresCompleteDeltaCoverage && $expectedDeltaFrom != $range->to) {
             if ($reportAvailableWindows) {
-                // A trailing span after the final available delta is not a gap
-                // inside the meter history. Keep the warning if no deltas were
-                // available at all for the requested range.
-                if ($expectedDeltaFrom == $range->from) {
+                // Time after the last observation is not a gap. If an explicit
+                // observation range indicates more data should exist, however,
+                // missing deltas inside that known history are reported.
+                $missing = new TimeRange($expectedDeltaFrom, $range->to);
+                $missing = $options->observationRange === null
+                    ? ($expectedDeltaFrom == $range->from ? $missing : null)
+                    : $missing->intersection($options->observationRange);
+                if ($missing !== null) {
                     $warnings[] = [
                         'code' => 'MISSING_METER_DATA',
                         'scope' => 'METER_INTERVAL',
-                        'from' => $expectedDeltaFrom->format(DATE_ATOM),
-                        'to' => $range->to->format(DATE_ATOM),
+                        'from' => $missing->from->format(DATE_ATOM),
+                        'to' => $missing->to->format(DATE_ATOM),
                         'message' => 'Usage costs are based only on available meter data.',
                     ];
                 }
@@ -815,6 +825,7 @@ final class CostCalculator
             $range,
             $billingPeriods,
             $coversWholeBillingPeriods,
+            $options->observationRange,
         );
 
         $hasPeriodicCharges = $periodicCharges !== [];
@@ -840,6 +851,7 @@ final class CostCalculator
             $range,
             $billingPeriods,
             $billingSummaryState,
+            $options->observationRange,
         );
 
         $legacyBillingCycle = count($definition->billingCycles) === 1
@@ -884,7 +896,14 @@ final class CostCalculator
         TimeRange $range,
         array $billingPeriods,
         bool $calculate,
+        ?TimeRange $observationRange = null,
     ): array {
+        // The selected range determines completeness; meter history determines
+        // which of those complete billing periods are actually chargeable.
+        $chargeablePeriods = $observationRange === null ? $billingPeriods : array_values(array_filter(
+            $billingPeriods,
+            static fn(ResolvedBillingPeriod $period): bool => $period->range->overlaps($observationRange),
+        ));
         $periodicCalculator = new PeriodicChargeCalculator($this->math, $this->billingCycleResolver);
         $charges = [];
         $total = $calculate ? '0' : null;
@@ -907,7 +926,7 @@ final class CostCalculator
 
                 $calculated = null;
                 if ($calculate) {
-                    $calculation = $periodicCalculator->calculate($component, $periodRange, $billingPeriods);
+                    $calculation = $periodicCalculator->calculate($component, $periodRange, $chargeablePeriods);
                     $calculated = $this->periodicCalculationSummary($calculation);
                     foreach ($calculation->buckets as $bucket) {
                         // A periodic fee is taxed as one invoice/nominal-unit fact, never as a tariff-period slice.
@@ -970,18 +989,21 @@ final class CostCalculator
         TimeRange $requestedRange,
         array $billingPeriods,
         array $summaryState,
+        ?TimeRange $observationRange = null,
     ): array {
         $summaries = [];
         foreach ($billingPeriods as $billingPeriod) {
             $key = $this->billingPeriodKey($billingPeriod);
             $state = $summaryState[$key];
             $fullyCovered = $this->rangeContains($requestedRange, $billingPeriod->range);
+            $observed = $observationRange === null || $billingPeriod->range->overlaps($observationRange);
 
             [$periodicCharges, , , $periodicCosts] = $this->periodicCharges(
                 $definition,
                 $billingPeriod->range,
                 [$billingPeriod],
-                $fullyCovered,
+                $fullyCovered || !$observed,
+                $observationRange,
             );
             $hasPeriodicCharges = $periodicCharges !== [];
 
@@ -1000,7 +1022,7 @@ final class CostCalculator
                     $state['usageBasedTaxes'],
                     $this->usageCosts($state['usageBasedTotal'], $state['usageBasedByComponent'], $state['usageBasedByZone']),
                     $periodicCosts,
-                    $hasPeriodicCharges && !$fullyCovered,
+                    $hasPeriodicCharges && !$fullyCovered && $observed,
                 ),
             ];
         }
