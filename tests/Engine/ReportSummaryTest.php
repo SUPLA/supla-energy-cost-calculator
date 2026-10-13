@@ -203,6 +203,86 @@ final class ReportSummaryTest extends TestCase
         self::assertContains('CALCULATION_PROBLEM', array_column($result->warnings, 'code'));
     }
 
+    #[DataProvider('trailingNettingRangeEnds')]
+    public function testTrailingUnfinishedNettingWindowIsIgnored(string $rangeTo, array $expectedWarnings): void
+    {
+        $definition = $this->definition();
+        $definition['periods'][0]['components'][0]['quantity'] += [
+            'strategy' => 'IMPORT_MINUS_EXPORT_CAP_ZERO',
+            'periodInMinutes' => 60,
+        ];
+        $deltas = [
+            // The 20:00-21:00 netting window is complete.
+            new EnergyDelta(new \DateTimeImmutable('2026-10-09T20:00:00Z'), new \DateTimeImmutable('2026-10-09T21:00:00Z'),
+                ['ACTIVE_ENERGY_IMPORT' => '2', 'ACTIVE_ENERGY_EXPORT' => '0']),
+            // The last, contiguous 21:00-22:00 window has no more readings after 21:30.
+            new EnergyDelta(new \DateTimeImmutable('2026-10-09T21:00:00Z'), new \DateTimeImmutable('2026-10-09T21:15:00Z'),
+                ['ACTIVE_ENERGY_IMPORT' => '1', 'ACTIVE_ENERGY_EXPORT' => '0']),
+            new EnergyDelta(new \DateTimeImmutable('2026-10-09T21:15:00Z'), new \DateTimeImmutable('2026-10-09T21:30:00Z'),
+                ['ACTIVE_ENERGY_IMPORT' => '1', 'ACTIVE_ENERGY_EXPORT' => '0']),
+        ];
+        $result = (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource()))
+            ->calculate('meter', $this->range('2026-10-09T20:00:00Z', $rangeTo), $definition,
+                new CalculationOptions(includeCharges: true, includeReportSummary: true,
+                    calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED));
+
+        // The partial final window contributes neither usage nor cost nor a window warning.
+        self::assertSame($expectedWarnings, array_column($result->warnings, 'code'));
+        self::assertSame('2', $result->usage['ACTIVE_ENERGY_IMPORT']);
+        self::assertSame(1, $result->processedDeltaCount);
+        self::assertSame('2.46', $result->costs['gross']['usageBased']['total']);
+        self::assertSame('2', $result->costs['net']['usageBased']['total']);
+        self::assertSame('2.46', $result->reportSummary['costs']['gross']['usageBased']['total']);
+        self::assertCount(1, $result->charges);
+        self::assertSame('2026-10-09T20:00:00+00:00', $result->charges[0]['from']);
+        self::assertSame('2026-10-09T21:00:00+00:00', $result->charges[0]['to']);
+    }
+
+    public static function trailingNettingRangeEnds(): iterable
+    {
+        yield 'selected range ends at last reading' => ['2026-10-09T21:30:00Z', []];
+        // Missing measurements AFTER the final reading are a separate existing warning.
+        yield 'selected range extends past last reading' => ['2026-10-09T23:00:00Z', ['MISSING_METER_DATA']];
+    }
+
+    public function testFinalWindowWithMissingBeginningStillWarns(): void
+    {
+        $definition = $this->definition();
+        $definition['periods'][0]['components'][0]['quantity'] += [
+            'strategy' => 'IMPORT_MINUS_EXPORT_CAP_ZERO', 'periodInMinutes' => 60,
+        ];
+        $deltas = [new EnergyDelta(
+            new \DateTimeImmutable('2026-10-09T21:15:00Z'),
+            new \DateTimeImmutable('2026-10-09T21:30:00Z'),
+            ['ACTIVE_ENERGY_IMPORT' => '1', 'ACTIVE_ENERGY_EXPORT' => '0'],
+        )];
+        $result = (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource()))
+            ->calculate('meter', $this->range('2026-10-09T21:15:00Z', '2026-10-09T21:30:00Z'), $definition,
+                new CalculationOptions(includeReportSummary: true,
+                    calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED));
+        self::assertSame(['CALCULATION_PROBLEM'], array_column($result->warnings, 'code'));
+    }
+
+    public function testIncompleteHistoricalWindowStillWarnsWhenLaterReadingsExist(): void
+    {
+        $definition = $this->definition();
+        $definition['periods'][0]['components'][0]['quantity'] += [
+            'strategy' => 'IMPORT_MINUS_EXPORT_CAP_ZERO', 'periodInMinutes' => 60,
+        ];
+        $deltas = [
+            new EnergyDelta(new \DateTimeImmutable('2026-10-09T20:00:00Z'), new \DateTimeImmutable('2026-10-09T20:15:00Z'),
+                ['ACTIVE_ENERGY_IMPORT' => '1', 'ACTIVE_ENERGY_EXPORT' => '0']),
+            new EnergyDelta(new \DateTimeImmutable('2026-10-09T21:00:00Z'), new \DateTimeImmutable('2026-10-09T22:00:00Z'),
+                ['ACTIVE_ENERGY_IMPORT' => '2', 'ACTIVE_ENERGY_EXPORT' => '0']),
+        ];
+        $result = (new CostCalculator(new InMemoryEnergyDeltaSource($deltas), new InMemoryReferenceDataSource()))
+            ->calculate('meter', $this->range('2026-10-09T20:00:00Z', '2026-10-09T22:00:00Z'), $definition,
+                new CalculationOptions(includeCharges: true, includeReportSummary: true,
+                    calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED));
+        self::assertContains('CALCULATION_PROBLEM', array_column($result->warnings, 'code'));
+        self::assertSame('2.46', $result->reportSummary['costs']['gross']['usageBased']['total']);
+    }
+
     #[DataProvider('failedNettingReferenceCases')]
     public function testFailedNettingWindowIsRolledBackWithoutASecondWarning(?string $secondRate, string $expectedWarning): void
     {

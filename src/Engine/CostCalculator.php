@@ -351,6 +351,20 @@ final class CostCalculator
                     $finalizeNettingWindow($window);
                     $finalizingWindow = null;
                     unset($activeNettingWindows[$key]);
+                    // Rolling back this delta or its new window must preserve
+                    // charges from preceding windows finalized successfully.
+                    $deltaState = array_replace($deltaState, [
+                        'usageBasedTotal' => $usageBasedTotal,
+                        'usageBasedNetTotal' => $usageBasedNetTotal,
+                        'usageBasedNetByComponent' => $usageBasedNetByComponent,
+                        'usageBasedNetByZone' => $usageBasedNetByZone,
+                        'usageBasedTaxes' => $usageBasedTaxes,
+                        'usageBasedByComponent' => $usageBasedByComponent,
+                        'usageBasedByZone' => $usageBasedByZone,
+                        'chargeCount' => count($charges),
+                        'billingSummaryState' => $billingSummaryState,
+                        'activeNettingWindows' => $activeNettingWindows,
+                    ]);
                 }
             }
 
@@ -762,6 +776,18 @@ final class CostCalculator
                 array_splice($charges, $state['chargeCount']);
                 $processed = $state['processed'];
                 $billingSummaryState = $state['billingSummaryState'];
+                // An otherwise contiguous final window may simply be unfinished
+                // because the meter has not produced any later deltas yet.
+                // Its charges and usage have already been rolled back above.
+                $firstDelta = $window['deltas'][0] ?? null;
+                if ($reportAvailableWindows
+                    && $firstDelta instanceof EnergyDelta
+                    && $firstDelta->from == $window['from']
+                    && $window['lastTo'] instanceof \DateTimeImmutable
+                    && $window['lastTo'] == $expectedDeltaFrom
+                    && $window['lastTo'] < $window['to']) {
+                    continue;
+                }
                 $warnings[] = [
                     'code' => 'CALCULATION_PROBLEM',
                     'scope' => 'TEMPORAL_NETTING_WINDOW',
