@@ -346,10 +346,6 @@ final class CostCalculator
             $expectedDeltaFrom = $delta->to;
 
             foreach ($activeNettingWindows as $key => $window) {
-                if ($reportAvailableWindows && isset($skippedNettingWindows[$key])) {
-                    unset($activeNettingWindows[$key]);
-                    continue;
-                }
                 if ($delta->from >= $window['to']) {
                     $finalizingWindow = $window;
                     $finalizeNettingWindow($window);
@@ -590,6 +586,14 @@ final class CostCalculator
 
                 if ($window !== null) {
                     $state = $window['state'];
+                    // A failure while resolving a later delta invalidates the entire
+                    // netting window, including deltas already added to usage totals.
+                    if ($reportAvailableWindows && $resolvingNettingWindow !== null) {
+                        $active = $activeNettingWindows[$window['component']->id] ?? null;
+                        if ($active !== null && $active['from'] == $window['from'] && $active['to'] == $window['to']) {
+                            $state = $active['state'];
+                        }
+                    }
                     $windowKey = $window['component']->id . ':' . $window['from']->getTimestamp() . ':' . $window['to']->getTimestamp();
                     $skippedNettingWindows[$windowKey] = true;
                     $warnings[] = [
@@ -642,6 +646,12 @@ final class CostCalculator
                 $window ??= $resolvingNettingWindow;
                 if ($window !== null) {
                     $state = $window['state'];
+                    if ($reportAvailableWindows && $resolvingNettingWindow !== null) {
+                        $active = $activeNettingWindows[$window['component']->id] ?? null;
+                        if ($active !== null && $active['from'] == $window['from'] && $active['to'] == $window['to']) {
+                            $state = $active['state'];
+                        }
+                    }
                     $windowKey = $window['component']->id . ':' . $window['from']->getTimestamp() . ':' . $window['to']->getTimestamp();
                     $skippedNettingWindows[$windowKey] = true;
                     $warnings[] = [

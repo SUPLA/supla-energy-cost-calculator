@@ -12,6 +12,7 @@ use Supla\EnergyCostCalculator\Engine\CostCalculator;
 use Supla\EnergyCostCalculator\Exception\CalculationException;
 use Supla\EnergyCostCalculator\Math\NativeDecimalMath;
 use Supla\EnergyCostCalculator\Model\EnergyDelta;
+use Supla\EnergyCostCalculator\Model\ReferenceInterval;
 use Supla\EnergyCostCalculator\Model\TimeRange;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryEnergyDeltaSource;
 use Supla\EnergyCostCalculator\Tests\Support\InMemoryReferenceDataSource;
@@ -200,6 +201,74 @@ final class ReportSummaryTest extends TestCase
         self::assertSame('12.3', $result->reportSummary['costs']['gross']['total']);
         self::assertTrue($result->reportSummary['fixedChargesComplete']);
         self::assertContains('CALCULATION_PROBLEM', array_column($result->warnings, 'code'));
+    }
+
+    #[DataProvider('failedNettingReferenceCases')]
+    public function testFailedNettingWindowIsRolledBackWithoutASecondWarning(?string $secondRate, string $expectedWarning): void
+    {
+        $definition = $this->definition();
+        $definition['periods'][0]['components'][0]['quantity'] += [
+            'strategy' => 'IMPORT_MINUS_EXPORT_CAP_ZERO',
+            'periodInMinutes' => 60,
+        ];
+        $definition['periods'][0]['components'][0]['rate'] = [
+            'type' => 'REFERENCE',
+            'source' => 'TEST.PRICE',
+            'unit' => 'PLN/kWh',
+        ];
+
+        $deltas = [];
+        foreach ([
+            ['00:00', '00:15'],
+            ['00:15', '00:30'],
+            ['00:30', '00:45'],
+            ['00:45', '01:00'],
+            ['01:00', '02:00'],
+        ] as [$from, $to]) {
+            $deltas[] = new EnergyDelta(
+                new \DateTimeImmutable('2026-10-10T' . $from . ':00Z'),
+                new \DateTimeImmutable('2026-10-10T' . $to . ':00Z'),
+                ['ACTIVE_ENERGY_IMPORT' => '2', 'ACTIVE_ENERGY_EXPORT' => '0'],
+            );
+        }
+
+        $series = [new ReferenceInterval(
+            new \DateTimeImmutable('2026-10-10T00:00:00Z'),
+            new \DateTimeImmutable('2026-10-10T00:15:00Z'),
+            '1',
+        )];
+        if ($secondRate !== null) {
+            $series[] = new ReferenceInterval(
+                new \DateTimeImmutable('2026-10-10T00:15:00Z'),
+                new \DateTimeImmutable('2026-10-10T01:00:00Z'),
+                $secondRate,
+            );
+        }
+        $series[] = new ReferenceInterval(
+            new \DateTimeImmutable('2026-10-10T01:00:00Z'),
+            new \DateTimeImmutable('2026-10-10T02:00:00Z'),
+            '1',
+        );
+
+        $result = (new CostCalculator(
+            new InMemoryEnergyDeltaSource($deltas),
+            new InMemoryReferenceDataSource(['TEST.PRICE' => $series]),
+        ))->calculate('meter', $this->range('2026-10-10T00:00:00Z', '2026-10-10T02:00:00Z'), $definition,
+            new CalculationOptions(includeCharges: true, includeReportSummary: true, calculationProblemPolicy: CalculationProblemPolicy::SKIP_AFFECTED));
+
+        // A failure in the second delta invalidates the whole first hour.
+        // Only the next, complete hour is counted and priced.
+        self::assertSame([$expectedWarning], array_column($result->warnings, 'code'));
+        self::assertSame('2', $result->usage['ACTIVE_ENERGY_IMPORT']);
+        self::assertSame('2.46', $result->reportSummary['costs']['gross']['usageBased']['total']);
+        self::assertCount(1, $result->charges);
+        self::assertSame('2026-10-10T01:00:00+00:00', $result->charges[0]['from']);
+    }
+
+    public static function failedNettingReferenceCases(): iterable
+    {
+        yield 'missing reference in the second delta' => [null, 'MISSING_REFERENCE_DATA'];
+        yield 'changed rate in the second delta' => ['2', 'CALCULATION_PROBLEM'];
     }
 
     public function testIncompleteLeadingWindowDoesNotDiscardTheNextCompleteWindow(): void
